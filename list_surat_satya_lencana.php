@@ -119,66 +119,79 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
     display: inline-block;
 }
 
-/* Filter Year Styles */
+/* Filter Year Styles - DROPDOWN */
 .year-filter-section {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    padding: 20px;
+    padding: 20px 25px;
     border-radius: 12px;
     margin-bottom: 25px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .year-filter-section h4 {
     color: white;
-    margin: 0 0 15px 0;
+    margin: 0;
     font-size: 16px;
+    white-space: nowrap;
 }
 
-.year-tabs {
+.year-dropdown-wrap {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.year-tab {
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.year-tab:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    color: white;
-    text-decoration: none;
-}
-
-.year-tab.active {
-    background: white;
-    color: #667eea;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
-}
-
-.year-info {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 12px 15px;
-    border-radius: 8px;
-    color: white;
-    margin-top: 12px;
+.year-dropdown-wrap label {
+    color: rgba(255,255,255,0.85);
     font-size: 14px;
+    white-space: nowrap;
+    margin: 0;
 }
 
-.year-info i {
-    margin-right: 8px;
+.year-select {
+    background: white;
+    color: #2c3e50;
+    border: none;
+    padding: 9px 36px 9px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 150px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-color: white;
+    transition: all 0.2s;
+}
+
+.year-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.4);
+}
+
+.year-select:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.year-info-badge {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.year-info-badge strong {
+    color: #f9ca24;
 }
 
 .btn-export-nominatif {
@@ -214,33 +227,39 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
         </div>
     </div>
 
-    <!-- Year Filter Section -->
+    <!-- Year Filter Section - DROPDOWN -->
     <div class="year-filter-section fade-in">
-        <h4><i class="fas fa-calendar-alt"></i> Filter Berdasarkan Tahun Usulan</h4>
-        <div class="year-tabs">
-            <?php if (!empty($tahun_list)): ?>
-                <?php foreach ($tahun_list as $tahun): ?>
-                    <a href="?tahun=<?= $tahun ?>" 
-                       class="year-tab <?= ($tahun == $filter_tahun) ? 'active' : '' ?>">
-                        <i class="fas fa-calendar"></i>
-                        Tahun <?= $tahun ?>
-                    </a>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <a href="#" class="year-tab active">
-                    <i class="fas fa-calendar"></i>
-                    Tahun <?= date('Y') ?>
-                </a>
+        <h4><i class="fas fa-calendar-alt me-2"></i>Filter Tahun</h4>
+        
+        <div class="year-dropdown-wrap">
+            <label for="yearSelect"><i class="fas fa-filter me-1"></i> Pilih Tahun:</label>
+            <select class="year-select" id="yearSelect" onchange="gantiTahun(this.value)">
+                <?php if (!empty($tahun_list)): ?>
+                    <?php foreach ($tahun_list as $tahun): ?>
+                        <option value="<?= $tahun ?>" <?= ($tahun == $filter_tahun) ? 'selected' : '' ?>>
+                            📅 Tahun <?= $tahun ?>
+                        </option>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <option value="<?= date('Y') ?>" selected>
+                        📅 Tahun <?= date('Y') ?>
+                    </option>
+                <?php endif; ?>
+            </select>
+        </div>
+
+        <?php if ($total_pegawai > 0): ?>
+        <div class="year-info-badge">
+            <i class="fas fa-users me-1"></i>
+            <strong><?= $total_pegawai ?></strong> pegawai
+            <?php if ($stats['tanggal_awal'] && $stats['tanggal_akhir']): ?>
+                &nbsp;·&nbsp; <?= date('d/m/Y', strtotime($stats['tanggal_awal'])) ?> 
+                – <?= date('d/m/Y', strtotime($stats['tanggal_akhir'])) ?>
             <?php endif; ?>
         </div>
-        
-        <?php if ($total_pegawai > 0): ?>
-        <div class="year-info">
-            <i class="fas fa-info-circle"></i>
-            Menampilkan <strong><?= $total_pegawai ?></strong> pegawai dari tahun <strong><?= $filter_tahun ?></strong>
-            <?php if ($stats['tanggal_awal'] && $stats['tanggal_akhir']): ?>
-                (Periode: <?= date('d/m/Y', strtotime($stats['tanggal_awal'])) ?> - <?= date('d/m/Y', strtotime($stats['tanggal_akhir'])) ?>)
-            <?php endif; ?>
+        <?php else: ?>
+        <div class="year-info-badge">
+            <i class="fas fa-inbox me-1"></i> Tidak ada data tahun <strong><?= $filter_tahun ?></strong>
         </div>
         <?php endif; ?>
     </div>
@@ -340,7 +359,6 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
                     if ($result->num_rows > 0):
                         $no = 1;
                         while($row = $result->fetch_assoc()): 
-                            // Ambil inisial nama untuk avatar
                             $nama_parts = explode(' ', $row['nama']);
                             $inisial = '';
                             foreach($nama_parts as $part) {
@@ -352,7 +370,6 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
                     ?>
                     <tr>
                         <td class="text-center"><?= $no++ ?></td>
-                          
                         <td>
                             <strong><?= htmlspecialchars($row['nomor_usulan']) ?></strong>
                             <br><small class="text-muted">
@@ -360,7 +377,6 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
                                 <?= date('d-m-Y', strtotime($row['tanggal_usulan'])) ?>
                             </small>
                         </td>
-
                         <td>
                             <div class="employee-info">
                                 <div class="employee-avatar">
@@ -434,6 +450,11 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
 </div>
 
 <script>
+// Fungsi ganti tahun via dropdown
+function gantiTahun(tahun) {
+    window.location.href = '?tahun=' + tahun;
+}
+
 // Search functionality
 document.getElementById('searchInput').addEventListener('keyup', function() {
     const searchTerm = this.value.toLowerCase();
@@ -441,11 +462,7 @@ document.getElementById('searchInput').addEventListener('keyup', function() {
     
     tableRows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
     });
 });
 
