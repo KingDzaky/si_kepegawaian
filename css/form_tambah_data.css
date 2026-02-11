@@ -1,0 +1,24 @@
+/* form_tambah_duk.css */
+
+/* style card */
+.form-duk-card {
+    max-width: 1000px;
+    margin: 30px auto;
+  }
+  
+  .form-duk-card .card-body {
+    padding: 30px;
+  }
+  
+  /* wrapper biar gak nempel sidebar */
+  .form-duk-wrapper {
+    margin-left: 230px; /* samain sama lebar sidebar */
+    width: calc(100% - 230px);
+    background: #f7f7f7;
+    min-height: calc(100vh - 56px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  

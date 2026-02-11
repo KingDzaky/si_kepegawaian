@@ -1,0 +1,446 @@
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --warning-gradient: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+    --danger-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    --info-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    --border-radius: 15px;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .main-content {
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  
+ 
+  .header-logo {
+    flex-shrink: 0;
+  }
+  
+  .header-logo .logo-image {
+    width: 150px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+  
+  .header-text {
+    flex: 1;
+  }
+  
+  .page-header h1 {
+    margin-bottom: 8px;
+  }
+  
+  @media (max-width: 768px) {
+    .header-logo .logo-image {
+      width: 60px;
+      height: 60px;
+    }
+  }
+
+
+  /* Page Header */
+  .page-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-30px, -30px);
+  }
+  
+  .page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 300;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .page-subtitle {
+    margin-top: 0.5rem;
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+  
+  /* Statistics Cards */
+  .card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+  
+  .card-primary {
+    background: linear-gradient(135deg, #4e73df, #224abe); /* biru */
+  }
+  
+  .card-success {
+    background: linear-gradient(135deg, #1cc88a, #13855c); /* hijau */
+  }
+  
+  .card-warning {
+    background: linear-gradient(135deg, #f6c23e, #dda20a); /* kuning */
+  }
+  
+  .card-dark {
+    background: linear-gradient(135deg, #5a5c69, #2e2f37); /* abu gelap */
+  }
+  
+  /* Card untuk Usulan Kenaikan Pangkat */
+.card-info {
+  background: linear-gradient(135deg, #3498db, #2980b9); /* biru info */
+}
+
+.card-secondary {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d); /* abu-abu */
+}
+
+.card-pending {
+  background: linear-gradient(135deg, #e67e22, #d35400); /* oranye */
+}
+
+.card-approved {
+  background: linear-gradient(135deg, #27ae60, #229954); /* hijau tua */
+}
+
+.card-rejected {
+  background: linear-gradient(135deg, #e74c3c, #c0392b); /* merah */
+}
+
+
+  
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .card-icon {
+    font-size: 2.5rem;
+    opacity: 0.3;
+  }
+  
+  .card-footer {
+    background: rgba(0,0,0,0.1);
+    padding: 1rem 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .counter {
+    display: inline-block;
+  }
+  
+  /* Chart Cards */
+  .chart-card, .vision-mission {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .chart-card:hover, .vision-mission:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+  }
+  
+  .card-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .card-body {
+    padding: 2rem;
+  }
+  
+  .chart-loading {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+  }
+  
+  .loading-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Table Styles */
+  .table-section {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+  }
+  
+  .table-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .table-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .table-responsive {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .table {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  .table thead th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    border: none;
+    padding: 1rem 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .table tbody td {
+    padding: 1rem 0.75rem;
+    border-top: 1px solid #e9ecef;
+    vertical-align: middle;
+  }
+  
+  .table tbody tr {
+    transition: all 0.3s ease;
+  }
+  
+  .table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.01);
+  }
+  
+  .employee-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .employee-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+  }
+  
+  .employee-details h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  
+  .employee-details small {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+  
+  .badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+  
+  .badge-primary { background: #667eea; color: white; }
+  .badge-success { background: #2ed573; color: white; }
+  .badge-warning { background: #ffa502; color: white; }
+  .badge-info { background: #3742fa; color: white; }
+  
+  .btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-sm:hover {
+    transform: translateY(-2px);
+  }
+  
+ /* Carousel Styles */
+.carousel-container {
+  margin-bottom: 2rem;
+}
+
+/* Fix untuk gambar tetap full height */
+.carousel-inner {
+  height: 400px;
+}
+
+.carousel-item {
+  height: 400px;
+}
+
+.carousel-item img {
+  height: 800px !important;
+  width: 700px;
+  object-fit: cover;
+}
+
+/* Perbaikan untuk transisi fade */
+.carousel-fade .carousel-item {
+  opacity: 0;
+  transition-duration: 0.6s;
+  transition-property: opacity;
+}
+
+.carousel-fade .carousel-item.active,
+.carousel-fade .carousel-item-next.carousel-item-start,
+.carousel-fade .carousel-item-prev.carousel-item-end {
+  opacity: 1;
+}
+
+.carousel-fade .active.carousel-item-start,
+.carousel-fade .active.carousel-item-end {
+  opacity: 0;
+}
+
+.carousel-caption {
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%);
+  padding: 2rem;
+  text-align: left;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.carousel-caption h5 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+
+.carousel-indicators {
+  margin-bottom: 1rem;
+}
+
+.carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 4px;
+}
+
+/* Fade in animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carousel-inner,
+  .carousel-item,
+  .carousel-item img {
+    height: 300px !important;
+  }
+  
+  .col-md-2 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+  }
+  
+  .card-body {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .employee-info {
+    flex-direction: column;
+    text-align: center;
+  }
+}

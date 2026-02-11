@@ -1,0 +1,196 @@
+<?php
+// proses_edit_duk.php
+session_start();
+require_once 'check_session.php';
+require_once 'config/koneksi.php';
+require_once 'includes/alert_functions.php';
+
+// Hanya superadmin dan admin yang bisa akses
+if (!isAdmin()) {
+    alertGagal('dashboard.php', 'Akses ditolak! Anda tidak memiliki izin.');
+    exit;
+}
+
+// DEBUG: Log semua POST data
+error_log("===== POST DATA =====");
+error_log(print_r($_POST, true));
+
+// Escape semua input
+$nomor_usulan = mysqli_real_escape_string($koneksi, trim($_POST['nomor_usulan'] ?? ''));
+$tanggal_usulan = mysqli_real_escape_string($koneksi, $_POST['tanggal_usulan'] ?? '');
+$nip = mysqli_real_escape_string($koneksi, trim($_POST['nip'] ?? ''));
+$nama = mysqli_real_escape_string($koneksi, trim($_POST['nama'] ?? ''));
+$kartu_pegawai = mysqli_real_escape_string($koneksi, trim($_POST['kartu_pegawai'] ?? ''));
+$tempat_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir'] ?? ''));
+$pendidikan_terakhir = mysqli_real_escape_string($koneksi, $_POST['pendidikan_terakhir'] ?? '');
+$prodi = mysqli_real_escape_string($koneksi, trim($_POST['prodi'] ?? ''));
+
+// DEBUG
+error_log("Tempat Lahir: [$tempat_lahir]");
+
+// Data Lama
+$pangkat_lama = mysqli_real_escape_string($koneksi, trim($_POST['pangkat_lama'] ?? ''));
+$golongan_lama = mysqli_real_escape_string($koneksi, $_POST['golongan_lama'] ?? '');
+$tmt_pangkat_lama = mysqli_real_escape_string($koneksi, $_POST['tmt_pangkat_lama'] ?? '');
+$masa_kerja_tahun_lama = (int)($_POST['masa_kerja_tahun_lama'] ?? 0);
+$masa_kerja_bulan_lama = (int)($_POST['masa_kerja_bulan_lama'] ?? 0);
+$gaji_pokok_lama = (float)str_replace(['.', ','], '', $_POST['gaji_pokok_lama'] ?? '0');
+$jabatan_lama = mysqli_real_escape_string($koneksi, trim($_POST['jabatan_lama'] ?? ''));
+
+// Data Baru
+$pangkat_baru = mysqli_real_escape_string($koneksi, trim($_POST['pangkat_baru'] ?? ''));
+$golongan_baru = mysqli_real_escape_string($koneksi, $_POST['golongan_baru'] ?? '');
+$tmt_pangkat_baru = mysqli_real_escape_string($koneksi, $_POST['tmt_pangkat_baru'] ?? '');
+$masa_kerja_tahun_baru = (int)($_POST['masa_kerja_tahun_baru'] ?? 0);
+$masa_kerja_bulan_baru = (int)($_POST['masa_kerja_bulan_baru'] ?? 0);
+$gaji_pokok_baru = (float)str_replace(['.', ','], '', $_POST['gaji_pokok_baru'] ?? '0');
+$jabatan_baru = mysqli_real_escape_string($koneksi, trim($_POST['jabatan_baru'] ?? ''));
+
+// Masa Kerja Golongan
+$mk_golongan_tahun = (int)($_POST['mk_golongan_tahun'] ?? 0);
+$mk_golongan_bulan = (int)($_POST['mk_golongan_bulan'] ?? 0);
+$mk_dari_sampai = mysqli_real_escape_string($koneksi, trim($_POST['mk_dari_sampai'] ?? ''));
+
+// Jenis & Atasan
+$jenis_kenaikan = mysqli_real_escape_string($koneksi, $_POST['jenis_kenaikan'] ?? '');
+$atasan_nama = mysqli_real_escape_string($koneksi, trim($_POST['atasan_nama'] ?? ''));
+$atasan_nip = mysqli_real_escape_string($koneksi, trim($_POST['atasan_nip'] ?? ''));
+$atasan_pangkat = mysqli_real_escape_string($koneksi, trim($_POST['atasan_pangkat'] ?? ''));
+$atasan_jabatan = mysqli_real_escape_string($koneksi, trim($_POST['atasan_jabatan'] ?? ''));
+
+// Wilayah & SKP
+$wilayah_pembayaran = mysqli_real_escape_string($koneksi, trim($_POST['wilayah_pembayaran'] ?? ''));
+$skp_tahun_1 = mysqli_real_escape_string($koneksi, trim($_POST['skp_tahun_1'] ?? ''));
+$skp_nilai_1 = mysqli_real_escape_string($koneksi, trim($_POST['skp_nilai_1'] ?? ''));
+$skp_tahun_2 = mysqli_real_escape_string($koneksi, trim($_POST['skp_tahun_2'] ?? ''));
+$skp_nilai_2 = mysqli_real_escape_string($koneksi, trim($_POST['skp_nilai_2'] ?? ''));
+
+$status = mysqli_real_escape_string($koneksi, $_POST['status'] ?? '');
+
+// TAMBAHAN: Ambil id_opd dari duk berdasarkan NIP
+$id_opd = null;
+if (!empty($nip)) {
+    $query_opd = "SELECT id_opd FROM duk WHERE nip = ? LIMIT 1";
+    $stmt_opd = $koneksi->prepare($query_opd);
+    $stmt_opd->bind_param("s", $nip);
+    $stmt_opd->execute();
+    $result_opd = $stmt_opd->get_result();
+
+    if ($result_opd->num_rows > 0) {
+        $row_opd = $result_opd->fetch_assoc();
+        $id_opd = (int)$row_opd['id_opd'];
+    }
+    $stmt_opd->close();
+}
+
+error_log("ID OPD yang diambil: " . ($id_opd ?? 'NULL'));
+
+// Jika id_opd NULL, set ke 0 atau berikan error
+if ($id_opd === null) {
+    header('Location: form_tambah_kenaikan_pangkat.php?error=Data pegawai tidak ditemukan atau belum memiliki ID OPD');
+    exit;
+}
+
+// Query INSERT dengan id_opd (38 kolom, 38 placeholder)
+$query = "INSERT INTO kenaikan_pangkat (
+    nomor_usulan, tanggal_usulan, nip, id_opd, nama, kartu_pegawai, tempat_lahir, 
+    pendidikan_terakhir, prodi, pangkat_lama, golongan_lama, tmt_pangkat_lama, 
+    masa_kerja_tahun_lama, masa_kerja_bulan_lama, gaji_pokok_lama, jabatan_lama,
+    pangkat_baru, golongan_baru, tmt_pangkat_baru, masa_kerja_tahun_baru, 
+    masa_kerja_bulan_baru, gaji_pokok_baru, jabatan_baru, mk_golongan_tahun, 
+    mk_golongan_bulan, mk_dari_sampai, jenis_kenaikan, atasan_nama, atasan_nip, 
+    atasan_pangkat, atasan_jabatan, wilayah_pembayaran, skp_tahun_1, skp_nilai_1, 
+    skp_tahun_2, skp_nilai_2, status
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+// Hitung jumlah placeholder
+$placeholder_count = substr_count($query, '?');
+error_log("Jumlah placeholder (?): $placeholder_count");
+
+$stmt = $koneksi->prepare($query);
+
+if (!$stmt) {
+    error_log("Prepare error: " . $koneksi->error);
+    header('Location: form_tambah_kenaikan_pangkat.php?error=Query error: ' . urlencode($koneksi->error));
+    exit;
+}
+
+// Tipe data: 38 karakter untuk 38 parameter
+// s=string, i=integer, d=double
+$types = "sssissssssssiidssssiidssiisssssssssss";
+//        ^ tambahan 's' untuk id_opd (parameter ke-4)
+error_log("Jumlah tipe data: " . strlen($types)); // Harus 38
+
+// Bind parameter dengan urutan yang BENAR
+$bind_result = $stmt->bind_param(
+    $types,
+    $nomor_usulan,           // 1  - s
+    $tanggal_usulan,         // 2  - s
+    $nip,                    // 3  - s
+    $id_opd,                 // 4  - i
+    $nama,                   // 5  - s
+    $kartu_pegawai,          // 6  - s
+    $tempat_lahir,           // 7  - s
+    $pendidikan_terakhir,    // 9  - s
+    $prodi,                  // 10 - s
+    $pangkat_lama,           // 11 - s
+    $golongan_lama,          // 12 - s
+    $tmt_pangkat_lama,       // 13 - s
+    $masa_kerja_tahun_lama,  // 14 - i
+    $masa_kerja_bulan_lama,  // 15 - i
+    $gaji_pokok_lama,        // 16 - d
+    $jabatan_lama,           // 17 - s
+    $pangkat_baru,           // 18 - s
+    $golongan_baru,          // 19 - s
+    $tmt_pangkat_baru,       // 20 - s
+    $masa_kerja_tahun_baru,  // 21 - i
+    $masa_kerja_bulan_baru,  // 22 - i
+    $gaji_pokok_baru,        // 23 - d
+    $jabatan_baru,           // 24 - s
+    $mk_golongan_tahun,      // 25 - i
+    $mk_golongan_bulan,      // 26 - i
+    $mk_dari_sampai,         // 27 - s
+    $jenis_kenaikan,         // 28 - s
+    $atasan_nama,            // 29 - s
+    $atasan_nip,             // 30 - s
+    $atasan_pangkat,         // 31 - s
+    $atasan_jabatan,         // 32 - s
+    $wilayah_pembayaran,     // 33 - s
+    $skp_tahun_1,            // 34 - s
+    $skp_nilai_1,            // 35 - s
+    $skp_tahun_2,            // 36 - s
+    $skp_nilai_2,            // 37 - s
+    $status                  // 38 - s
+);
+
+if (!$bind_result) {
+    error_log("Bind param error");
+    header('Location: form_tambah_kenaikan_pangkat.php?error=Bind parameter error');
+    exit;
+}
+
+// Execute statement
+if ($stmt->execute()) {
+    $insert_id = $stmt->insert_id;
+    $stmt->close();
+    $koneksi->close();
+    
+    // Log sukses
+    error_log("✅ Data Kenaikan Pangkat berhasil ditambahkan - ID: $insert_id | Nama: $nama");
+    
+    // Redirect dengan alert sukses
+    alertSuksesTambah('kenaikan_pangkat.php', "Data Usulan Pegawai Atas Nama $nama berhasil ditambahkan!");
+    
+} else {
+    $error = $stmt->error;
+    $stmt->close();
+    $koneksi->close();
+    
+    // Log error
+    error_log("❌ Error execute statement: $error");
+    
+    // Redirect dengan alert gagal
+    alertGagal('form_tambah_kenaikan_pangkat.php', 'Gagal menyimpan data: ' . $error);
+}
+
+?>

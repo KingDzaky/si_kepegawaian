@@ -1,0 +1,129 @@
+/* CSS untuk Print Surat Pensiun */
+@page {
+    size: A4;
+    margin: 2cm 2.5cm;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+}
+
+.kop-surat {
+    text-align: center;
+    border-bottom: 3px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.kop-surat h2 {
+    margin: 5px 0;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+.kop-surat p {
+    margin: 3px 0;
+    font-size: 10pt;
+}
+
+.nomor-surat {
+    text-align: center;
+    margin: 20px 0;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.isi-surat {
+    text-align: justify;
+    margin: 20px 0;
+}
+
+.tabel-surat {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.tabel-surat td {
+    padding: 8px;
+    border: 1px solid #000;
+    vertical-align: top;
+}
+
+.ttd-section {
+    margin-top: 40px;
+    text-align: right;
+}
+
+.ttd-nama {
+    margin-top: 80px;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.paraf-box {
+    position: absolute;
+    bottom: 2cm;
+    left: 2.5cm;
+    border: 1px solid #000;
+    padding: 5px;
+}
+
+.paraf-box p {
+    margin: 3px 0;
+    font-size: 9pt;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+.tabel-data {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.tabel-data td {
+    padding: 5px 10px;
+}
+
+.tabel-data td:first-child {
+    width: 40%;
+}
+
+.tabel-data td:nth-child(2) {
+    width: 5%;
+}
+
+.no-print {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.no-print button, .no-print a {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    border-radius: 3px;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .paraf-box {
+        page-break-inside: avoid;
+    }
+}
