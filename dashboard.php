@@ -592,7 +592,7 @@ $result_duk = $koneksi->query($sql_duk);
   </div>
 
   <div class="row mb-5">
-    <!-- Chart Jenis Jabatan -->
+    <!-- Jenis Jabatan -->
     <div class="col-md-6 fade-in">
         <div class="chart-card">
             <div class="card-header">
@@ -604,7 +604,7 @@ $result_duk = $koneksi->query($sql_duk);
         </div>
     </div>
 
-    <!-- Chart Eselon -->
+    <!--  Eselon -->
     <div class="col-md-6 fade-in">
         <div class="chart-card">
             <div class="card-header">
@@ -617,7 +617,7 @@ $result_duk = $koneksi->query($sql_duk);
     </div>
 </div>
 
-<!-- Chart Golongan (Full Width) -->
+<!--  Golongan (Full Width) -->
 <div class="row mb-5">
     <div class="col-12 fade-in">
         <div class="chart-card">
