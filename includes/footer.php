@@ -126,6 +126,11 @@
                 <span>DZAKY AKMAL RIZQULLAH</span>
                 <div class="link-underline"></div>
               </a>
+            <a href="https://www.instagram.com/dheovv?igsh=eWxnYnNzbWpwMWxm" class="footer-link">
+            <i class="fab fa-instagram"></i>
+                <span>DHEO VALENTINO ERAY</span>
+                <div class="link-underline"></div>
+              </a>
               <div class="status-item">
                 <i class="fas fa-clock"></i>
                 <span id="current-time"></span>

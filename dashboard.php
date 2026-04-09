@@ -711,12 +711,22 @@ $result_duk = $koneksi->query($sql_duk);
         </div>
         <div class="col-md-6">
           <h5><i class="fas fa-rocket me-2" style="color: #28a745;"></i>Misi</h5>
-          <ul>
-            <li>Meningkatkan kualitas hidup perempuan melalui pemberdayaan ekonomi dan sosial</li>
-            <li>Mengoptimalkan sistem perlindungan anak dari berbagai bentuk kekerasan</li>
-            <li>Mengembangkan program kependudukan dan keluarga berencana yang berkelanjutan</li>
-            <li>Memperkuat kapasitas kelembagaan dan SDM aparatur yang profesional</li>
-          </ul>
+          <div class="d-flex align-items-start mb-2">
+            <i class="fas fa-check-circle me-2 mt-1" style="color: #28a745;"></i>
+            <span>Meningkatkan kualitas hidup perempuan melalui pemberdayaan ekonomi dan sosial</span>
+          </div>
+          <div class="d-flex align-items-start mb-2">
+            <i class="fas fa-check-circle me-2 mt-1" style="color: #28a745;"></i>
+            <span>Mengoptimalkan sistem perlindungan anak dari berbagai bentuk kekerasan</span>
+          </div>
+          <div class="d-flex align-items-start mb-2">
+            <i class="fas fa-check-circle me-2 mt-1" style="color: #28a745;"></i>
+            <span>Mengembangkan program kependudukan dan keluarga berencana yang berkelanjutan</span>
+          </div>
+          <div class="d-flex align-items-start mb-2">
+            <i class="fas fa-check-circle me-2 mt-1" style="color: #28a745;"></i>
+            <span>Memperkuat kapasitas kelembagaan dan SDM aparatur yang profesional</span>
+          </div>
         </div>
       </div>
     </div>

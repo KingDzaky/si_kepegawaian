@@ -103,7 +103,7 @@ $result = $koneksi->query($query);
             <i class="fas fa-search"></i> Cari Pegawai/No. Usulan
           </label>
           <input type="text" class="form-control" id="searchInput" 
-                 placeholder="Ketik nama pegawai, NIP, atau nomor usulan..." 
+                 placeholder="Ketik nama pegawai, NIP, Tahun atau Nomor Usulan..." 
                  onkeyup="filterTable()">
         </div>
         <div class="col-md-6 d-flex align-items-end">
