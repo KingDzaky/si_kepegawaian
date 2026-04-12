@@ -189,7 +189,7 @@ require_once 'includes/sidebar.php';
           <i class="fas fa-times me-2"></i>Batal
         </a>
         <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save me-2"></i>Update Usulan
+          <i class="fas fa-save me-2"></i>Simpan Perubahan
         </button>
       </div>
     </form>

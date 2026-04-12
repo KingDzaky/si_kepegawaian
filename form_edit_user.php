@@ -235,7 +235,7 @@ $user = mysqli_fetch_assoc($result);
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
-                    Update Data
+                    Simpan Perubahan
                 </button>
                 <a href="users.php" class="btn btn-secondary">
                     <i class="fas fa-times"></i>

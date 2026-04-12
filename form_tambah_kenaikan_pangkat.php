@@ -407,7 +407,7 @@ $nomor_usulan = "800.1.3.2/" . $urutan . "/DPPKBPM-BJM/" . $tahun;
                   <i class="fas fa-times me-2"></i>Batal
                 </a>
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Simpan Usulan
+                  <i class="fas fa-save me-2"></i>Simpan Data Usulan
                 </button>
               </div>
             </form>

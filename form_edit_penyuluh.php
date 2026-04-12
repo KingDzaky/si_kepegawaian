@@ -385,7 +385,7 @@ $error = $_GET['error'] ?? '';
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
         <button type="button" class="btn btn-primary" id="confirmSubmit">
-          <i class="fas fa-check me-2"></i>Konfirmasi & Update
+          <i class="fas fa-check me-2"></i>Simpan Perubahan
         </button>
       </div>
     </div>
@@ -593,7 +593,7 @@ $error = $_GET['error'] ?? '';
 }
 
 #submitBtn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e);
   border: none;
 }
 

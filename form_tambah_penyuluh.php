@@ -618,7 +618,7 @@ $success = $_GET['success'] ?? '';
 }
 
 #submitBtn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e);
   border: none;
   transition: all 0.3s ease;
 }

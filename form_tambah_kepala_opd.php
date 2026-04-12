@@ -155,7 +155,7 @@ if (!isAdmin()) {
                   <i class="fas fa-times me-2"></i>Batal
                 </a>
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Simpan Data
+                  <i class="fas fa-save me-2"></i>Simpan Data 
                 </button>
               </div>
             </form>

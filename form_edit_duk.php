@@ -75,10 +75,6 @@ function val($field, $data, $default = '') {
           <div class="card-header">
             <i class="fas fa-database me-2"></i>
             Edit Data Pegawai
-            <div class="data-status">
-              <i class="fas fa-database me-1"></i>
-              Data Existing
-            </div>
           </div>
           <div class="card-body">
             <form id="editForm" method="post" action="proses_edit_duk.php" novalidate>

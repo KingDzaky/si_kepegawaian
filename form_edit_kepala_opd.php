@@ -223,7 +223,7 @@ $error = $_GET['error'] ?? '';
                   <i class="fas fa-undo me-2"></i>Reset
                 </button>
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Update Data
+                  <i class="fas fa-save me-2"></i>Simpan Perubahan
                 </button>
               </div>
             </form>
