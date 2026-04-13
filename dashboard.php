@@ -169,7 +169,7 @@ $result_duk = $koneksi->query($sql_duk);
     
     <!-- Text Content -->
     <div class="header-text">
-      <h1><i class="fas fa-tachometer-alt me-3"></i>JEMBUTTTT</h1>
+      <h1><i class="fas fa-tachometer-alt me-3"></i>Dashboard DPPKBPM</h1>
       <p class="page-subtitle">Sistem Informasi Dinas Pemberdayaan Perempuan, Perlindungan Anak, Kependudukan dan Keluarga Berencana Kota Banjarmasin</p>
     </div>
   </div>
