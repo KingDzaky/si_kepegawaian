@@ -49,6 +49,7 @@ $errors = [];
 
 if (empty($nama)) $errors[] = "Nama wajib diisi";
 if (strlen($nama) < 3 && !empty($nama)) $errors[] = "Nama minimal 3 karakter";
+if (empty($nip)) $errors[] = "NIP wajib diisi";
 if (empty($kartu_pegawai)) $errors[] = "Kartu Pegawai wajib diisi";
 if (empty($ttl)) $errors[] = "Tempat, Tanggal Lahir wajib diisi";
 if (empty($jenis_kelamin)) $errors[] = "Jenis Kelamin wajib diisi";
