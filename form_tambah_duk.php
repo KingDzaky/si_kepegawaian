@@ -27,7 +27,7 @@ $success = $_GET['success'] ?? '';
     <!-- Page Header -->
     <div class="page-header fade-in">
       <h2><i class="fas fa-user-plus me-3"></i>Tambah Data DUK</h2>
-      <p class="mb-0">Formulir Penambahan Data Urut Kepangkatan</p>
+      <p class="mb-0">Formulir Penambahan Data Urut Kepegawaian</p>
     </div>
 
     <div class="row justify-content-center">

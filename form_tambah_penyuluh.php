@@ -28,7 +28,7 @@ $success = $_GET['success'] ?? '';
             </div>
             <div class="header-text">
               <h2 class="form-title">Tambah Data Penyuluh</h2>
-              <p class="form-subtitle">Sistem Informasi Penyuluh Pertanian</p>
+              <p class="form-subtitle">Sistem Administrasi Kepegawaian </p>
             </div>
           </div>
           <div class="progress-indicator">
@@ -61,7 +61,7 @@ $success = $_GET['success'] ?? '';
           <div class="card-header">
             <h5 class="card-title">
               <i class="fas fa-edit me-2"></i>
-              Form Input Data Penyuluh Pertanian
+              Form Input Data Penyuluh 
             </h5>
             <div class="card-tools">
               <span class="badge bg-info">Formulir Baru</span>
@@ -279,7 +279,7 @@ $success = $_GET['success'] ?? '';
                              name="jabatan_terakhir" 
                              id="jabatan_terakhir" 
                              class="form-control enhanced-input"
-                             placeholder="Contoh: Penyuluh Pertanian Ahli Pertama">
+                             placeholder="Contoh: Penyuluh Ahli Pertama">
                       <div class="input-feedback"></div>
                     </div>
                   </div>
@@ -303,8 +303,6 @@ $success = $_GET['success'] ?? '';
                         <option value="D3">Diploma III (D3)</option>
                         <option value="D4">Diploma IV (D4)</option>
                         <option value="S1">Sarjana (S1)</option>
-                        <option value="S1 Pertanian">S1 Pertanian</option>
-                        <option value="S1 Penyuluhan">S1 Penyuluhan Pertanian</option>
                         <option value="S2">Magister (S2)</option>
                         <option value="S3">Doktor (S3)</option>
                       </select>

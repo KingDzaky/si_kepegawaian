@@ -41,7 +41,7 @@ $result_duk = $koneksi->query($sql_duk);
       <i class="fas fa-tachometer-alt me-2"></i>
       DATA DUK
     </h1>
-    <p class="dashboard-subtitle">Sistem Informasi Data Urusan Kepegawaian</p>
+    <p class="dashboard-subtitle">Sistem Administrasi Data Urusan Kepegawaian</p>
   </div>
 
   <!-- Enhanced Statistics -->

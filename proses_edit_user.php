@@ -41,12 +41,15 @@ if (!empty($password)) {
     }
     
     // Update dengan password baru (TANPA updated_at)
-    $query = "UPDATE users SET 
-              password = '$password',
-              nama_lengkap = '$nama_lengkap',
-              role = '$role',
-              is_active = $is_active
-              WHERE id = $id";
+   // ✅ SESUDAH - di-hash dulu
+$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+$query = "UPDATE users SET 
+          password = '$hashed_password',
+          nama_lengkap = '$nama_lengkap',
+          role = '$role',
+          is_active = $is_active
+          WHERE id = $id";
 } else {
     // Update tanpa mengubah password (TANPA updated_at)
     $query = "UPDATE users SET 
