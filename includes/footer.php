@@ -121,6 +121,12 @@
           </div>
           <div class="col-md-6">
             <div class="footer-status">
+
+            <div class="status-item">
+                <i class="fas fa-clock"></i>
+                <span id="current-time"></span>
+              </div>
+              
             <a href="https://www.instagram.com/dzkymrz10_?igsh=bWh2ejQxdHp0OG1n" class="footer-link">
             <i class="fab fa-instagram"></i>
                 <span>DZAKY AKMAL RIZQULLAH</span>
@@ -131,10 +137,7 @@
                 <span>DHEO VALENTINO ERAY</span>
                 <div class="link-underline"></div>
               </a>
-              <div class="status-item">
-                <i class="fas fa-clock"></i>
-                <span id="current-time"></span>
-              </div>
+              
             </div>
           </div>
         </div>
