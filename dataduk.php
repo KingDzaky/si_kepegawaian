@@ -6,6 +6,10 @@ require_once 'config/koneksi.php';
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
+require_once 'includes/sweetalert.php';
+require_once 'includes/alert_handler.php';
+require_once 'includes/alert_functions.php';
+
 
 // Statistik dengan query yang lebih detail
 $stats_query = "
@@ -25,9 +29,12 @@ $jabatan_options = $koneksi->query("SELECT DISTINCT jabatan_terakhir FROM duk WH
 $pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM duk WHERE pendidikan_terakhir != '' ORDER BY pendidikan_terakhir")->fetch_all(MYSQLI_ASSOC);
 
 // Query untuk data tabel DUK - PERBAIKAN: TAMBAHKAN SEMUA FIELD YANG DIPERLUKAN
+// ✅ PERBAIKAN: Query hanya tampilkan data yang BELUM dihapus
 $sql_duk = "SELECT id, nama, nip, kartu_pegawai, pangkat_terakhir, golongan, jabatan_terakhir, ttl, jenis_kelamin, 
             pendidikan_terakhir, prodi, tmt_pangkat, tmt_eselon, eselon, jenis_jabatan, jft_tingkat, jfu_kelas 
-            FROM duk ORDER BY nama ASC";
+            FROM duk 
+            WHERE deleted_at IS NULL 
+            ORDER BY nama ASC";
 $result_duk = $koneksi->query($sql_duk);
 ?>
 
@@ -319,7 +326,9 @@ $result_duk = $koneksi->query($sql_duk);
                       <i class="fas fa-edit"></i>
                     </a>
                     <a href="proses_hapus_duk.php?id=<?= $row['id'] ?>" class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                      title="Hapus Data" onclick="return confirm('Yakin ingin menghapus data ini?')" style="width: 100%;">
+                      title="Hapus Data" 
+                      onclick="return konfirmasiHapus(event, this.href, '<?= htmlspecialchars($row['nama']) ?>')" 
+                      style="width: 100%;">
                       <i class="fas fa-trash"></i>
                     </a>
                   </div>

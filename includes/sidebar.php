@@ -607,6 +607,15 @@
               </a>
             </li>
           </ul>
+          <li class="nav-item" data-tooltip="Recycle Bin">
+          <a class="nav-link sidebar-link" href="recycle_bin.php">
+            <div class="link-content">
+              <i class="fas fa-trash-restore nav-icon"></i>
+              <span class="nav-text">Recycle Bin</span>
+            </div>
+            <div class="link-hover-effect"></div>
+          </a>
+        </li>
         </li>
 
         <?php endif; ?>
