@@ -28,6 +28,7 @@ $jenis_kenaikan = mysqli_real_escape_string($koneksi, $_POST['jenis_kenaikan']);
 $nama = mysqli_real_escape_string($koneksi, trim($_POST['nama']));
 $kartu_pegawai = mysqli_real_escape_string($koneksi, trim($_POST['kartu_pegawai']));
 $tempat_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir']));
+$tanggal_lahir = mysqli_real_escape_string($koneksi, $_POST['tanggal_lahir'] ?? ''); // ✅ TAMBAHKAN INI
 $pendidikan_terakhir = mysqli_real_escape_string($koneksi, $_POST['pendidikan_terakhir']);
 $prodi = mysqli_real_escape_string($koneksi, trim($_POST['prodi']));
 
@@ -111,6 +112,7 @@ $query = "UPDATE kenaikan_pangkat SET
     nama = ?, 
     kartu_pegawai = ?, 
     tempat_lahir = ?,
+    tanggal_lahir = ?,
     pendidikan_terakhir = ?, 
     prodi = ?, 
     pangkat_lama = ?, 
@@ -154,13 +156,14 @@ if (!$stmt) {
 // Total: 27 s + 8 i + 2 d = 37 parameter (36 field + 1 id)
 
 $stmt->bind_param(
-    "sssssssssssiidssssiidssiissssssssssi",
+    "ssssssssssssiidssssiidssiissssssssssi",
     $nomor_usulan,             // 1  - s (BARU)
     $tanggal_usulan,           // 2  - s
     $jenis_kenaikan,           // 3  - s
     $nama,                     // 4  - s
     $kartu_pegawai,            // 5  - s
     $tempat_lahir,             // 6  - s
+    $tanggal_lahir,             // 6  - s
     $pendidikan_terakhir,      // 7  - s
     $prodi,                    // 8  - s
     $pangkat_lama,             // 9  - s

@@ -121,13 +121,18 @@ $success = $_GET['success'] ?? '';
                       </label>
                       <div class="input-group">
                         <input type="text" name="ttl" id="ttl" class="form-control with-icon" 
-                               required placeholder="Banjarmasin, 01-01-1990">
+                               required placeholder="Banjarmasin 1990-02-10">
                         <i class="input-icon fas fa-birthday-cake"></i>
                       </div>
                       <div class="invalid-feedback"></div>
                       <div class="valid-feedback">TTL valid!</div>
+                      <small class="form-text text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Format: Tempat, YYYY-MM-DD (contoh: Banjarmasin 1990-02-10)
+                      </small>
                     </div>
                   </div>
+                  
 
                   <div class="col-md-6">
                     <div class="form-group fade-in">

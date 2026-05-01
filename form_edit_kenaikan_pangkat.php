@@ -18,6 +18,7 @@ if (!$id) {
   exit;
 }
 
+// ✅ Query dengan tempat_lahir dan tanggal_lahir
 $query = "SELECT * FROM kenaikan_pangkat WHERE id = ?";
 $stmt = $koneksi->prepare($query);
 $stmt->bind_param("i", $id);
@@ -30,6 +31,15 @@ if ($result->num_rows === 0) {
 }
 
 $data = $result->fetch_assoc();
+
+// ✅ TAMBAHKAN Helper untuk format tanggal
+require_once 'includes/date_helper.php';
+
+// ✅ Format TTL untuk preview (opsional)
+$ttl_preview = '';
+if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
+    $ttl_preview = formatTTL($data['tempat_lahir'], $data['tanggal_lahir']);
+}
 ?>
 
 <link rel="stylesheet" href="css/form_tambah_duk.css">
@@ -72,10 +82,6 @@ $data = $result->fetch_assoc();
                              value="<?= htmlspecialchars($data['nomor_usulan']) ?>"
                              placeholder="Masukkan nomor usulan"
                              required>
-                      <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Nomor usulan dapat diedit sesuai kebutuhan
-                      </small>
                     </div>
                   </div>
                   <div class="col-md-4">
@@ -108,6 +114,15 @@ $data = $result->fetch_assoc();
                 <div class="section-title">
                   <i class="fas fa-user me-2"></i>Data Pegawai
                 </div>
+                
+                <!-- ✅ PREVIEW TTL (Read-only) -->
+                <?php if (!empty($ttl_preview)): ?>
+                <div class="alert alert-info mb-3">
+                  <i class="fas fa-info-circle me-2"></i>
+                  <strong>TTL:</strong> <?= $ttl_preview ?>
+                </div>
+                <?php endif; ?>
+                
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
@@ -136,15 +151,34 @@ $data = $result->fetch_assoc();
                              value="<?= htmlspecialchars($data['kartu_pegawai']) ?>" required>
                     </div>
                   </div>
+                  
+                  <!-- ✅ FIELD TERPISAH: Tempat Lahir & Tanggal Lahir -->
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
                         <i class="fas fa-map-marker-alt"></i> Tempat Lahir <span class="required">*</span>
                       </label>
                       <input type="text" name="tempat_lahir" class="form-control" 
-                             value="<?= htmlspecialchars($data['tempat_lahir']) ?>" required>
+                             value="<?= htmlspecialchars($data['tempat_lahir'] ?? '') ?>" 
+                             placeholder="Contoh: Banjarmasin"
+                             required>
                     </div>
                   </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-calendar-alt"></i> Tanggal Lahir <span class="required">*</span>
+                      </label>
+                      <input type="date" name="tanggal_lahir" class="form-control" 
+                             value="<?= htmlspecialchars($data['tanggal_lahir'] ?? '') ?>" 
+                             required>
+                      <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Format: YYYY-MM-DD
+                      </small>
+                    </div>
+                  </div>
+                  
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">

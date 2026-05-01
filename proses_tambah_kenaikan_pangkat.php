@@ -1,5 +1,4 @@
 <?php
-// proses_edit_duk.php
 session_start();
 require_once 'check_session.php';
 require_once 'config/koneksi.php';
@@ -21,12 +20,84 @@ $tanggal_usulan = mysqli_real_escape_string($koneksi, $_POST['tanggal_usulan'] ?
 $nip = mysqli_real_escape_string($koneksi, trim($_POST['nip'] ?? ''));
 $nama = mysqli_real_escape_string($koneksi, trim($_POST['nama'] ?? ''));
 $kartu_pegawai = mysqli_real_escape_string($koneksi, trim($_POST['kartu_pegawai'] ?? ''));
-$tempat_lahir = mysqli_real_escape_string($koneksi, trim($_POST['tempat_lahir'] ?? ''));
 $pendidikan_terakhir = mysqli_real_escape_string($koneksi, $_POST['pendidikan_terakhir'] ?? '');
 $prodi = mysqli_real_escape_string($koneksi, trim($_POST['prodi'] ?? ''));
 
-// DEBUG
-error_log("Tempat Lahir: [$tempat_lahir]");
+// ✅ PARSING TTL - handle semua format
+$tempat_lahir = '';
+$tanggal_lahir = null;
+
+if (!empty($nip)) {
+    $query_ttl = "SELECT ttl FROM duk WHERE nip = ? AND deleted_at IS NULL LIMIT 1";
+    $stmt_ttl = $koneksi->prepare($query_ttl);
+    $stmt_ttl->bind_param("s", $nip);
+    $stmt_ttl->execute();
+    $result_ttl = $stmt_ttl->get_result();
+    
+    if ($result_ttl->num_rows > 0) {
+        $row_ttl = $result_ttl->fetch_assoc();
+        $ttl_raw = trim($row_ttl['ttl']);
+        error_log("TTL dari DUK: [$ttl_raw]");
+        
+        // ── STEP 1: Pisah tempat & tanggal ──────────────────────────
+        $tanggal_raw = '';
+        
+        if (strpos($ttl_raw, ',') !== false) {
+            // Format: "Banjarmasin, ..." (ada koma)
+            [$tempat_lahir, $tanggal_raw] = explode(',', $ttl_raw, 2);
+            $tempat_lahir = trim($tempat_lahir);
+            $tanggal_raw  = trim($tanggal_raw);
+        } elseif (preg_match('/^(.+?)\s+(\d{4}-\d{2}-\d{2})$/', $ttl_raw, $m)) {
+            // Format: "Banjarmasin 1990-01-19"
+            $tempat_lahir = trim($m[1]);
+            $tanggal_raw  = trim($m[2]);
+        } elseif (preg_match('/^(.+?)\s+(\d{2}-\d{2}-\d{4})$/', $ttl_raw, $m)) {
+            // Format: "Banjarmasin 19-01-1990"
+            $tempat_lahir = trim($m[1]);
+            $tanggal_raw  = trim($m[2]);
+        } else {
+            $tempat_lahir = $ttl_raw;
+            $tanggal_raw  = '';
+        }
+        
+        // ── STEP 2: Normalisasi bulan nama Indonesia ─────────────────
+        // Handle: "1990-Januari-19", "19-Januari-1990", "19 Januari 1990"
+        if (!empty($tanggal_raw)) {
+            $bulan_map = [
+                'Januari'=>'01', 'Februari'=>'02', 'Maret'=>'03',    'April'=>'04',
+                'Mei'=>'05',     'Juni'=>'06',     'Juli'=>'07',     'Agustus'=>'08',
+                'September'=>'09','Oktober'=>'10', 'November'=>'11', 'Desember'=>'12'
+            ];
+            foreach ($bulan_map as $nama => $angka) {
+                if (stripos($tanggal_raw, $nama) !== false) {
+                    $tanggal_raw = str_ireplace($nama, $angka, $tanggal_raw);
+                    break;
+                }
+            }
+            // Setelah replace: "1990-01-19" atau "19-01-1990" atau "19 01 1990"
+        }
+        
+        // ── STEP 3: Parse ke Y-m-d ──────────────────────────────────
+        if (!empty($tanggal_raw)) {
+            $formats = ['Y-m-d', 'd-m-Y', 'd/m/Y', 'Y/m/d', 'd-m-Y', 'Y-d-m'];
+            foreach ($formats as $fmt) {
+                $date_obj = DateTime::createFromFormat($fmt, $tanggal_raw);
+                if ($date_obj !== false) {
+                    $tanggal_lahir = $date_obj->format('Y-m-d');
+                    break;
+                }
+            }
+            // Fallback strtotime
+            if (empty($tanggal_lahir)) {
+                $ts = strtotime($tanggal_raw);
+                $tanggal_lahir = ($ts !== false) ? date('Y-m-d', $ts) : null;
+            }
+        }
+        
+        error_log("Hasil parse → Tempat: [$tempat_lahir] | Tanggal: [$tanggal_lahir]");
+    }
+    $stmt_ttl->close();
+}
 
 // Data Lama
 $pangkat_lama = mysqli_real_escape_string($koneksi, trim($_POST['pangkat_lama'] ?? ''));
@@ -91,9 +162,10 @@ if ($id_opd === null) {
     exit;
 }
 
-// Query INSERT dengan id_opd (38 kolom, 38 placeholder)
+// ✅ Query INSERT dengan tempat_lahir dan tanggal_lahir terpisah (38 kolom)
 $query = "INSERT INTO kenaikan_pangkat (
-    nomor_usulan, tanggal_usulan, nip, id_opd, nama, kartu_pegawai, tempat_lahir, 
+    nomor_usulan, tanggal_usulan, nip, id_opd, nama, kartu_pegawai, 
+    tempat_lahir, tanggal_lahir, 
     pendidikan_terakhir, prodi, pangkat_lama, golongan_lama, tmt_pangkat_lama, 
     masa_kerja_tahun_lama, masa_kerja_bulan_lama, gaji_pokok_lama, jabatan_lama,
     pangkat_baru, golongan_baru, tmt_pangkat_baru, masa_kerja_tahun_baru, 
@@ -101,7 +173,7 @@ $query = "INSERT INTO kenaikan_pangkat (
     mk_golongan_bulan, mk_dari_sampai, jenis_kenaikan, atasan_nama, atasan_nip, 
     atasan_pangkat, atasan_jabatan, wilayah_pembayaran, skp_tahun_1, skp_nilai_1, 
     skp_tahun_2, skp_nilai_2, status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 // Hitung jumlah placeholder
 $placeholder_count = substr_count($query, '?');
@@ -115,13 +187,13 @@ if (!$stmt) {
     exit;
 }
 
-// Tipe data: 38 karakter untuk 38 parameter
+// ✅ Tipe data: 38 parameter
 // s=string, i=integer, d=double
-$types = "sssissssssssiidssssiidssiisssssssssss";
-//        ^ tambahan 's' untuk id_opd (parameter ke-4)
+$types = "ssissssssssssiidssssiidssiisssssssssss";
+//        ^       ^^ tempat_lahir (s), tanggal_lahir (s)
 error_log("Jumlah tipe data: " . strlen($types)); // Harus 38
 
-// Bind parameter dengan urutan yang BENAR
+// ✅ Bind parameter dengan urutan yang BENAR
 $bind_result = $stmt->bind_param(
     $types,
     $nomor_usulan,           // 1  - s
@@ -130,7 +202,8 @@ $bind_result = $stmt->bind_param(
     $id_opd,                 // 4  - i
     $nama,                   // 5  - s
     $kartu_pegawai,          // 6  - s
-    $tempat_lahir,           // 7  - s
+    $tempat_lahir,           // 7  - s ✅ BARU
+    $tanggal_lahir,          // 8  - s ✅ BARU (DATE disimpan sebagai string)
     $pendidikan_terakhir,    // 9  - s
     $prodi,                  // 10 - s
     $pangkat_lama,           // 11 - s
@@ -176,7 +249,7 @@ if ($stmt->execute()) {
     $koneksi->close();
     
     // Log sukses
-    error_log("✅ Data Kenaikan Pangkat berhasil ditambahkan - ID: $insert_id | Nama: $nama");
+    error_log("✅ Data Kenaikan Pangkat berhasil ditambahkan - ID: $insert_id | Nama: $nama | Tempat Lahir: $tempat_lahir | Tanggal Lahir: $tanggal_lahir");
     
     // Redirect dengan alert sukses
     alertSuksesTambah('kenaikan_pangkat.php', "Data Usulan Pegawai Atas Nama $nama berhasil ditambahkan!");
@@ -192,5 +265,4 @@ if ($stmt->execute()) {
     // Redirect dengan alert gagal
     alertGagal('form_tambah_kenaikan_pangkat.php', 'Gagal menyimpan data: ' . $error);
 }
-
 ?>

@@ -160,6 +160,12 @@ $nomor_usulan = "800.1.3.2/" . $urutan . "/DPPKBPM-BJM/" . $tahun;
                     </div>
                     <div class="col-md-6">
                       <div class="form-group">
+                        <label class="form-label"><i class="fas fa-calendar-alt"></i>Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control" readonly>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
                         <label class="form-label"><i class="fas fa-graduation-cap"></i>Pendidikan Terakhir</label>
                         <input type="text" name="pendidikan_terakhir" id="pendidikan_terakhir" class="form-control" readonly>
                       </div>
@@ -452,6 +458,7 @@ $(document).ready(function() {
                     $('#nama').val(response.data.nama);
                     $('#kartu_pegawai').val(response.data.kartu_pegawai);
                     $('#tempat_lahir').val(response.data.tempat_lahir);
+                    $('#tanggal_lahir').val(response.data.tanggal_lahir);
                     $('#pendidikan_terakhir').val(response.data.pendidikan_terakhir);
                     $('#prodi').val(response.data.prodi);
                     
@@ -497,7 +504,8 @@ $(document).ready(function() {
 
 // Fungsi untuk mengosongkan field
 function clearFormFields() {
-    $('#nama, #kartu_pegawai, #tempat_lahir, #pendidikan_terakhir, #prodi').val('');
+    $('#nama, #kartu_pegawai, #tempat_lahir, #tanggal_lahir, #pendidikan_terakhir, #prodi').val('');
+    //                                         ^^^^^^^^^^^^^^^ TAMBAHKAN INI
     $('#pangkat_lama, #golongan_lama, #tmt_pangkat_lama, #jabatan_lama').val('');
     $('#atasan_nama, #atasan_nip, #atasan_pangkat, #atasan_jabatan').val('');
     $('#autoFillData').hide();

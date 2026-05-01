@@ -8,6 +8,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
+// ✅ Query mengambil semua data dari kenaikan_pangkat + kepala_opd
 $query = "SELECT 
     k.*,
     o.nama as nama_kepala_opd,
@@ -33,6 +34,33 @@ if ($result->num_rows === 0) {
 
 $data = $result->fetch_assoc();
 $stmt->close();
+
+// ✅ ========================================
+// FORMAT TTL dari tempat_lahir + tanggal_lahir
+// ========================================
+$ttl_formatted = '-';
+if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
+    $timestamp = strtotime($data['tanggal_lahir']);
+    if ($timestamp !== false) {
+        // Array nama bulan dalam Bahasa Indonesia
+        $bulan_indo = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        
+        $hari = date('d', $timestamp);
+        $bulan = $bulan_indo[(int)date('m', $timestamp)];
+        $tahun = date('Y', $timestamp);
+        
+        // Output: "Banjarmasin, 12 April 2000"
+        $ttl_formatted = $data['tempat_lahir'] . ', ' . $hari . ' ' . $bulan . ' ' . $tahun;
+    }
+} elseif (!empty($data['tempat_lahir'])) {
+    // Jika hanya ada tempat lahir tanpa tanggal
+    $ttl_formatted = $data['tempat_lahir'];
+}
+// ========================================
 
 $nama_kepala = $data['atasan_nama'];
 $jabatan_kepala = $data['atasan_jabatan'];
@@ -172,7 +200,6 @@ $koneksi->close();
             font-weight: bold;
         }
 
-
         /* Inner table untuk alignment titik dua */
         .align-table {
             width: 100%;
@@ -305,18 +332,20 @@ $koneksi->close();
                 <td class="col-no">2.</td>
                 <td class="label-col" colspan="2">NIP/Seri Karpeg/Pendidikan</td>
                 <td class="colon-col">:</td>
-                <td class="value-col"><?= htmlspecialchars($data['nip']) ?> /
-                    <?= htmlspecialchars($data['kartu_pegawai']) ?> /
+                <td class="value-col">
+                    <?= htmlspecialchars($data['nip']) ?> / 
+                    <?= htmlspecialchars($data['kartu_pegawai']) ?> / 
                     <?= htmlspecialchars($data['pendidikan_terakhir'] . ' ' . $data['prodi']) ?>
                 </td>
             </tr>
 
-            <!-- Row 3: TTL -->
+            <!-- ✅ Row 3: TTL - UPDATED dengan Format Indonesia -->
             <tr>
                 <td class="col-no">3.</td>
                 <td class="label-col" colspan="2">Tempat Tanggal Lahir</td>
                 <td class="colon-col">:</td>
-                <td class="value-col"><?= htmlspecialchars($data['tempat_lahir']) ?></td>
+                <td class="value-col"><?= $ttl_formatted ?></td>
+                <!-- ✅ JANGAN pakai htmlspecialchars() karena sudah diformat di atas -->
             </tr>
 
             <!-- Row 4: Pangkat LAMA -->
@@ -324,29 +353,41 @@ $koneksi->close();
                 <td class="col-no" rowspan="4">4.</td>
                 <td class="upright-col" rowspan="4">LAMA</td>
                 <td class="label-col">a. Pangkat / Gol. Ruang / TMT</td>
-                <td class="colon-con">:</td>
-                <td class="value-col"><?= htmlspecialchars($data['pangkat_lama']) ?> /
-                    <?= htmlspecialchars($data['golongan_lama']) ?> /
-                    <?= date('d F Y', strtotime($data['tmt_pangkat_lama'])) ?>
+                <td class="colon-col">:</td>
+                <td class="value-col">
+                    <?= htmlspecialchars($data['pangkat_lama']) ?> / 
+                    <?= htmlspecialchars($data['golongan_lama']) ?> / 
+                    <?php
+                    // Format tanggal: 01 October 2021
+                    $tmt_lama_obj = new DateTime($data['tmt_pangkat_lama']);
+                    $bulan_inggris = [
+                        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+                        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+                        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+                    ];
+                    echo $tmt_lama_obj->format('d') . ' ' . $bulan_inggris[(int)$tmt_lama_obj->format('m')] . ' ' . $tmt_lama_obj->format('Y');
+                    ?>
                 </td>
             </tr>
 
             <tr>
                 <td class="label-col">b. Masa Kerja</td>
-                <td class="colon-con">:</td>
-                <td class="value-col"><?= str_pad($data['masa_kerja_tahun_lama'], 2, '0', STR_PAD_LEFT) ?>
-                    Tahun <?= str_pad($data['masa_kerja_bulan_lama'], 2, '0', STR_PAD_LEFT) ?> Bulan</td>
+                <td class="colon-col">:</td>
+                <td class="value-col">
+                    <?= str_pad($data['masa_kerja_tahun_lama'], 2, '0', STR_PAD_LEFT) ?> Tahun 
+                    <?= str_pad($data['masa_kerja_bulan_lama'], 2, '0', STR_PAD_LEFT) ?> Bulan
+                </td>
             </tr>
 
             <tr>
                 <td class="label-col">c. Gaji Pokok</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= number_format($data['gaji_pokok_lama'], 0, ',', '.') ?>,-</td>
             </tr>
 
             <tr>
                 <td class="label-col">d. Jabatan</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($data['jabatan_lama']) ?></td>
             </tr>
 
@@ -355,29 +396,36 @@ $koneksi->close();
                 <td class="col-no" rowspan="4">5.</td>
                 <td class="upright-col" rowspan="4">BARU</td>
                 <td class="label-col">a. Pangkat / Gol. Ruang / TMT</td>
-                <td class="colon-con">:</td>
-                <td class="value-col"><?= htmlspecialchars($data['pangkat_baru']) ?> /
-                    <?= htmlspecialchars($data['golongan_baru']) ?> /
-                    <?= date('d F Y', strtotime($data['tmt_pangkat_baru'])) ?>
+                <td class="colon-col">:</td>
+                <td class="value-col">
+                    <?= htmlspecialchars($data['pangkat_baru']) ?> / 
+                    <?= htmlspecialchars($data['golongan_baru']) ?> / 
+                    <?php
+                    // Format tanggal: 02 December 2025
+                    $tmt_baru_obj = new DateTime($data['tmt_pangkat_baru']);
+                    echo $tmt_baru_obj->format('d') . ' ' . $bulan_inggris[(int)$tmt_baru_obj->format('m')] . ' ' . $tmt_baru_obj->format('Y');
+                    ?>
                 </td>
             </tr>
 
             <tr>
                 <td class="label-col">b. Masa Kerja</td>
-                <td class="colon-con">:</td>
-                <td class="value-col"><?= str_pad($data['masa_kerja_tahun_baru'], 2, '0', STR_PAD_LEFT) ?>
-                    Tahun <?= str_pad($data['masa_kerja_bulan_baru'], 2, '0', STR_PAD_LEFT) ?> Bulan</td>
+                <td class="colon-col">:</td>
+                <td class="value-col">
+                    <?= str_pad($data['masa_kerja_tahun_baru'], 2, '0', STR_PAD_LEFT) ?> Tahun 
+                    <?= str_pad($data['masa_kerja_bulan_baru'], 2, '0', STR_PAD_LEFT) ?> Bulan
+                </td>
             </tr>
 
             <tr>
                 <td class="label-col">c. Gaji Pokok</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
                 <td class="value-col">Rp <?= number_format($data['gaji_pokok_baru'], 0, ',', '.') ?>,-</td>
             </tr>
 
             <tr>
                 <td class="label-col">d. Jabatan</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($data['jabatan_baru']) ?></td>
             </tr>
 
@@ -385,36 +433,37 @@ $koneksi->close();
             <tr>
                 <td class="col-no" rowspan="4">6.</td>
                 <td class="label-col" colspan="2">Atasan Langsung</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
+                <td class="value-col"></td>
             </tr>
 
             <tr>
                 <td class="label-col" colspan="2">Nama / NIP</td>
-                <td class="colon-con">:</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($nama_kepala) ?></td>
             </tr>
 
             <tr>
-                <td class="label-col" colspan="2">Pangkat / Gol. Ruang / TMT</td>
-                <td class="colon-con">:</td>
+                <td class="label-col" colspan="2">Pangkat / Gol. Ruang</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($nip_kepala) ?></td>
             </tr>
 
             <tr>
-                <td class="label-col" colspan="2">Jabatan / TMT</td>
-                <td class="colon-con">:</td>
+                <td class="label-col" colspan="2">Jabatan</td>
+                <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($jabatan_kepala) ?></td>
             </tr>
 
-          <!-- Row 7: Wilayah Pembayaran -->
-          <tr>
+            <!-- Row 7: Wilayah Pembayaran -->
+            <tr>
                 <td class="col-no">7.</td>
                 <td class="label-col" colspan="2">Wilayah Pembayaran</td>
                 <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($data['wilayah_pembayaran']) ?></td>
             </tr>
 
-            <!-- Row 8: Perhitungan Masa Kerja - FIXED CALCULATION -->
+            <!-- Row 8: Perhitungan Masa Kerja -->
             <tr>
                 <td class="col-no">8.</td>
                 <td colspan="4">
@@ -442,7 +491,7 @@ $koneksi->close();
                             </td>
                         </tr>
                         
-                        <!-- Baris 1: MKG Saat Ini (dari SK terakhir) -->
+                        <!-- Baris 1: MKG Saat Ini -->
                         <tr>
                             <td style="text-align: center; padding: 4px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;">
                                 <?= htmlspecialchars($data['golongan_lama']) ?>
@@ -458,7 +507,7 @@ $koneksi->close();
                             </td>
                         </tr>
                         
-                        <!-- Baris 2: Tambahan MKG (dari TMT lama ke TMT baru) -->
+                        <!-- Baris 2: Tambahan MKG -->
                         <tr>
                             <td style="text-align: center; padding: 4px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;">
                                 <?= htmlspecialchars($data['golongan_lama']) ?> ke <?= htmlspecialchars($data['golongan_baru']) ?>
@@ -474,7 +523,7 @@ $koneksi->close();
                             </td>
                         </tr>
                         
-                        <!-- Baris 3: TOTAL (Baris 1 + Baris 2) -->
+                        <!-- Baris 3: TOTAL -->
                         <tr style="background-color: #f0f0f0;">
                             <td colspan="2" style="border-right: 1px solid #000; border-top: 1px solid #000;"></td>
                             <td style="text-align: center; padding: 4px; border-right: 1px solid #000; border-top: 1px solid #000; font-weight: bold; font-size: 8.5pt;">
@@ -497,11 +546,11 @@ $koneksi->close();
             <td style="width: 60%; vertical-align: top; padding: 6px;">
                 <p style="margin: 1px 0; font-size: 9.5pt;"><strong>Alasan-alasan Mutasi Kenaikan Pangkat</strong></p>
                 <p style="margin: 1px 0; font-size: 9.5pt;">Memenuhi Syarat untuk diusulkan kenaikan Pangkat</p>
-                <p style="margin: 1px 0; font-size: 9.5pt;">SKP Tahun <?= htmlspecialchars($data['skp_tahun_1']) ?> :
-                    <?= htmlspecialchars($data['skp_nilai_1']) ?>
+                <p style="margin: 1px 0; font-size: 9.5pt;">
+                    SKP Tahun <?= htmlspecialchars($data['skp_tahun_1']) ?> : <?= htmlspecialchars($data['skp_nilai_1']) ?>
                 </p>
-                <p style="margin: 1px 0; font-size: 9.5pt;">SKP Tahun <?= htmlspecialchars($data['skp_tahun_2']) ?> :
-                    <?= htmlspecialchars($data['skp_nilai_2']) ?>
+                <p style="margin: 1px 0; font-size: 9.5pt;">
+                    SKP Tahun <?= htmlspecialchars($data['skp_tahun_2']) ?> : <?= htmlspecialchars($data['skp_nilai_2']) ?>
                 </p>
             </td>
             <td style="width: 40%; vertical-align: top; padding: 6px; text-align: center;">
@@ -512,8 +561,7 @@ $koneksi->close();
                 <p style="margin: 1px 0; font-size: 9.5pt;">
                     <strong><?= htmlspecialchars($pangkat_kepala) ?><?= !empty($golongan_kepala) ? ' / ' . htmlspecialchars($golongan_kepala) : '' ?></strong>
                 </p>
-                <p style="margin: 1px 0; font-size: 9.5pt;"><strong>NIP. <?= htmlspecialchars($nip_kepala) ?></strong>
-                </p>
+                <p style="margin: 1px 0; font-size: 9.5pt;"><strong>NIP. <?= htmlspecialchars($nip_kepala) ?></strong></p>
             </td>
         </tr>
     </table>
@@ -525,5 +573,4 @@ $koneksi->close();
     </div>
 
 </body>
-
 </html>
