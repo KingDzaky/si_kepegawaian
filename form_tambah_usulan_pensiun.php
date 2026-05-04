@@ -35,9 +35,12 @@ $contoh_nomor = "800.1.4.2/$new_num/DPPKBPM-BJM/$tahun";
 $tanggal_usulan = date('Y-m-d');
 
 // Ambil data DUK untuk dropdown
+// SESUDAH ✅
 $query_duk = "SELECT id, nip, nama, ttl, pangkat_terakhir, golongan, jabatan_terakhir, 
               pendidikan_terakhir, prodi, jenis_kelamin, nomor_wa, kartu_pegawai, tmt_pangkat
               FROM duk 
+              WHERE deleted_at IS NULL 
+                AND status_pegawai = 'aktif'
               ORDER BY nama ASC";
 $duk_list = $koneksi->query($query_duk);
 

@@ -613,6 +613,16 @@ function showAlertWA(type, message) {
     }
   }, 5000);
 }
+
+
+if (!response.success) {
+    if (response.type === 'warning') {
+        showNotification('warning', response.message); // tampil kuning
+    } else {
+        showNotification('error', response.message);   // tampil merah
+    }
+}
+
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

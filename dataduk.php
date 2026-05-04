@@ -10,28 +10,30 @@ require_once 'includes/sweetalert.php';
 require_once 'includes/alert_handler.php';
 require_once 'includes/alert_functions.php';
 
-
 // Statistik dengan query yang lebih detail
+// ✅ Tambah kolom status_pegawai ke statistik
 $stats_query = "
     SELECT 
         COUNT(*) as total_duk,
         COUNT(CASE WHEN jenis_kelamin = 'Laki-laki' THEN 1 END) as total_laki,
         COUNT(CASE WHEN jenis_kelamin = 'Perempuan' THEN 1 END) as total_perempuan,
-        COUNT(CASE WHEN eselon IS NOT NULL AND eselon != '' AND eselon != 'Non-Eselon' THEN 1 END) as total_eselon
+        COUNT(CASE WHEN eselon IS NOT NULL AND eselon != '' AND eselon != 'Non-Eselon' THEN 1 END) as total_eselon,
+        COUNT(CASE WHEN status_pegawai = 'nonaktif' THEN 1 END) as total_nonaktif
     FROM duk
+    WHERE deleted_at IS NULL
 ";
 $stats = $koneksi->query($stats_query)->fetch_assoc();
 
 // Query untuk filter options
-$pangkat_options = $koneksi->query("SELECT DISTINCT pangkat_terakhir FROM duk WHERE pangkat_terakhir != '' ORDER BY pangkat_terakhir")->fetch_all(MYSQLI_ASSOC);
-$golongan_options = $koneksi->query("SELECT DISTINCT golongan FROM duk WHERE golongan != '' ORDER BY golongan")->fetch_all(MYSQLI_ASSOC);
-$jabatan_options = $koneksi->query("SELECT DISTINCT jabatan_terakhir FROM duk WHERE jabatan_terakhir != '' ORDER BY jabatan_terakhir")->fetch_all(MYSQLI_ASSOC);
-$pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM duk WHERE pendidikan_terakhir != '' ORDER BY pendidikan_terakhir")->fetch_all(MYSQLI_ASSOC);
+$pangkat_options    = $koneksi->query("SELECT DISTINCT pangkat_terakhir FROM duk WHERE pangkat_terakhir != '' AND deleted_at IS NULL ORDER BY pangkat_terakhir")->fetch_all(MYSQLI_ASSOC);
+$golongan_options   = $koneksi->query("SELECT DISTINCT golongan FROM duk WHERE golongan != '' AND deleted_at IS NULL ORDER BY golongan")->fetch_all(MYSQLI_ASSOC);
+$jabatan_options    = $koneksi->query("SELECT DISTINCT jabatan_terakhir FROM duk WHERE jabatan_terakhir != '' AND deleted_at IS NULL ORDER BY jabatan_terakhir")->fetch_all(MYSQLI_ASSOC);
+$pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM duk WHERE pendidikan_terakhir != '' AND deleted_at IS NULL ORDER BY pendidikan_terakhir")->fetch_all(MYSQLI_ASSOC);
 
-// Query untuk data tabel DUK - PERBAIKAN: TAMBAHKAN SEMUA FIELD YANG DIPERLUKAN
-// ✅ PERBAIKAN: Query hanya tampilkan data yang BELUM dihapus
+// ✅ Tambah status_pegawai, alasan_nonaktif, nonaktif_at ke SELECT
 $sql_duk = "SELECT id, nama, nip, kartu_pegawai, pangkat_terakhir, golongan, jabatan_terakhir, ttl, jenis_kelamin, 
-            pendidikan_terakhir, prodi, tmt_pangkat, tmt_eselon, eselon, jenis_jabatan, jft_tingkat, jfu_kelas 
+            pendidikan_terakhir, prodi, tmt_pangkat, tmt_eselon, eselon, jenis_jabatan, jft_tingkat, jfu_kelas,
+            status_pegawai, alasan_nonaktif, nonaktif_at
             FROM duk 
             WHERE deleted_at IS NULL 
             ORDER BY nama ASC";
@@ -45,8 +47,7 @@ $result_duk = $koneksi->query($sql_duk);
   <!-- Dashboard Header -->
   <div class="dashboard-header fade-in">
     <h1 class="dashboard-title">
-      <i class="fas fa-tachometer-alt me-2"></i>
-      DATA DUK
+      <i class="fas fa-tachometer-alt me-2"></i>DATA DUK
     </h1>
     <p class="dashboard-subtitle">Sistem Administrasi Data Urusan Kepegawaian</p>
   </div>
@@ -54,62 +55,50 @@ $result_duk = $koneksi->query($sql_duk);
   <!-- Enhanced Statistics -->
   <div class="stats-container fade-in">
     <div class="stat-card primary" onclick="filterByCard('all')">
-      <div class="stat-icon">
-        <i class="fas fa-users"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-users"></i></div>
       <h3 class="stat-number"><?= $stats['total_duk'] ?></h3>
       <p class="stat-label">Total Pegawai DUK</p>
-      <div class="stat-trend trend-up">
-        <i class="fas fa-arrow-up me-1"></i>
-        <span>Data terkini</span>
-      </div>
+      <div class="stat-trend trend-up"><i class="fas fa-arrow-up me-1"></i><span>Data terkini</span></div>
     </div>
 
     <div class="stat-card success" onclick="filterByCard('laki')">
-      <div class="stat-icon">
-        <i class="fas fa-male"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-male"></i></div>
       <h3 class="stat-number"><?= $stats['total_laki'] ?></h3>
       <p class="stat-label">Pegawai Laki-laki</p>
       <div class="stat-trend">
-        <span><?= $stats['total_duk'] > 0 ? round(($stats['total_laki'] / $stats['total_duk']) * 100, 1) : 0 ?>% dari
-          total</span>
+        <span><?= $stats['total_duk'] > 0 ? round(($stats['total_laki'] / $stats['total_duk']) * 100, 1) : 0 ?>% dari total</span>
       </div>
     </div>
 
     <div class="stat-card warning" onclick="filterByCard('perempuan')">
-      <div class="stat-icon">
-        <i class="fas fa-female"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-female"></i></div>
       <h3 class="stat-number"><?= $stats['total_perempuan'] ?></h3>
       <p class="stat-label">Pegawai Perempuan</p>
       <div class="stat-trend">
-        <span><?= $stats['total_duk'] > 0 ? round(($stats['total_perempuan'] / $stats['total_duk']) * 100, 1) : 0 ?>%
-          dari total</span>
+        <span><?= $stats['total_duk'] > 0 ? round(($stats['total_perempuan'] / $stats['total_duk']) * 100, 1) : 0 ?>% dari total</span>
       </div>
     </div>
 
     <div class="stat-card info" onclick="filterByCard('eselon')">
-      <div class="stat-icon">
-        <i class="fas fa-star"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-star"></i></div>
       <h3 class="stat-number"><?= $stats['total_eselon'] ?></h3>
       <p class="stat-label">Pegawai Eselon</p>
-      <div class="stat-trend trend-up">
-        <i class="fas fa-arrow-up me-1"></i>
-        <span>Struktural</span>
-      </div>
+      <div class="stat-trend trend-up"><i class="fas fa-arrow-up me-1"></i><span>Struktural</span></div>
+    </div>
+
+    <!-- ✅ Card baru: Nonaktif -->
+    <div class="stat-card" style="background: linear-gradient(135deg, #6c757d, #495057); cursor:pointer;" onclick="filterByCard('nonaktif')">
+      <div class="stat-icon"><i class="fas fa-user-slash"></i></div>
+      <h3 class="stat-number"><?= $stats['total_nonaktif'] ?></h3>
+      <p class="stat-label">Pegawai Nonaktif</p>
+      <div class="stat-trend"><span>Pensiun / Pindah</span></div>
     </div>
   </div>
 
   <!-- Advanced Filter Section -->
   <div class="filter-section fade-in">
-    <button class="filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent"
-      aria-expanded="false">
-      <span>
-        <i class="fas fa-filter me-2"></i>
-        Filter & Pencarian Lanjutan
-      </span>
+    <button class="filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent" aria-expanded="false">
+      <span><i class="fas fa-filter me-2"></i>Filter & Pencarian Lanjutan</span>
       <i class="fas fa-chevron-down"></i>
     </button>
 
@@ -117,33 +106,23 @@ $result_duk = $koneksi->query($sql_duk);
       <form id="filterForm">
         <div class="filter-row">
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-search me-1"></i>Pencarian Nama/NIP
-            </label>
+            <label class="form-label"><i class="fas fa-search me-1"></i>Pencarian Nama/NIP</label>
             <input type="text" class="form-control" id="searchName" placeholder="Masukkan nama atau NIP...">
           </div>
-
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-venus-mars me-1"></i>Jenis Kelamin
-            </label>
+            <label class="form-label"><i class="fas fa-venus-mars me-1"></i>Jenis Kelamin</label>
             <select class="form-control" id="filterGender">
               <option value="">Semua Jenis Kelamin</option>
               <option value="Laki-laki">Laki-laki</option>
               <option value="Perempuan">Perempuan</option>
             </select>
           </div>
-
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-medal me-1"></i>Pangkat
-            </label>
+            <label class="form-label"><i class="fas fa-medal me-1"></i>Pangkat</label>
             <select class="form-control" id="filterPangkat">
               <option value="">Semua Pangkat</option>
               <?php foreach ($pangkat_options as $pangkat): ?>
-                <option value="<?= htmlspecialchars($pangkat['pangkat_terakhir']) ?>">
-                  <?= htmlspecialchars($pangkat['pangkat_terakhir']) ?>
-                </option>
+                <option value="<?= htmlspecialchars($pangkat['pangkat_terakhir']) ?>"><?= htmlspecialchars($pangkat['pangkat_terakhir']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -151,44 +130,42 @@ $result_duk = $koneksi->query($sql_duk);
 
         <div class="filter-row">
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-layer-group me-1"></i>Golongan
-            </label>
+            <label class="form-label"><i class="fas fa-layer-group me-1"></i>Golongan</label>
             <select class="form-control" id="filterGolongan">
               <option value="">Semua Golongan</option>
               <?php foreach ($golongan_options as $golongan): ?>
-                <option value="<?= htmlspecialchars($golongan['golongan']) ?>">
-                  <?= htmlspecialchars($golongan['golongan']) ?>
-                </option>
+                <option value="<?= htmlspecialchars($golongan['golongan']) ?>"><?= htmlspecialchars($golongan['golongan']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
-
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-briefcase me-1"></i>Jabatan
-            </label>
+            <label class="form-label"><i class="fas fa-briefcase me-1"></i>Jabatan</label>
             <select class="form-control" id="filterJabatan">
               <option value="">Semua Jabatan</option>
               <?php foreach ($jabatan_options as $jabatan): ?>
-                <option value="<?= htmlspecialchars($jabatan['jabatan_terakhir']) ?>">
-                  <?= htmlspecialchars($jabatan['jabatan_terakhir']) ?>
-                </option>
+                <option value="<?= htmlspecialchars($jabatan['jabatan_terakhir']) ?>"><?= htmlspecialchars($jabatan['jabatan_terakhir']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
-
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-graduation-cap me-1"></i>Pendidikan
-            </label>
+            <label class="form-label"><i class="fas fa-graduation-cap me-1"></i>Pendidikan</label>
             <select class="form-control" id="filterPendidikan">
               <option value="">Semua Pendidikan</option>
               <?php foreach ($pendidikan_options as $pendidikan): ?>
-                <option value="<?= htmlspecialchars($pendidikan['pendidikan_terakhir']) ?>">
-                  <?= htmlspecialchars($pendidikan['pendidikan_terakhir']) ?>
-                </option>
+                <option value="<?= htmlspecialchars($pendidikan['pendidikan_terakhir']) ?>"><?= htmlspecialchars($pendidikan['pendidikan_terakhir']) ?></option>
               <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <!-- ✅ Tambah filter status pegawai -->
+        <div class="filter-row">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-toggle-on me-1"></i>Status Pegawai</label>
+            <select class="form-control" id="filterStatus">
+              <option value="">Semua Status</option>
+              <option value="aktif">Aktif</option>
+              <option value="nonaktif">Nonaktif</option>
             </select>
           </div>
         </div>
@@ -215,10 +192,7 @@ $result_duk = $koneksi->query($sql_duk);
   <!-- Enhanced Table Section -->
   <div class="table-section fade-in">
     <div class="table-header">
-      <h5 class="table-title">
-        <i class="fas fa-table me-2"></i>
-        Data Pegawai DUK
-      </h5>
+      <h5 class="table-title"><i class="fas fa-table me-2"></i>Data Pegawai DUK</h5>
       <div class="table-controls">
         <div class="search-box">
           <input type="text" class="search-input" id="quickSearch" placeholder="Pencarian cepat...">
@@ -242,7 +216,8 @@ $result_duk = $koneksi->query($sql_duk);
             <th>Pendidikan</th>
             <th>TMT/Eselon</th>
             <th>Jenis Jabatan</th>
-            <th width="150">Aksi</th>
+            <th>Status</th>
+            <th width="120">Aksi</th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -255,9 +230,9 @@ $result_duk = $koneksi->query($sql_duk);
                 $initials = strtoupper(substr($nama_parts[0], 0, 1) . substr(end($nama_parts), 0, 1));
               }
               $genderClass = $row['jenis_kelamin'] === 'Laki-laki' ? 'primary' : 'warning';
-              $genderIcon = $row['jenis_kelamin'] === 'Laki-laki' ? 'fa-mars' : 'fa-venus';
+              $genderIcon  = $row['jenis_kelamin'] === 'Laki-laki' ? 'fa-mars' : 'fa-venus';
 
-              // Tentukan jenis jabatan untuk ditampilkan
+              // Jenis jabatan display
               $jenis_jabatan_display = '-';
               if ($row['eselon'] === 'Non-Eselon') {
                 if ($row['jenis_jabatan'] === 'JFT' && !empty($row['jft_tingkat'])) {
@@ -270,76 +245,119 @@ $result_duk = $koneksi->query($sql_duk);
               } else {
                 $jenis_jabatan_display = '<span class="badge badge-primary">Eselon</span>';
               }
-              ?>
-              <tr data-eselon="<?= $row['eselon'] ?>" data-jenis-jabatan="<?= $row['jenis_jabatan'] ?? '' ?>"
-                data-jft-tingkat="<?= $row['jft_tingkat'] ?? '' ?>" data-jfu-kelas="<?= $row['jfu_kelas'] ?? '' ?>">
+
+              // ✅ Status pegawai display
+              $status = $row['status_pegawai'] ?? 'aktif';
+              $alasan = $row['alasan_nonaktif'] ?? '';
+              $nonaktif_at = $row['nonaktif_at'] ?? '';
+
+              // Format tooltip tanggal nonaktif
+              $tooltip_nonaktif = '';
+              if ($status === 'nonaktif' && !empty($nonaktif_at)) {
+                $tooltip_nonaktif = 'Nonaktif sejak ' . date('d/m/Y', strtotime($nonaktif_at)) . ' - ' . $alasan;
+              }
+            ?>
+              <tr data-eselon="<?= $row['eselon'] ?>"
+                  data-jenis-jabatan="<?= $row['jenis_jabatan'] ?? '' ?>"
+                  data-jft-tingkat="<?= $row['jft_tingkat'] ?? '' ?>"
+                  data-jfu-kelas="<?= $row['jfu_kelas'] ?? '' ?>"
+                  data-status="<?= $status ?>"
+                  <?= $status === 'nonaktif' ? 'style="opacity: 0.7; background-color: #f8f9fa;"' : '' ?>>
+
                 <td>
                   <div class="employee-info">
-                    <div class="employee-avatar">
+                    <div class="employee-avatar" style="<?= $status === 'nonaktif' ? 'background: #6c757d;' : '' ?>">
                       <?= $initials ?>
                     </div>
                     <div class="employee-details">
                       <h6><?= htmlspecialchars($row['nama']) ?></h6>
-                      <small><i
-                          class="fas fa-id-card me-1"></i><?= htmlspecialchars($row['nip'] ?: 'Belum ada NIP') ?></small>
+                      <small><i class="fas fa-id-card me-1"></i><?= htmlspecialchars($row['nip'] ?: 'Belum ada NIP') ?></small>
                     </div>
                   </div>
                 </td>
                 <td>
                   <div>
                     <strong><?= htmlspecialchars($row['pangkat_terakhir'] ?: '-') ?></strong>
-                    <br><span
-                      class="badge badge-<?= $genderClass ?>"><?= htmlspecialchars($row['golongan'] ?: '-') ?></span>
+                    <br><span class="badge badge-<?= $genderClass ?>"><?= htmlspecialchars($row['golongan'] ?: '-') ?></span>
                   </div>
                 </td>
-                <td>
-                  <span class="fw-semibold"><?= htmlspecialchars($row['jabatan_terakhir'] ?: '-') ?></span>
-                </td>
-                <td>
-                  <small><?= htmlspecialchars($row['ttl'] ?: '-') ?></small>
-                </td>
+                <td><span class="fw-semibold"><?= htmlspecialchars($row['jabatan_terakhir'] ?: '-') ?></span></td>
+                <td><small><?= htmlspecialchars($row['ttl'] ?: '-') ?></small></td>
                 <td>
                   <span class="badge badge-<?= $genderClass ?>">
                     <i class="fas <?= $genderIcon ?> me-1"></i><?= htmlspecialchars($row['jenis_kelamin']) ?>
                   </span>
                 </td>
-                <td>
-                  <span class="badge badge-info"><?= htmlspecialchars($row['pendidikan_terakhir'] ?: '-') ?></span>
-                </td>
+                <td><span class="badge badge-info"><?= htmlspecialchars($row['pendidikan_terakhir'] ?: '-') ?></span></td>
                 <td>
                   <div>
                     <small><strong>TMT:</strong> <?= htmlspecialchars($row['tmt_eselon'] ?: '-') ?></small>
                     <br><small><strong>Eselon:</strong> <?= htmlspecialchars($row['eselon'] ?: '-') ?></small>
                   </div>
                 </td>
+                <td><?= $jenis_jabatan_display ?></td>
+
+                <!-- ✅ Kolom Status -->
                 <td>
-                  <?= $jenis_jabatan_display ?>
+                  <?php if ($status === 'aktif'): ?>
+                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Aktif</span>
+                  <?php else: ?>
+                    <span class="badge bg-secondary" 
+                          data-bs-toggle="tooltip" 
+                          title="<?= htmlspecialchars($tooltip_nonaktif) ?>">
+                      <i class="fas fa-user-slash me-1"></i>Nonaktif
+                    </span>
+                    <?php if (!empty($alasan)): ?>
+                      <br><small class="text-muted"><?= htmlspecialchars($alasan) ?></small>
+                    <?php endif; ?>
+                  <?php endif; ?>
                 </td>
+
+                <!-- ✅ Kolom Aksi -->
                 <td>
-                  <div class="action-buttons" style="display: flex; flex-direction: column; gap: 5px; align-items: stretch;">
-                    <a href="detail_duk.php?id=<?= $row['id'] ?>" class="btn btn-info btn-sm" data-bs-toggle="tooltip"
-                      title="Lihat Detail" style="width: 100%;">
+                  <div class="action-buttons" style="display: flex; flex-direction: column; gap: 4px; align-items: stretch;">
+                    <a href="detail_duk.php?id=<?= $row['id'] ?>" 
+                       class="btn btn-info btn-sm" title="Lihat Detail">
                       <i class="fas fa-eye"></i>
                     </a>
-                    <a href="form_edit_duk.php?id=<?= $row['id'] ?>" class="btn btn-warning btn-sm" data-bs-toggle="tooltip"
-                      title="Edit Data" style="width: 100%;">
+                    <a href="form_edit_duk.php?id=<?= $row['id'] ?>" 
+                       class="btn btn-warning btn-sm" title="Edit Data">
                       <i class="fas fa-edit"></i>
                     </a>
-                    <a href="proses_hapus_duk.php?id=<?= $row['id'] ?>" class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                      title="Hapus Data" 
-                      onclick="return konfirmasiHapus(event, this.href, '<?= htmlspecialchars($row['nama']) ?>')" 
-                      style="width: 100%;">
+
+                    <?php if ($status === 'aktif'): ?>
+                      <!-- Tombol Nonaktifkan (kuning gelap) -->
+                      <button type="button"
+                              class="btn btn-sm"
+                              style="background-color: #fd7e14; color: white;"
+                              title="Nonaktifkan Pegawai"
+                              onclick="bukaNonaktif(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['nama'])) ?>')">
+                        <i class="fas fa-user-slash"></i>
+                      </button>
+                    <?php else: ?>
+                      <!-- Tombol Reaktifkan (hijau) -->
+                      <button type="button"
+                              class="btn btn-success btn-sm"
+                              title="Aktifkan Kembali"
+                              onclick="bukaReaktif(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['nama'])) ?>')">
+                        <i class="fas fa-user-check"></i>
+                      </button>
+                    <?php endif; ?>
+
+                    <a href="proses_hapus_duk.php?id=<?= $row['id'] ?>" 
+                       class="btn btn-danger btn-sm" title="Hapus Data"
+                       onclick="return konfirmasiHapus(event, this.href, '<?= htmlspecialchars($row['nama']) ?>')">
                       <i class="fas fa-trash"></i>
                     </a>
                   </div>
                 </td>
               </tr>
-              <?php
+            <?php
             endwhile;
           else:
             ?>
             <tr>
-              <td colspan="9" class="empty-state">
+              <td colspan="10" class="empty-state">
                 <i class="fas fa-inbox"></i>
                 <h5>Belum ada data DUK</h5>
                 <p>Silakan tambahkan data pegawai terlebih dahulu</p>
@@ -355,19 +373,167 @@ $result_duk = $koneksi->query($sql_duk);
   </div>
 </main>
 
+<!-- ====================================================================== -->
+<!-- ✅ MODAL NONAKTIFKAN PEGAWAI                                            -->
+<!-- ====================================================================== -->
+<div class="modal fade" id="modalNonaktif" tabindex="-1" aria-labelledby="modalNonaktifLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #fd7e14; color: white;">
+        <h5 class="modal-title" id="modalNonaktifLabel">
+          <i class="fas fa-user-slash me-2"></i>Nonaktifkan Pegawai
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="proses_nonaktif_duk.php" method="POST">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="nonaktif_id">
+          <input type="hidden" name="aksi" value="nonaktif">
+
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Anda akan menonaktifkan pegawai: <strong id="nonaktif_nama"></strong>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              Alasan Nonaktif <span class="text-danger">*</span>
+            </label>
+            <select name="alasan" class="form-select" required>
+              <option value="">-- Pilih Alasan --</option>
+              <option value="Pensiun">Pensiun</option>
+              <option value="Pindah">Pindah</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Keterangan Tambahan <small class="text-muted">(opsional)</small></label>
+            <textarea name="keterangan" class="form-control" rows="2"
+                      placeholder="Contoh: Pensiun per 1 Mei 2026..."></textarea>
+          </div>
+
+          <div class="alert alert-danger mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Pegawai ini <strong>tidak dapat diusulkan</strong> untuk kenaikan pangkat, SLKS, 
+            maupun pensiun selama <strong>6 bulan</strong> setelah dinonaktifkan.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button type="submit" class="btn btn-warning text-white">
+            <i class="fas fa-user-slash me-2"></i>Ya, Nonaktifkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ✅ MODAL REAKTIFKAN PEGAWAI                                             -->
+<!-- ====================================================================== -->
+<div class="modal fade" id="modalReaktif" tabindex="-1" aria-labelledby="modalReaktifLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalReaktifLabel">
+          <i class="fas fa-user-check me-2"></i>Aktifkan Kembali Pegawai
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="proses_nonaktif_duk.php" method="POST">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="reaktif_id">
+          <input type="hidden" name="aksi" value="reaktif">
+
+          <div class="alert alert-success">
+            <i class="fas fa-user-check me-2"></i>
+            Aktifkan kembali pegawai: <strong id="reaktif_nama"></strong>?
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Keterangan <small class="text-muted">(opsional)</small></label>
+            <textarea name="keterangan" class="form-control" rows="2"
+                      placeholder="Alasan pengaktifan kembali..."></textarea>
+          </div>
+
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Jika 6 bulan masa nonaktif belum selesai, hanya <strong>Superadmin</strong> yang dapat mengaktifkan kembali.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-user-check me-2"></i>Ya, Aktifkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================== -->
+<!-- Scripts                                                                 -->
+<!-- ====================================================================== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="js/dataduk.js"></script>
 
 <script>
-  // Initialize exporter dengan data
-  document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
+  // Initialize exporter
+  if (typeof DUKExporter !== 'undefined') {
     window.dukExporter = new DUKExporter(originalData);
-  });
-</script>
+  }
 
+  // Init Bootstrap Tooltips
+  const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltipEls.forEach(el => new bootstrap.Tooltip(el));
+});
+
+// ✅ Buka modal nonaktifkan
+function bukaNonaktif(id, nama) {
+  document.getElementById('nonaktif_id').value = id;
+  document.getElementById('nonaktif_nama').textContent = nama;
+  // Reset form
+  document.querySelector('#modalNonaktif select[name="alasan"]').value = '';
+  document.querySelector('#modalNonaktif textarea[name="keterangan"]').value = '';
+  new bootstrap.Modal(document.getElementById('modalNonaktif')).show();
+}
+
+// ✅ Buka modal reaktifkan
+function bukaReaktif(id, nama) {
+  document.getElementById('reaktif_id').value = id;
+  document.getElementById('reaktif_nama').textContent = nama;
+  document.querySelector('#modalReaktif textarea[name="keterangan"]').value = '';
+  new bootstrap.Modal(document.getElementById('modalReaktif')).show();
+}
+
+// ✅ Filter by card (tambah support 'nonaktif')
+function filterByCard(type) {
+  const filterStatus = document.getElementById('filterStatus');
+  const filterGender = document.getElementById('filterGender');
+  const filterEselon = document.getElementById('filterEselon');
+
+  // Reset semua filter dulu
+  if (filterStatus) filterStatus.value = '';
+  if (filterGender) filterGender.value = '';
+
+  if (type === 'laki')      { if (filterGender) filterGender.value = 'Laki-laki'; }
+  if (type === 'perempuan') { if (filterGender) filterGender.value = 'Perempuan'; }
+  if (type === 'nonaktif')  { if (filterStatus) filterStatus.value = 'nonaktif'; }
+
+  applyFilter();
+}
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

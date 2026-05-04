@@ -66,6 +66,34 @@ if (empty($tanggal_pensiun)) {
 // DEBUG
 error_log("Validasi lolos. NIP: $nip, Nama: $nama");
 
+// ✅ CEK STATUS PEGAWAI DI DUK
+if (!empty($nip)) {
+    $cek_status = $koneksi->prepare("SELECT status_pegawai, alasan_nonaktif, nonaktif_at 
+                                     FROM duk 
+                                     WHERE nip = ? AND deleted_at IS NULL LIMIT 1");
+    $cek_status->bind_param("s", $nip);
+    $cek_status->execute();
+    $res_status = $cek_status->get_result();
+    
+    if ($res_status->num_rows > 0) {
+        $data_status = $res_status->fetch_assoc();
+        
+        if ($data_status['status_pegawai'] === 'nonaktif') {
+            $alasan   = $data_status['alasan_nonaktif'] ?? '-';
+            $tgl_nonaktif = date('d/m/Y', strtotime($data_status['nonaktif_at']));
+            
+            $cek_status->close();
+            alertWarning(
+                'form_tambah_usulan_pensiun.php',
+                "Pegawai dengan NIP $nip tidak dapat diusulkan karena berstatus NONAKTIF "
+                . "sejak $tgl_nonaktif dengan alasan: $alasan."
+            );
+            exit;
+        }
+    }
+    $cek_status->close();
+}
+
 // Cek apakah nomor usulan sudah ada (untuk mencegah duplikasi)
 $check_nomor_query = "SELECT id FROM usulan_pensiun WHERE nomor_usulan = ?";
 $check_nomor_stmt = $koneksi->prepare($check_nomor_query);

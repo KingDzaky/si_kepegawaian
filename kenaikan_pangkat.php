@@ -641,6 +641,15 @@ function formatDateTime(dateString) {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
+
+if (!response.success) {
+    if (response.type === 'warning') {
+        showNotification('warning', response.message); // tampil kuning
+    } else {
+        showNotification('error', response.message);   // tampil merah
+    }
+}
+
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

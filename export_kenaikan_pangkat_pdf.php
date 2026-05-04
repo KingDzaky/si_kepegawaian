@@ -403,7 +403,7 @@ $koneksi->close();
                     <?php
                     // Format tanggal: 02 December 2025
                     $tmt_baru_obj = new DateTime($data['tmt_pangkat_baru']);
-                    echo $tmt_baru_obj->format('d') . ' ' . $bulan_inggris[(int)$tmt_baru_obj->format('m')] . ' ' . $tmt_baru_obj->format('Y');
+                    echo $tmt_baru_obj->format('d') . ' ' . $bulan_indo[(int)$tmt_baru_obj->format('m')] . ' ' . $tmt_baru_obj->format('Y');
                     ?>
                 </td>
             </tr>

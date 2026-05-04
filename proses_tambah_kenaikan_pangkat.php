@@ -68,9 +68,9 @@ if (!empty($nip)) {
                 'Mei'=>'05',     'Juni'=>'06',     'Juli'=>'07',     'Agustus'=>'08',
                 'September'=>'09','Oktober'=>'10', 'November'=>'11', 'Desember'=>'12'
             ];
-            foreach ($bulan_map as $nama => $angka) {
-                if (stripos($tanggal_raw, $nama) !== false) {
-                    $tanggal_raw = str_ireplace($nama, $angka, $tanggal_raw);
+           foreach ($bulan_map as $nama_bulan => $angka_bulan) {
+                if (stripos($tanggal_raw, $nama_bulan) !== false) {
+                    $tanggal_raw = str_ireplace($nama_bulan, $angka_bulan, $tanggal_raw);
                     break;
                 }
             }
