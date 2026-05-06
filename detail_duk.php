@@ -6,62 +6,158 @@ require_once 'config/koneksi.php';
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// Ambil ID dari URL
 $id = $_GET['id'] ?? 0;
-
 if (!$id || !is_numeric($id)) {
     header('Location: dataduk.php?error=ID tidak valid');
     exit;
 }
 
-// Query untuk mengambil data DUK berdasarkan ID
-$sql = "SELECT * FROM duk WHERE id = ?";
-$stmt = $koneksi->prepare($sql);
+// ── Data DUK ─────────────────────────────────────────────────────────────────
+$stmt = $koneksi->prepare("SELECT * FROM duk WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    header('Location: dataduk.php?error=Data tidak ditemukan');
-    exit;
-}
-
+if ($result->num_rows === 0) { header('Location: dataduk.php?error=Data tidak ditemukan'); exit; }
 $duk = $result->fetch_assoc();
+$stmt->close();
 
-// Hitung usia berdasarkan TTL
+// ── Riwayat Kenaikan Pangkat ──────────────────────────────────────────────────
+$stmt_kp = $koneksi->prepare(
+    "SELECT id, nomor_usulan, tanggal_usulan, pangkat_lama, golongan_lama,
+            pangkat_baru, golongan_baru, tmt_pangkat_baru, jabatan_baru, status, jenis_kenaikan
+     FROM kenaikan_pangkat
+     WHERE nip = ? AND deleted_at IS NULL
+     ORDER BY tmt_pangkat_baru ASC"
+);
+$stmt_kp->bind_param("s", $duk['nip']);
+$stmt_kp->execute();
+$riwayat_kp = $stmt_kp->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt_kp->close();
+
+// ── Usulan Pensiun ────────────────────────────────────────────────────────────
+$stmt_up = $koneksi->prepare(
+    "SELECT id, nomor_usulan, tanggal_usulan, tanggal_pensiun, jenis_pensiun, status,
+            DATEDIFF(tanggal_pensiun, CURDATE()) as hari_tersisa
+     FROM usulan_pensiun
+     WHERE nip = ? AND deleted_at IS NULL
+     ORDER BY created_at DESC LIMIT 1"
+);
+$stmt_up->bind_param("s", $duk['nip']);
+$stmt_up->execute();
+$pensiun = $stmt_up->get_result()->fetch_assoc();
+$stmt_up->close();
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function hitungUsia($ttl) {
-    if (empty($ttl)) return null;
-    
-    // Extract tahun dari TTL (format: "Tempat, YYYY-MM-DD" atau "Tempat, DD-MM-YYYY")
-    preg_match('/(\d{4})/', $ttl, $matches);
-    if (!empty($matches[1])) {
-        $tahunLahir = $matches[1];
-        $usia = date('Y') - $tahunLahir;
-        return $usia > 0 && $usia < 100 ? $usia : null;
-    }
-    
+    preg_match('/(\d{4})/', $ttl, $m);
+    if (!empty($m[1])) { $u = date('Y') - $m[1]; return ($u > 0 && $u < 100) ? $u : null; }
     return null;
 }
-
-// Fungsi untuk format masa kerja
-function hitungMasaKerja($tmt) {
+function masaKerja($tmt) {
     if (empty($tmt)) return null;
-    
-    $tanggalMulai = new DateTime($tmt);
-    $tanggalSekarang = new DateTime();
-    $interval = $tanggalMulai->diff($tanggalSekarang);
-    
-    return $interval->y . ' tahun ' . $interval->m . ' bulan';
+    $i = (new DateTime($tmt))->diff(new DateTime());
+    return $i->y . ' tahun ' . $i->m . ' bulan';
+}
+$bulan_indo = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
+               7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
+function formatTglIndo($tgl, $bulan_indo) {
+    if (empty($tgl)) return '-';
+    $ts = strtotime($tgl);
+    return date('d', $ts) . ' ' . $bulan_indo[(int)date('m', $ts)] . ' ' . date('Y', $ts);
 }
 
-$usia = hitungUsia($duk['ttl']);
-$masaKerjaPangkat = hitungMasaKerja($duk['tmt_pangkat']);
-$masaKerjaEselon = hitungMasaKerja($duk['tmt_eselon']);
+$usia             = hitungUsia($duk['ttl']);
+$masaKerjaPangkat = masaKerja($duk['tmt_pangkat']);
+$masaKerjaEselon  = masaKerja($duk['tmt_eselon']);
+$status_pegawai   = $duk['status_pegawai'] ?? 'aktif';
+
+// Inisial avatar
+$parts    = array_filter(explode(' ', $duk['nama']));
+$initials = strtoupper(substr(reset($parts), 0, 1) . substr(end($parts), 0, 1));
+
+// Jenis jabatan display
+$jenis_jabatan_display = htmlspecialchars($duk['eselon'] ?: 'Non-Eselon');
+if ($duk['eselon'] === 'Non-Eselon') {
+    if ($duk['jenis_jabatan'] === 'JFT' && !empty($duk['jft_tingkat']))
+        $jenis_jabatan_display = 'JFT – ' . htmlspecialchars($duk['jft_tingkat']);
+    elseif ($duk['jenis_jabatan'] === 'JFU' && !empty($duk['jfu_kelas']))
+        $jenis_jabatan_display = 'JFU – Kelas ' . htmlspecialchars($duk['jfu_kelas']);
+}
 ?>
+
+<link rel="stylesheet" href="css/detail_duk.css">
+
+<!-- Tambahan minimal: hanya yang tidak ada di detail_duk.css -->
+<style>
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(3px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 16px; padding: 28px;
+  max-width: 460px; width: 92%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+.modal-box h5 { color: #2c3e50; margin: 0 0 8px; font-size: 1.1rem; }
+.modal-box p  { color: #6c757d; font-size: .9rem; margin: 0 0 16px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+
+/* Share preview */
+.share-preview {
+  background: #f8f9fa; border: 1px solid #dee2e6;
+  border-radius: 10px; padding: 16px; margin-bottom: 16px; font-size: .88rem;
+}
+.share-preview .sp-name { font-size: 1rem; font-weight: 700; color: #212529; margin-bottom: 6px; }
+.share-preview .sp-row  { color: #495057; margin: 3px 0; }
+
+/* Toast */
+.toast-copied {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: #28a745; color: #fff;
+  padding: 10px 24px; border-radius: 999px;
+  font-size: .88rem; font-weight: 600; opacity: 0;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 10000; pointer-events: none;
+}
+.toast-copied.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Delete input */
+.delete-input {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1.5px solid #dee2e6; font-size: .9rem;
+  margin-bottom: 4px; outline: none; transition: border-color .2s;
+}
+.delete-input:focus { border-color: #dc3545; box-shadow: 0 0 0 3px rgba(220,53,69,.1); }
+
+/* Status / badge kecil */
+.badge-sm {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: .72rem; font-weight: 600;
+}
+.badge-sm.draft     { background: #e9ecef; color: #6c757d; }
+.badge-sm.diajukan  { background: #cce5ff; color: #004085; }
+.badge-sm.disetujui { background: #d4edda; color: #155724; }
+.badge-sm.ditolak   { background: #f8d7da; color: #721c24; }
+
+/* Countdown pensiun */
+.pensiun-countdown { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.countdown-unit {
+  background: #fff3cd; border: 1px solid #ffc107;
+  border-radius: 8px; padding: 8px 14px; text-align: center; min-width: 60px;
+}
+.countdown-unit .cnt-num { font-size: 1.3rem; font-weight: 800; color: #856404; display: block; }
+.countdown-unit .cnt-lbl { font-size: .62rem; color: #856404; text-transform: uppercase; }
+</style>
 
 <main class="main-content">
   <div class="container-fluid">
-    
+
     <!-- Breadcrumb & Navigation -->
     <div class="page-header">
       <div class="header-content">
@@ -76,7 +172,6 @@ $masaKerjaEselon = hitungMasaKerja($duk['tmt_eselon']);
             <li class="breadcrumb-item active">Detail Pegawai</li>
           </ol>
         </nav>
-        
         <div class="page-actions">
           <a href="dataduk.php" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
@@ -84,141 +179,122 @@ $masaKerjaEselon = hitungMasaKerja($duk['tmt_eselon']);
           <a href="form_edit_duk.php?id=<?= $id ?>" class="btn btn-warning btn-sm">
             <i class="fas fa-edit me-1"></i>Edit Data
           </a>
-          <button class="btn btn-primary btn-sm" onclick="printDetail()">
-            <i class="fas fa-print me-1"></i>Cetak
-          </button>
-          <div class="dropdown d-inline">
-            <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-              <i class="fas fa-share me-1"></i>Aksi
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
-                <i class="fas fa-file-pdf me-2"></i>Export PDF
-              </a></li>
-              <li><a class="dropdown-item" href="#" onclick="shareProfile()">
-                <i class="fas fa-share-alt me-2"></i>Bagikan
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#" onclick="confirmDelete()">
-                <i class="fas fa-trash me-2"></i>Hapus Data
-              </a></li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
 
     <div class="row">
-      <!-- Profile Card -->
+
+      <!-- ── Profile Card (kiri) ────────────────────────────────────────── -->
       <div class="col-lg-4 col-xl-3">
         <div class="profile-card">
           <div class="profile-header">
             <div class="profile-avatar">
-              <?php
-              $initials = '';
-              $nameParts = explode(' ', $duk['nama']);
-              foreach($nameParts as $part) {
-                  if (!empty($part)) {
-                      $initials .= strtoupper($part[0]);
-                  }
-              }
-              $initials = substr($initials, 0, 2);
-              ?>
-              <div class="avatar-circle">
-                <?= $initials ?>
+              <div class="avatar-circle"><?= $initials ?></div>
+              <div class="status-indicator online"
+                   data-bs-toggle="tooltip"
+                   title="<?= $status_pegawai === 'aktif' ? 'Pegawai Aktif' : 'Pegawai Nonaktif' ?>"
+                   style="background: <?= $status_pegawai === 'aktif' ? '#28a745' : '#dc3545' ?>">
               </div>
-              <div class="status-indicator online" data-bs-toggle="tooltip" title="Data Aktif"></div>
             </div>
-            
-            <div class="profile-info">
-              <h4 class="profile-name"><?= htmlspecialchars($duk['nama']) ?></h4>
-              <p class="profile-nip">
-                <i class="fas fa-id-card me-1"></i>
-                <?= !empty($duk['nip']) ? htmlspecialchars($duk['nip']) : 'NIP tidak tersedia' ?>
-              </p>
-              <div class="profile-badges">
-                <span class="badge badge-<?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'primary' : 'warning' ?>">
-                  <i class="fas fa-<?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'mars' : 'venus' ?> me-1"></i>
-                  <?= htmlspecialchars($duk['jenis_kelamin'] ?? 'Tidak diketahui') ?>
-                </span>
-                <?php if ($usia): ?>
-                <span class="badge badge-info">
-                  <i class="fas fa-birthday-cake me-1"></i>
-                  <?= $usia ?> Tahun
-                </span>
-                <?php endif; ?>
-              </div>
+            <h4 class="profile-name"><?= htmlspecialchars($duk['nama']) ?></h4>
+            <p class="profile-nip">
+              <i class="fas fa-id-card me-1"></i>
+              <?= $duk['nip'] ?: 'NIP belum diisi' ?>
+            </p>
+            <div class="profile-badges">
+              <span class="badge <?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'badge-primary' : 'badge-warning' ?>">
+                <i class="fas fa-<?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'mars' : 'venus' ?> me-1"></i>
+                <?= htmlspecialchars($duk['jenis_kelamin'] ?? '-') ?>
+              </span>
+              <?php if ($usia): ?>
+              <span class="badge badge-info">
+                <i class="fas fa-birthday-cake me-1"></i><?= $usia ?> Tahun
+              </span>
+              <?php endif; ?>
+              <span class="badge <?= $status_pegawai === 'aktif' ? 'badge-success' : '' ?>"
+                    <?= $status_pegawai === 'nonaktif' ? 'style="background:linear-gradient(135deg,#dc3545,#c82333)"' : '' ?>>
+                <i class="fas fa-<?= $status_pegawai === 'aktif' ? 'check-circle' : 'user-slash' ?> me-1"></i>
+                <?= $status_pegawai === 'aktif' ? 'Aktif' : 'Nonaktif' ?>
+              </span>
             </div>
           </div>
 
           <div class="profile-stats">
             <div class="stat-item">
-              <div class="stat-icon bg-primary">
-                <i class="fas fa-star"></i>
-              </div>
+              <div class="stat-icon bg-primary"><i class="fas fa-star"></i></div>
               <div class="stat-content">
                 <h6>Pangkat</h6>
-                <p><?= htmlspecialchars($duk['pangkat_terakhir'] ?? 'Belum ditetapkan') ?></p>
+                <p><?= htmlspecialchars($duk['pangkat_terakhir'] ?: '-') ?></p>
               </div>
             </div>
-
             <div class="stat-item">
-              <div class="stat-icon bg-success">
-                <i class="fas fa-layer-group"></i>
-              </div>
+              <div class="stat-icon bg-success"><i class="fas fa-layer-group"></i></div>
               <div class="stat-content">
                 <h6>Golongan</h6>
-                <p><?= htmlspecialchars($duk['golongan'] ?? 'Belum ditetapkan') ?></p>
+                <p><?= htmlspecialchars($duk['golongan'] ?: '-') ?></p>
               </div>
             </div>
-
             <div class="stat-item">
-              <div class="stat-icon bg-warning">
-                <i class="fas fa-crown"></i>
-              </div>
+              <div class="stat-icon bg-warning"><i class="fas fa-crown"></i></div>
               <div class="stat-content">
                 <h6>Eselon</h6>
-                <p><?= htmlspecialchars($duk['eselon'] ?? 'Non Eselon') ?></p>
+                <p><?= htmlspecialchars($duk['eselon'] ?: 'Non-Eselon') ?></p>
               </div>
             </div>
+            <?php if ($pensiun): ?>
+            <div class="stat-item">
+              <div class="stat-icon" style="background:linear-gradient(135deg,#fd7e14,#e8560a)">
+                <i class="fas fa-user-clock"></i>
+              </div>
+              <div class="stat-content">
+                <h6>Pensiun</h6>
+                <p><?= formatTglIndo($pensiun['tanggal_pensiun'], $bulan_indo) ?></p>
+              </div>
+            </div>
+            <?php endif; ?>
           </div>
 
           <div class="profile-actions">
-            <button class="btn btn-outline-primary btn-block" onclick="contactEmployee()">
-              <i class="fas fa-envelope me-2"></i>Kontak
+            <button class="btn btn-outline-primary btn-block" onclick="openShare()">
+              <i class="fas fa-share-alt me-2"></i>Bagikan Profil
             </button>
-            <button class="btn btn-outline-success btn-block" onclick="viewCareerPath()">
-              <i class="fas fa-route me-2"></i>Riwayat Karir
+            <button class="btn btn-outline-danger btn-block" onclick="openDelete()">
+              <i class="fas fa-trash me-2"></i>Hapus Data
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Detail Information -->
+      <!-- ── Detail Tabs (kanan) ────────────────────────────────────────── -->
       <div class="col-lg-8 col-xl-9">
-        
-        <!-- Information Tabs -->
         <div class="detail-card">
           <div class="card-header">
             <ul class="nav nav-tabs card-tabs" role="tablist">
               <li class="nav-item">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#personal-info">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-personal">
                   <i class="fas fa-user me-2"></i>Data Pribadi
                 </button>
               </li>
               <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#career-info">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-career">
                   <i class="fas fa-briefcase me-2"></i>Karir & Jabatan
                 </button>
               </li>
               <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#education-info">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-education">
                   <i class="fas fa-graduation-cap me-2"></i>Pendidikan
                 </button>
               </li>
               <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#timeline">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-timeline">
                   <i class="fas fa-history me-2"></i>Timeline
+                  <?php $total_event = count($riwayat_kp) + ($pensiun ? 1 : 0); ?>
+                  <?php if ($total_event > 0): ?>
+                  <span class="badge badge-info" style="font-size:.65rem;padding:2px 7px;margin-left:4px;">
+                    <?= $total_event ?>
+                  </span>
+                  <?php endif; ?>
                 </button>
               </li>
             </ul>
@@ -226,622 +302,411 @@ $masaKerjaEselon = hitungMasaKerja($duk['tmt_eselon']);
 
           <div class="card-body">
             <div class="tab-content">
-              
-              <!-- Personal Information Tab -->
-              <div class="tab-pane fade show active" id="personal-info">
+
+              <!-- ── Data Pribadi ───────────────────────────────────────── -->
+              <div class="tab-pane fade show active" id="tab-personal">
                 <div class="info-section">
                   <h6 class="section-title">
-                    <i class="fas fa-user-circle me-2"></i>
-                    Informasi Pribadi
+                    <i class="fas fa-user-circle me-2"></i>Informasi Pribadi
                   </h6>
-                  
                   <div class="info-grid">
                     <div class="info-item">
-                      <div class="info-label">
-                        <i class="fas fa-user me-2"></i>Nama Lengkap
-                      </div>
+                      <div class="info-label"><i class="fas fa-user me-2"></i>Nama Lengkap</div>
                       <div class="info-value"><?= htmlspecialchars($duk['nama']) ?></div>
                     </div>
-
                     <div class="info-item">
-                      <div class="info-label">
-                      <i class="fa-solid fa-tag"></i>NIP
-                      </div>
-                      <div class="info-value">
-                        <?= !empty($duk['nip']) ? htmlspecialchars($duk['nip']) : '<span class="text-muted">Belum diisi</span>' ?>
-                      </div>
+                      <div class="info-label"><i class="fas fa-id-card me-2"></i>NIP</div>
+                      <div class="info-value"><?= htmlspecialchars($duk['nip'] ?: '-') ?></div>
                     </div>
-                    
                     <div class="info-item">
-                      <div class="info-label">
-                        <i class="fas fa-id-card me-2"></i>Kartu Pegawai
-                      </div>
-                      <div class="info-value">
-                        <?= !empty($duk['kartu_pegawai']) ? htmlspecialchars($duk['kartu_pegawai']) : '<span class="text-muted">Belum diisi</span>' ?>
-                      </div>
+                      <div class="info-label"><i class="fas fa-id-badge me-2"></i>Kartu Pegawai</div>
+                      <div class="info-value"><?= htmlspecialchars($duk['kartu_pegawai'] ?: '-') ?></div>
                     </div>
-
                     <div class="info-item">
-                      <div class="info-label">
-                        <i class="fas fa-map-marker-alt me-2"></i>Tempat, Tanggal Lahir
-                      </div>
+                      <div class="info-label"><i class="fas fa-map-marker-alt me-2"></i>Tempat, Tanggal Lahir</div>
                       <div class="info-value">
-                        <?= !empty($duk['ttl']) ? htmlspecialchars($duk['ttl']) : '<span class="text-muted">Belum diisi</span>' ?>
+                        <?= htmlspecialchars($duk['ttl'] ?: '-') ?>
                         <?php if ($usia): ?>
                           <small class="text-muted d-block">Usia: <?= $usia ?> tahun</small>
                         <?php endif; ?>
                       </div>
                     </div>
-
                     <div class="info-item">
-                      <div class="info-label">
-                        <i class="fas fa-venus-mars me-2"></i>Jenis Kelamin
-                      </div>
+                      <div class="info-label"><i class="fas fa-venus-mars me-2"></i>Jenis Kelamin</div>
+                      <div class="info-value"><?= htmlspecialchars($duk['jenis_kelamin'] ?? '-') ?></div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label"><i class="fab fa-whatsapp me-2"></i>Nomor WhatsApp</div>
                       <div class="info-value">
-                        <span class="badge badge-<?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'primary' : 'warning' ?>">
-                          <i class="fas fa-<?= $duk['jenis_kelamin'] === 'Laki-laki' ? 'mars' : 'venus' ?> me-1"></i>
-                          <?= htmlspecialchars($duk['jenis_kelamin'] ?? 'Tidak diketahui') ?>
+                        <?php if (!empty($duk['nomor_wa'])): ?>
+                          <a href="https://wa.me/<?= $duk['nomor_wa'] ?>" target="_blank" class="text-success">
+                            <?= htmlspecialchars($duk['nomor_wa']) ?>
+                            <i class="fas fa-external-link-alt ms-1" style="font-size:.7rem"></i>
+                          </a>
+                        <?php else: ?>-<?php endif; ?>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label"><i class="fas fa-toggle-on me-2"></i>Status Pegawai</div>
+                      <div class="info-value">
+                        <span class="badge <?= $status_pegawai === 'aktif' ? 'badge-success' : '' ?>"
+                              <?= $status_pegawai === 'nonaktif' ? 'style="background:linear-gradient(135deg,#dc3545,#c82333)"' : '' ?>>
+                          <?= $status_pegawai === 'aktif' ? 'Aktif' : 'Nonaktif' ?>
                         </span>
+                        <?php if ($status_pegawai === 'nonaktif' && !empty($duk['alasan_nonaktif'])): ?>
+                          <small class="text-muted d-block mt-1">
+                            Alasan: <?= htmlspecialchars($duk['alasan_nonaktif']) ?>
+                            <?php if (!empty($duk['nonaktif_at'])): ?>
+                              · sejak <?= formatTglIndo($duk['nonaktif_at'], $bulan_indo) ?>
+                            <?php endif; ?>
+                          </small>
+                        <?php endif; ?>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Career Information Tab -->
-              <div class="tab-pane fade" id="career-info">
+              <!-- ── Karir & Jabatan ────────────────────────────────────── -->
+              <div class="tab-pane fade" id="tab-career">
                 <div class="info-section">
-                  <h6 class="section-title">
-                    <i class="fas fa-medal me-2"></i>
-                    Kepangkatan
-                  </h6>
-                  
+                  <h6 class="section-title"><i class="fas fa-medal me-2"></i>Kepangkatan</h6>
                   <div class="career-timeline">
                     <div class="timeline-item">
-                      <div class="timeline-marker bg-primary">
-                        <i class="fas fa-star"></i>
-                      </div>
+                      <div class="timeline-marker bg-primary"><i class="fas fa-star"></i></div>
                       <div class="timeline-content">
                         <h6>Pangkat Terakhir</h6>
-                        <p class="mb-1">
-                          <strong><?= htmlspecialchars($duk['pangkat_terakhir'] ?? 'Belum ditetapkan') ?></strong>
-                        </p>
+                        <p><strong><?= htmlspecialchars($duk['pangkat_terakhir'] ?: '-') ?></strong></p>
                         <small class="text-muted">
                           <i class="fas fa-calendar me-1"></i>
-                          TMT: <?= !empty($duk['tmt_pangkat']) ? date('d F Y', strtotime($duk['tmt_pangkat'])) : 'Belum diisi' ?>
-                          <?php if ($masaKerjaPangkat): ?>
-                            <br>Masa kerja: <?= $masaKerjaPangkat ?>
-                          <?php endif; ?>
+                          TMT: <?= formatTglIndo($duk['tmt_pangkat'], $bulan_indo) ?>
+                          <?php if ($masaKerjaPangkat): ?> · Masa kerja: <?= $masaKerjaPangkat ?><?php endif; ?>
                         </small>
                       </div>
                     </div>
-
                     <div class="timeline-item">
-                      <div class="timeline-marker bg-success">
-                        <i class="fas fa-layer-group"></i>
-                      </div>
+                      <div class="timeline-marker bg-success"><i class="fas fa-layer-group"></i></div>
                       <div class="timeline-content">
                         <h6>Golongan</h6>
-                        <p class="mb-1">
-                          <strong><?= htmlspecialchars($duk['golongan'] ?? 'Belum ditetapkan') ?></strong>
-                        </p>
+                        <p><strong><?= htmlspecialchars($duk['golongan'] ?: '-') ?></strong></p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div class="info-section">
-                  <h6 class="section-title">
-                    <i class="fas fa-briefcase me-2"></i>
-                    Jabatan & Eselon
-                  </h6>
-                  
+                  <h6 class="section-title"><i class="fas fa-briefcase me-2"></i>Jabatan & Eselon</h6>
                   <div class="career-timeline">
                     <div class="timeline-item">
-                      <div class="timeline-marker bg-info">
-                        <i class="fas fa-user-tie"></i>
-                      </div>
+                      <div class="timeline-marker bg-info"><i class="fas fa-user-tie"></i></div>
                       <div class="timeline-content">
                         <h6>Jabatan Terakhir</h6>
-                        <p class="mb-1">
-                          <strong><?= htmlspecialchars($duk['jabatan_terakhir'] ?? 'Belum ditetapkan') ?></strong>
-                        </p>
+                        <p><strong><?= htmlspecialchars($duk['jabatan_terakhir'] ?: '-') ?></strong></p>
                       </div>
                     </div>
-
                     <div class="timeline-item">
-                      <div class="timeline-marker bg-warning">
-                        <i class="fas fa-crown"></i>
-                      </div>
+                      <div class="timeline-marker bg-warning"><i class="fas fa-crown"></i></div>
                       <div class="timeline-content">
-                        <h6>Eselon</h6>
-                        <p class="mb-1">
-                          <strong><?= htmlspecialchars($duk['eselon'] ?? 'Non Eselon') ?></strong>
-                        </p>
+                        <h6>Eselon / Jenis Jabatan</h6>
+                        <p><strong><?= $jenis_jabatan_display ?></strong></p>
                         <small class="text-muted">
                           <i class="fas fa-calendar me-1"></i>
-                          TMT: <?= !empty($duk['tmt_eselon']) ? date('d F Y', strtotime($duk['tmt_eselon'])) : 'Belum diisi' ?>
-                          <?php if ($masaKerjaEselon): ?>
-                            <br>Masa kerja: <?= $masaKerjaEselon ?>
-                          <?php endif; ?>
+                          TMT: <?= formatTglIndo($duk['tmt_eselon'], $bulan_indo) ?>
+                          <?php if ($masaKerjaEselon): ?> · Masa kerja: <?= $masaKerjaEselon ?><?php endif; ?>
                         </small>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <?php if ($pensiun): ?>
+                <div class="info-section">
+                  <h6 class="section-title"><i class="fas fa-user-clock me-2"></i>Usulan Pensiun</h6>
+                  <div class="info-item">
+                    <div class="info-label">
+                      <?= htmlspecialchars($pensiun['nomor_usulan']) ?> &nbsp;
+                      <span class="badge-sm <?= $pensiun['status'] ?>"><?= ucfirst($pensiun['status']) ?></span>
+                    </div>
+                    <div class="info-value">
+                      Pensiun: <strong><?= formatTglIndo($pensiun['tanggal_pensiun'], $bulan_indo) ?></strong>
+                      · <?= htmlspecialchars($pensiun['jenis_pensiun']) ?>
+                    </div>
+                    <?php
+                    $hari = (int)$pensiun['hari_tersisa'];
+                    if ($hari > 0):
+                      $th = floor($hari / 365); $bl = floor(($hari % 365) / 30); $hr = $hari % 30;
+                    ?>
+                    <div class="pensiun-countdown">
+                      <?php if ($th > 0): ?>
+                      <div class="countdown-unit">
+                        <span class="cnt-num"><?= $th ?></span><span class="cnt-lbl">Tahun</span>
+                      </div>
+                      <?php endif; ?>
+                      <?php if ($bl > 0): ?>
+                      <div class="countdown-unit">
+                        <span class="cnt-num"><?= $bl ?></span><span class="cnt-lbl">Bulan</span>
+                      </div>
+                      <?php endif; ?>
+                      <div class="countdown-unit">
+                        <span class="cnt-num"><?= $hr ?></span><span class="cnt-lbl">Hari</span>
+                      </div>
+                    </div>
+                    <?php else: ?>
+                      <div class="mt-2">
+                        <span class="badge-sm ditolak">
+                          <i class="fas fa-flag-checkered me-1"></i>Sudah melewati tanggal pensiun
+                        </span>
+                      </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+                <?php endif; ?>
               </div>
 
-              <!-- Education Tab -->
-              <div class="tab-pane fade" id="education-info">
+              <!-- ── Pendidikan ─────────────────────────────────────────── -->
+              <div class="tab-pane fade" id="tab-education">
                 <div class="info-section">
                   <h6 class="section-title">
-                    <i class="fas fa-graduation-cap me-2"></i>
-                    Pendidikan Terakhir
+                    <i class="fas fa-graduation-cap me-2"></i>Pendidikan Terakhir
                   </h6>
-                  
                   <div class="education-card">
-                    <div class="education-icon">
-                      <i class="fas fa-university"></i>
-                    </div>
+                    <div class="education-icon"><i class="fas fa-university"></i></div>
                     <div class="education-content">
-                    <p class="text-muted mb-0">Tingkat Pendidikan</p>
-                      <h5><?= htmlspecialchars($duk['pendidikan_terakhir'] ?? 'Belum diisi') ?></h5>
-                      
+                      <p class="text-muted mb-0">Tingkat Pendidikan</p>
+                      <h5><?= htmlspecialchars($duk['pendidikan_terakhir'] ?: '-') ?></h5>
                     </div>
                   </div>
                   <div class="education-card">
-                    <div class="education-icon">
-                    <i class="fa-solid fa-suitcase"></i>
-                    </div>
+                    <div class="education-icon"><i class="fas fa-book"></i></div>
                     <div class="education-content">
-                    <p class="text-muted mb-0">Program Studi</p>
-                      <h5><?= htmlspecialchars($duk['prodi'] ?? 'Belum diisi') ?></h5>
+                      <p class="text-muted mb-0">Program Studi</p>
+                      <h5><?= htmlspecialchars($duk['prodi'] ?: '-') ?></h5>
                     </div>
                   </div>
-
-                  <!-- Education Level Chart -->
-                  <div class="education-chart">
-                    <canvas id="educationChart" width="400" height="200"></canvas>
+                  <?php if (!empty($duk['jenis_jabatan'])): ?>
+                  <div class="education-card">
+                    <div class="education-icon"><i class="fas fa-briefcase"></i></div>
+                    <div class="education-content">
+                      <p class="text-muted mb-0">Jenis Jabatan Fungsional</p>
+                      <h5><?= $jenis_jabatan_display ?></h5>
+                    </div>
                   </div>
+                  <?php endif; ?>
                 </div>
               </div>
 
-              <!-- Timeline Tab -->
-              <div class="tab-pane fade" id="timeline">
+              <!-- ── Timeline ───────────────────────────────────────────── -->
+              <div class="tab-pane fade" id="tab-timeline">
                 <div class="info-section">
                   <h6 class="section-title">
-                    <i class="fas fa-history me-2"></i>
-                    Riwayat Karir
+                    <i class="fas fa-history me-2"></i>Riwayat Karir Pegawai
                   </h6>
-                  
+
                   <div class="timeline-vertical">
-                    <?php if (!empty($duk['tmt_eselon'])): ?>
+
+                    <!-- Terdaftar -->
                     <div class="timeline-event">
-                      <div class="timeline-date"><?= date('Y', strtotime($duk['tmt_eselon'])) ?></div>
-                      <div class="timeline-marker bg-warning">
-                        <i class="fas fa-crown"></i>
+                      <div class="timeline-date"><?= date('Y', strtotime($duk['created_at'])) ?></div>
+                      <div class="timeline-marker bg-success"><i class="fas fa-plus"></i></div>
+                      <div class="timeline-content">
+                        <h6>Terdaftar di Sistem DUK</h6>
+                        <p><?= formatTglIndo($duk['created_at'], $bulan_indo) ?></p>
+                        <small class="text-muted">Data pegawai pertama kali dimasukkan ke sistem kepegawaian</small>
+                      </div>
+                    </div>
+
+                    <!-- Riwayat Kenaikan Pangkat (dari DB) -->
+                    <?php foreach ($riwayat_kp as $kp): ?>
+                    <div class="timeline-event">
+                      <div class="timeline-date"><?= date('Y', strtotime($kp['tmt_pangkat_baru'])) ?></div>
+                      <div class="timeline-marker" style="background:linear-gradient(135deg,#17a2b8,#138496)">
+                        <i class="fas fa-arrow-up"></i>
                       </div>
                       <div class="timeline-content">
-                        <h6>Penunjukan Eselon</h6>
-                        <p>Diangkat sebagai <?= htmlspecialchars($duk['eselon']) ?></p>
-                        <small class="text-muted"><?= date('d F Y', strtotime($duk['tmt_eselon'])) ?></small>
+                        <h6>Kenaikan Pangkat – <?= htmlspecialchars($kp['jenis_kenaikan']) ?></h6>
+                        <p>
+                          <?= htmlspecialchars($kp['pangkat_lama']) ?> (<?= htmlspecialchars($kp['golongan_lama']) ?>)
+                          &rarr;
+                          <strong><?= htmlspecialchars($kp['pangkat_baru']) ?> (<?= htmlspecialchars($kp['golongan_baru']) ?>)</strong>
+                        </p>
+                        <small class="text-muted">
+                          TMT: <?= formatTglIndo($kp['tmt_pangkat_baru'], $bulan_indo) ?>
+                          · Jabatan: <?= htmlspecialchars($kp['jabatan_baru']) ?>
+                          <br>No. <?= htmlspecialchars($kp['nomor_usulan']) ?>
+                        </small>
+                        <div class="mt-1">
+                          <span class="badge-sm <?= $kp['status'] ?>"><?= ucfirst($kp['status']) ?></span>
+                        </div>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <!-- Nonaktif (jika ada) -->
+                    <?php if ($status_pegawai === 'nonaktif' && !empty($duk['nonaktif_at'])): ?>
+                    <div class="timeline-event">
+                      <div class="timeline-date"><?= date('Y', strtotime($duk['nonaktif_at'])) ?></div>
+                      <div class="timeline-marker" style="background:linear-gradient(135deg,#dc3545,#c82333)">
+                        <i class="fas fa-user-slash"></i>
+                      </div>
+                      <div class="timeline-content">
+                        <h6>Dinonaktifkan</h6>
+                        <p><?= formatTglIndo($duk['nonaktif_at'], $bulan_indo) ?></p>
+                        <small class="text-muted">Alasan: <?= htmlspecialchars($duk['alasan_nonaktif'] ?? '-') ?></small>
+                        <div class="mt-1">
+                          <span class="badge-sm ditolak">Nonaktif</span>
+                        </div>
                       </div>
                     </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($duk['tmt_pangkat'])): ?>
+                    <!-- Pensiun (jika ada) -->
+                    <?php if ($pensiun): ?>
                     <div class="timeline-event">
-                      <div class="timeline-date"><?= date('Y', strtotime($duk['tmt_pangkat'])) ?></div>
-                      <div class="timeline-marker bg-primary">
-                        <i class="fas fa-star"></i>
+                      <div class="timeline-date"><?= date('Y', strtotime($pensiun['tanggal_pensiun'])) ?></div>
+                      <div class="timeline-marker" style="background:linear-gradient(135deg,#fd7e14,#e8560a)">
+                        <i class="fas fa-flag-checkered"></i>
                       </div>
                       <div class="timeline-content">
-                        <h6>Kenaikan Pangkat</h6>
-                        <p>Naik pangkat menjadi <?= htmlspecialchars($duk['pangkat_terakhir']) ?> 
-                           Golongan <?= htmlspecialchars($duk['golongan']) ?></p>
-                        <small class="text-muted"><?= date('d F Y', strtotime($duk['tmt_pangkat'])) ?></small>
+                        <h6>Rencana Pensiun – <?= htmlspecialchars($pensiun['jenis_pensiun']) ?></h6>
+                        <p>Tanggal: <strong><?= formatTglIndo($pensiun['tanggal_pensiun'], $bulan_indo) ?></strong></p>
+                        <small class="text-muted">
+                          No. <?= htmlspecialchars($pensiun['nomor_usulan']) ?>
+                          <?php $h = (int)$pensiun['hari_tersisa']; ?>
+                          <?php if ($h > 0): ?> · ⏳ <?= $h ?> hari lagi<?php else: ?> · Sudah melewati tanggal pensiun<?php endif; ?>
+                        </small>
+                        <div class="mt-1">
+                          <span class="badge-sm <?= $pensiun['status'] ?>"><?= ucfirst($pensiun['status']) ?></span>
+                        </div>
                       </div>
                     </div>
                     <?php endif; ?>
 
+                    <!-- Kosong -->
+                    <?php if (empty($riwayat_kp) && !$pensiun && $status_pegawai === 'aktif'): ?>
                     <div class="timeline-event">
-                      <div class="timeline-date"><?= date('Y') ?></div>
-                      <div class="timeline-marker bg-success">
-                        <i class="fas fa-plus"></i>
-                      </div>
+                      <div class="timeline-date">-</div>
+                      <div class="timeline-marker" style="background:#6c757d"><i class="fas fa-clock"></i></div>
                       <div class="timeline-content">
-                        <h6>Data Terdaftar</h6>
-                        <p>Data pegawai terdaftar dalam sistem DUK</p>
-                        <small class="text-muted">Saat ini</small>
+                        <h6 class="text-muted">Belum ada riwayat</h6>
+                        <small class="text-muted">Kenaikan pangkat dan usulan pensiun belum tercatat</small>
                       </div>
                     </div>
-                  </div>
+                    <?php endif; ?>
+
+                  </div><!-- /timeline-vertical -->
                 </div>
               </div>
-              
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+            </div><!-- /tab-content -->
+          </div><!-- /card-body -->
+        </div><!-- /detail-card -->
+      </div><!-- /col -->
+
+    </div><!-- /row -->
+  </div><!-- /container -->
 </main>
 
-<style>
-/* Enhanced Detail Page Styles */
-.main-content {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
-  padding: 1rem 0;
+<!-- ── MODAL BAGIKAN ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalShare">
+  <div class="modal-box">
+    <h5><i class="fas fa-share-alt me-2 text-info"></i>Bagikan Profil Pegawai</h5>
+    <p>Salin teks ringkasan atau kirim langsung via WhatsApp.</p>
+    <div class="share-preview" id="sharePreviewBox">
+      <div class="sp-name">👤 <?= htmlspecialchars($duk['nama']) ?></div>
+      <div class="sp-row"><strong>NIP:</strong> <?= htmlspecialchars($duk['nip'] ?: '-') ?></div>
+      <div class="sp-row"><strong>Pangkat/Gol:</strong> <?= htmlspecialchars($duk['pangkat_terakhir'] ?: '-') ?> / <?= htmlspecialchars($duk['golongan'] ?: '-') ?></div>
+      <div class="sp-row"><strong>Jabatan:</strong> <?= htmlspecialchars($duk['jabatan_terakhir'] ?: '-') ?></div>
+      <div class="sp-row"><strong>Eselon:</strong> <?= htmlspecialchars($duk['eselon'] ?: '-') ?></div>
+      <div class="sp-row"><strong>TTL:</strong> <?= htmlspecialchars($duk['ttl'] ?: '-') ?></div>
+      <div class="sp-row"><strong>Pendidikan:</strong> <?= htmlspecialchars($duk['pendidikan_terakhir'] ?: '-') ?> – <?= htmlspecialchars($duk['prodi'] ?: '-') ?></div>
+      <div class="sp-row"><strong>Status:</strong> <?= $status_pegawai === 'aktif' ? 'Aktif' : 'Nonaktif (' . htmlspecialchars($duk['alasan_nonaktif'] ?? '') . ')' ?></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <button class="btn btn-outline-primary btn-sm" onclick="copyShareText()">
+        <i class="fas fa-copy me-1"></i>Salin Teks
+      </button>
+      <?php if (!empty($duk['nomor_wa'])): ?>
+      <button class="btn btn-outline-success btn-sm" onclick="shareWhatsApp()">
+        <i class="fab fa-whatsapp me-1"></i>Kirim WhatsApp
+      </button>
+      <?php endif; ?>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modalShare')">
+        <i class="fas fa-times me-1"></i>Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL HAPUS ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalDelete">
+  <div class="modal-box">
+    <h5><i class="fas fa-trash me-2 text-danger"></i>Hapus Data Pegawai</h5>
+    <p>
+      Anda akan menghapus data <strong><?= htmlspecialchars($duk['nama']) ?></strong>.<br>
+      Data akan masuk ke <strong>Recycle Bin</strong> dan dapat dipulihkan dalam 5 tahun.<br><br>
+      Ketik <strong class="text-danger">HAPUS</strong> untuk konfirmasi:
+    </p>
+    <input type="text" id="deleteConfirmInput" class="delete-input"
+           placeholder="Ketik HAPUS di sini...">
+    <small class="text-muted d-block mb-3">Tombol hapus aktif setelah mengetik HAPUS</small>
+    <div class="modal-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modalDelete')">
+        <i class="fas fa-times me-1"></i>Batal
+      </button>
+      <button class="btn btn-danger btn-sm" id="btnConfirmDelete" onclick="doDelete()" disabled>
+        <i class="fas fa-trash me-1"></i>Ya, Hapus
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-copied" id="toastCopied">✓ Berhasil disalin!</div>
+
+<script>
+const DUK_ID = <?= (int)$id ?>;
+
+// Modal
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+});
+
+// Share
+function openShare() { openModal('modalShare'); }
+function buildShareText() { return document.getElementById('sharePreviewBox').innerText; }
+function copyShareText() {
+  navigator.clipboard.writeText(buildShareText()).then(() => {
+    const t = document.getElementById('toastCopied');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  });
+}
+function shareWhatsApp() {
+  const text = encodeURIComponent('*Profil Pegawai*\n\n' + buildShareText());
+  window.open('https://wa.me/?text=' + text, '_blank');
 }
 
-/* Page Header */
-.page-header {
-  margin-bottom: 2rem;
+// Delete
+function openDelete() {
+  document.getElementById('deleteConfirmInput').value = '';
+  document.getElementById('btnConfirmDelete').disabled = true;
+  openModal('modalDelete');
+}
+document.getElementById('deleteConfirmInput').addEventListener('input', function() {
+  document.getElementById('btnConfirmDelete').disabled = (this.value !== 'HAPUS');
+});
+function doDelete() {
+  window.location.href = 'proses_hapus_duk.php?id=' + DUK_ID;
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-}
+// Tooltips
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+});
+</script>
 
-.breadcrumb {
-  margin: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.breadcrumb-item a {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.breadcrumb-item a:hover {
-  color: #764ba2;
-}
-
-.breadcrumb-item.active {
-  color: #6c757d;
-  font-weight: 600;
-}
-
-.page-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-/* Profile Card */
-.profile-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.profile-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-  text-align: center;
-  color: white;
-  position: relative;
-}
-
-.profile-avatar {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 1rem;
-}
-
-.avatar-circle {
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-  backdrop-filter: blur(10px);
-  border: 3px solid rgba(255, 255, 255, 0.3);
-}
-
-.status-indicator {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-}
-
-.status-indicator.online {
-  background: #28a745;
-  animation: pulse 2s infinite;
-}
-
-.profile-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.profile-nip {
-  margin: 0.5rem 0;
-  opacity: 0.9;
-  font-size: 0.95rem;
-}
-
-.profile-badges {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-}
-
-.badge {
-  padding: 0.5rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.badge-primary { background: linear-gradient(135deg, #007bff, #0056b3); }
-.badge-warning { background: linear-gradient(135deg, #ffc107, #e0a800); }
-.badge-info { background: linear-gradient(135deg, #17a2b8, #138496); }
-.badge-success { background: linear-gradient(135deg, #28a745, #1e7e34); }
-
-/* Profile Stats */
-.profile-stats {
-  padding: 1.5rem;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.stat-item:last-child {
-  border-bottom: none;
-}
-
-.stat-icon {
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 1rem;
-  color: white;
-  font-size: 18px;
-}
-
-.stat-icon.bg-primary { background: linear-gradient(135deg, #007bff, #0056b3); }
-.stat-icon.bg-success { background: linear-gradient(135deg, #28a745, #1e7e34); }
-.stat-icon.bg-warning { background: linear-gradient(135deg, #ffc107, #e0a800); }
-
-.stat-content h6 {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #6c757d;
-  font-weight: 600;
-}
-
-.stat-content p {
-  margin: 0;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-/* Profile Actions */
-.profile-actions {
-  padding: 1.5rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.btn-block {
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.btn-block:last-child {
-  margin-bottom: 0;
-}
-
-/* Detail Card */
-.detail-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.card-header {
-  background: linear-gradient(135deg, #2c3e50, #34495e);
-  padding: 0;
-  border-bottom: none;
-}
-
-.card-tabs {
-  margin: 0;
-  border-bottom: none;
-}
-
-.card-tabs .nav-link {
-  color: rgba(255, 255, 255, 0.8);
-  border: none;
-  padding: 1rem 1.5rem;
-  font-weight: 500;
-  border-radius: 0;
-  transition: all 0.3s ease;
-}
-
-.card-tabs .nav-link:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.card-tabs .nav-link.active {
-  color: white;
-  background: rgba(255, 255, 255, 0.2);
-  border-bottom: 3px solid #667eea;
-}
-
-.card-body {
-  padding: 2rem;
-}
-
-/* Info Sections */
-.info-section {
-  margin-bottom: 2rem;
-}
-
-.section-title {
-  color: #2c3e50;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-.info-item {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
-  transition: all 0.3s ease;
-}
-
-.info-item:hover {
-  background: #e3f2fd;
-  transform: translateX(5px);
-}
-
-.info-label {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.info-value {
-  font-weight: 500;
-  color: #212529;
-  font-size: 1rem;
-}
-
-/* Timeline Styles */
-.career-timeline {
-  position: relative;
-  padding-left: 2rem;
-}
-
-.timeline-item {
-  position: relative;
-  padding-bottom: 2rem;
-}
-
-.timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: -2rem;
-  top: 2rem;
-  width: 2px;
-  height: calc(100% - 1rem);
-  background: #e9ecef;
-}
-
-.timeline-item:last-child::before {
-  display: none;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -2.75rem;
-  top: 0;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 14px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-}
-
-.timeline-content h6 {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-weight: 600;
-}
-
-.timeline-content p {
-  margin: 0 0 0.5rem 0;
-  color: #495057;
-}
-
-/* Vertical Timeline */
-.timeline-vertical {
-  position: relative;
-}
-
-.timeline-event {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.timeline-event:last-child {
-  margin-bottom: 0;
-}
-
-.timeline-event::before {
-  content: '';
-  position: absolute;
-  left: 90px;
-  top: 2rem;
-  width: 2px;
-  height: calc(100% + 1rem);
-  background: #e9ecef;
-}
-
-.timeline-event:last-child::before {
-  display: none;
-}
-
-.timeline-date {
-  width: 60px;
-  font-weight: 600;
-  color: #667eea;
-  font-size: 0.9rem;
-  text-align: center;
-  margin-right: 2rem;
-}
-
-
-
-</style>
+<?php require_once 'includes/footer.php'; ?>

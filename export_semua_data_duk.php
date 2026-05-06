@@ -17,7 +17,7 @@ $filter_eselon = isset($_GET['eselon']) ? $_GET['eselon'] : '';
 
 // Query data DUK
 $query = "SELECT 
-    id, nama, nip, kartu_pegawai, ttl, 
+    id, nama, nip, kartu_pegawai, ttl, status_pegawai, 
     pangkat_terakhir, golongan, tmt_pangkat,
     jabatan_terakhir, eselon, jenis_jabatan, jft_tingkat, jfu_kelas,
     tmt_eselon, pendidikan_terakhir, prodi, jenis_kelamin
@@ -156,7 +156,7 @@ if ($format === 'excel') {
         }
         
         th {
-            background: #667eea;
+            background: #021296;
             color: white;
             padding: 8px 5px;
             font-size: 8pt;
@@ -190,7 +190,7 @@ if ($format === 'excel') {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #667eea;
+            background: #021296;
             color: white;
             padding: 12px 24px;
             border: none;
@@ -209,7 +209,7 @@ if ($format === 'excel') {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: #667eea;
+            background: #021296;
             color: white;
             padding: 12px 24px;
             border: none;
@@ -298,6 +298,7 @@ if ($format === 'excel') {
                 <th style="width: 5%;">L/P</th>
                 <th style="width: 8%;">Pendidikan</th>
                 <th style="width: 8%;">TMT</th>
+                <th style="width: 8%;">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -349,6 +350,7 @@ if ($format === 'excel') {
                 <td class="text-center"><?= $row['jenis_kelamin'] === 'Laki-laki' ? 'L' : 'P' ?></td>
                 <td><?= htmlspecialchars($row['pendidikan_terakhir']) ?></td>
                 <td><?= htmlspecialchars($row['tmt_pangkat']) ?></td>
+                <td><?= htmlspecialchars($row['status_pegawai']) ?></td>
             </tr>
             <?php 
                 endwhile;
@@ -414,6 +416,7 @@ function exportToExcel($result) {
                 <th>Eselon</th>
                 <th>Jenis Jabatan</th>
                 <th>JFT/JFU</th>
+                <th>Status</th>
             </tr>
             <?php 
             $no = 1;
