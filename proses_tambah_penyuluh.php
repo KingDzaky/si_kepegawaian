@@ -70,6 +70,29 @@ if (!empty($nip)) {
     $check_nip->close();
 }
 
+// ✅ CEK STATUS DI PENYULUH (jika sumber = penyuluh)
+if (!empty($nip) && ($sumber_data ?? '') === 'penyuluh') {
+    $cek = $koneksi->prepare("SELECT status_pegawai, alasan_nonaktif, nonaktif_at 
+                               FROM penyuluh WHERE nip = ? AND deleted_at IS NULL LIMIT 1");
+    $cek->bind_param("s", $nip);
+    $cek->execute();
+    $res = $cek->get_result();
+    if ($res->num_rows > 0) {
+        $row = $res->fetch_assoc();
+        if ($row['status_pegawai'] === 'nonaktif') {
+            $tgl = date('d/m/Y', strtotime($row['nonaktif_at']));
+            $cek->close();
+            alertWarning(
+                'form_tambah_usulan_pensiun.php',
+                "Penyuluh dengan NIP $nip tidak dapat diusulkan karena berstatus NONAKTIF "
+                . "sejak $tgl dengan alasan: {$row['alasan_nonaktif']}."
+            );
+            exit;
+        }
+    }
+    $cek->close();
+}
+
 // Validasi jenis kelamin
 if (!in_array($jenis_kelamin, ['Laki-laki', 'Perempuan'])) {
     $errors[] = 'Jenis kelamin tidak valid';

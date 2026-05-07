@@ -325,7 +325,7 @@ function renderTable() {
     if (paginatedData.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="text-center py-4">
+                <td colspan="9" class="text-center py-4">
                     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                     <p class="text-muted">Tidak ada data yang ditemukan</p>
                 </td>
@@ -377,9 +377,19 @@ function renderTable() {
                     <button class="btn btn-sm btn-warning" onclick="editData(${item.id})" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteData(${item.id}, '${item.nama}')" title="Hapus">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                        ${item.status_pegawai === 'aktif' 
+                      ? `<button class="btn btn-sm" style="background:#fd7e14;color:white;" 
+                                onclick="bukaNonaktif(${item.id}, '${item.nama.replace(/'/g,"\\'")}')">
+                            <i class="fas fa-user-slash"></i>
+                        </button>`
+                      : `<button class="btn btn-sm btn-success" 
+                                onclick="bukaReaktif(${item.id}, '${item.nama.replace(/'/g,"\\'")}')">
+                            <i class="fas fa-user-check"></i>
+                        </button>`
+                  }
+                  <button class="btn btn-sm btn-danger" onclick="deleteData(${item.id}, '${item.nama}')" title="Hapus">
+                      <i class="fas fa-trash"></i>
+                  </button>
                 </div>
             </td>
         </tr>
@@ -836,6 +846,25 @@ function deleteData(id, nama) {
 }
 
 // ===================================
+// NONAKTIF / REAKTIF PENYULUH
+// ===================================
+function bukaNonaktif(id, nama) {
+    document.getElementById('nonaktif_id_penyuluh').value = id;
+    document.getElementById('nonaktif_nama_penyuluh').textContent = nama;
+    // Reset form
+    document.querySelector('#modalNonaktifPenyuluh select[name="alasan"]').value = '';
+    document.querySelector('#modalNonaktifPenyuluh textarea[name="keterangan"]').value = '';
+    new bootstrap.Modal(document.getElementById('modalNonaktifPenyuluh')).show();
+}
+
+function bukaReaktif(id, nama) {
+    document.getElementById('reaktif_id_penyuluh').value = id;
+    document.getElementById('reaktif_nama_penyuluh').textContent = nama;
+    document.querySelector('#modalReaktifPenyuluh textarea[name="keterangan"]').value = '';
+    new bootstrap.Modal(document.getElementById('modalReaktifPenyuluh')).show();
+}
+
+// ===================================
 // EVENT LISTENERS
 // ===================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -882,6 +911,112 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('printData')?.addEventListener('click', printData);
 });
 </script>
+
+<!-- ── MODAL NONAKTIFKAN PENYULUH ──────────────────────────────── -->
+<div class="modal fade" id="modalNonaktifPenyuluh" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#fd7e14;color:white;">
+        <h5 class="modal-title">
+          <i class="fas fa-user-slash me-2"></i>Nonaktifkan Penyuluh
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="proses_nonaktif_penyuluh.php" method="POST">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="nonaktif_id_penyuluh">
+          <input type="hidden" name="aksi" value="nonaktif">
+
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Anda akan menonaktifkan: <strong id="nonaktif_nama_penyuluh"></strong>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              Alasan Nonaktif <span class="text-danger">*</span>
+            </label>
+            <select name="alasan" class="form-select" required>
+              <option value="">-- Pilih Alasan --</option>
+              <option value="Pensiun">Pensiun</option>
+              <option value="Pindah">Pindah</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Keterangan <small class="text-muted">(opsional)</small>
+            </label>
+            <textarea name="keterangan" class="form-control" rows="2"
+                      placeholder="Contoh: Pindah tugas ke instansi lain..."></textarea>
+          </div>
+
+          <div class="alert alert-danger mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Penyuluh ini <strong>tidak dapat diusulkan pensiun</strong>
+            selama <strong>6 bulan</strong> setelah dinonaktifkan.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button type="submit" class="btn btn-warning text-white">
+            <i class="fas fa-user-slash me-2"></i>Ya, Nonaktifkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL REAKTIFKAN PENYULUH ───────────────────────────────── -->
+<div class="modal fade" id="modalReaktifPenyuluh" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">
+          <i class="fas fa-user-check me-2"></i>Aktifkan Kembali Penyuluh
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="proses_nonaktif_penyuluh.php" method="POST">
+        <div class="modal-body">
+          <input type="hidden" name="id" id="reaktif_id_penyuluh">
+          <input type="hidden" name="aksi" value="reaktif">
+
+          <div class="alert alert-success">
+            <i class="fas fa-user-check me-2"></i>
+            Aktifkan kembali: <strong id="reaktif_nama_penyuluh"></strong>?
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Keterangan <small class="text-muted">(opsional)</small>
+            </label>
+            <textarea name="keterangan" class="form-control" rows="2"
+                      placeholder="Alasan pengaktifan kembali..."></textarea>
+          </div>
+
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Jika 6 bulan masa nonaktif belum selesai, hanya
+            <strong>Superadmin</strong> yang dapat mengaktifkan kembali.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Batal
+          </button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-user-check me-2"></i>Ya, Aktifkan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <!-- ✅ PENTING: Include confirm_delete.php -->
 <?php include 'includes/confirm_delete.php'; ?>
