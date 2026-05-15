@@ -149,6 +149,17 @@ $query = "INSERT INTO usulan_pensiun (
     jenis_pensiun, alasan, status
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+$cek = $koneksi->prepare("SELECT id FROM usulan_pensiun WHERE nomor_usulan = ?");
+$cek->bind_param("s", $nomor_usulan);
+$cek->execute();
+$cek->store_result();
+if ($cek->num_rows > 0) {
+    $cek->close();
+    alertGagal('form_tambah_usulan_pensiun.php', 'Nomor usulan sudah digunakan!');
+    exit;
+}
+$cek->close();
+
 $stmt = $koneksi->prepare($query);
 
 if (!$stmt) {

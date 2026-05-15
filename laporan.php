@@ -535,10 +535,6 @@ require_once 'includes/sidebar.php';
                class="btn-export btn-danger" target="_blank">
                 <i class="fas fa-file-pdf"></i> Export PDF
             </a>
-            <a href="print_laporan.php?tahun=<?= $filter_tahun ?>&status=<?= $filter_status ?>&search=<?= urlencode($search) ?>" 
-               class="btn-export btn-primary" target="_blank">
-                <i class="fas fa-print"></i> Cetak Laporan
-            </a>
         </div>
         
         <!-- Statistik Cards -->

@@ -191,6 +191,20 @@ $sql = "INSERT INTO duk (
     created_at
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
+// Cek duplikat nomor_usulan sebelum INSERT
+$cek = $koneksi->prepare("SELECT id FROM duk WHERE nip = ?");
+$cek->bind_param("s", $nomor_usulan);
+$cek->execute();
+$cek->store_result();
+
+if ($cek->num_rows > 0) {
+    $cek->close();
+    alertGagal('form_tambah_duk.php', 
+        'Nip sudah digunakan! Silakan gunakan nomor lain.');
+    exit;
+}
+$cek->close();
+
 $stmt = $koneksi->prepare($sql);
 
 if (!$stmt) {

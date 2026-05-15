@@ -483,6 +483,20 @@ function updateResultCount() {
               <div class="alert alert-info mb-0">
                 <small><i class="fas fa-info-circle me-1"></i>Data yang akan diekspor: <strong id="exportDataCount">${filteredData.length}</strong> pegawai</small>
               </div>
+              
+              <!-- INPUT PER TANGGAL -->
+              <div class="mt-3 p-3 bg-light rounded border">
+                <label class="form-label fw-bold mb-1">
+                  <i class="fas fa-calendar-alt me-1 text-primary"></i>
+                  Periode Data <small class="text-muted fw-normal">(muncul di header PDF sebagai "Per ...")</small>
+                </label>
+                <input type="text" 
+                       class="form-control form-control-sm" 
+                       id="exportPerTanggal" 
+                       placeholder="Contoh: 1 Agustus 2025  atau  31 Desember 2025"
+                       style="max-width: 320px;">
+                <small class="text-muted">Kosongkan jika ingin tampil sebagai titik-titik (diisi tulis tangan)</small>
+              </div>
             </div>
           </div>
 
@@ -718,6 +732,10 @@ function updateResultCount() {
   // ============================================
 
   function exportPDFTemplate(templateNumber) {
+    // Simpan nilai "Per Tanggal" dari input ke variabel global
+    const inputPerTanggal = document.getElementById('exportPerTanggal');
+    window._exportPerTanggal = (inputPerTanggal?.value || '').trim();
+
     const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
     if (modal) modal.hide();
 
@@ -830,7 +848,7 @@ function buatPDFSemuaData(doc, exportData, pageWidth) {
     currentY += 5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text('(Per 1 Agustus 2025)', pageWidth / 2, currentY, { align: 'center' });
+    doc.text(`(Per ${window._exportPerTanggal || '...............'})`, pageWidth / 2, currentY, { align: 'center' });
     currentY += 6;
 
     doc.setFontSize(7);
@@ -1154,7 +1172,7 @@ function prosesDataPerGolongan(data) {
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.text('(Per 1 Agustus 2025)', pageWidth / 2, currentY, { align: 'center' });
+    doc.text(`(Per ${window._exportPerTanggal || '...............'})`, pageWidth / 2, currentY, { align: 'center' });
     currentY += 6;
 
     doc.setFontSize(7);
@@ -1167,19 +1185,36 @@ function prosesDataPerGolongan(data) {
   function addPDFFooter(doc, finalY, pageWidth) {
   const footerY = finalY + 8;
 
+  // Bulan & tahun otomatis, tanggal dikosongkan (diisi tulis tangan)
+  const now = new Date();
+  const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni',
+                     'Juli','Agustus','September','Oktober','November','Desember'];
+  const bulan = namaBulan[now.getMonth()];
+  const tahun = now.getFullYear();
+
   doc.setFontSize(7);
-  doc.text('Banjarmasin, Agustus 2025', pageWidth - 50, footerY);
-  
+  // Tanggal sengaja dikosongkan → tulis tangan
+  doc.text(`Banjarmasin,           ${bulan} ${tahun}`, pageWidth - 50, footerY);
+
+  // Fungsi format NIP: "19730719199302 1002" → "19730719 199302 1 002"
+  function formatNIP(nip) {
+    const n = (nip || '').replace(/\s/g, '');
+    if (n.length === 18) {
+      return `${n.slice(0,8)} ${n.slice(8,14)} ${n.slice(14,15)} ${n.slice(15)}`;
+    }
+    return nip; // kembalikan apa adanya jika format tidak sesuai
+  }
+
   // Gunakan data dari kepalaOPDData
   if (kepalaOPDData) {
     doc.text(kepalaOPDData.jabatan, pageWidth - 50, footerY + 4);
-    
+
     // Garis TTD
     doc.line(pageWidth - 65, footerY + 18, pageWidth - 20, footerY + 18);
-    
+
     // Nama lengkap dengan gelar
     doc.text(kepalaOPDData.nama_lengkap, pageWidth - 50, footerY + 22);
-    doc.text('NIP. ' + kepalaOPDData.nip, pageWidth - 50, footerY + 26);
+    doc.text('NIP. ' + formatNIP(kepalaOPDData.nip), pageWidth - 50, footerY + 26);
   } else {
     // Fallback jika data belum dimuat
     doc.text('Pengguna Anggaran', pageWidth - 50, footerY + 4);
@@ -2300,5 +2335,3 @@ console.log('✅ Template 5 - Detail Per Golongan berhasil dimuat!');
       showNotification(`Error Excel: ${error.message}`, 'danger');
     }
   }
-
-  

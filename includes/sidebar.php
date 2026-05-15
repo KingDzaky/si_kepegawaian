@@ -635,25 +635,55 @@
 
         <?php if (isKepalaDinas()): ?>
         <!-- Laporan -->
-        <li class="nav-item" data-tooltip="Laporan">
-          <a class="nav-link sidebar-link" href="laporan.php">
+         <!-- ===== MENU KEPALA DINAS (dropdown) ===== -->
+         <li class="nav-item has-submenu" data-tooltip="Kenaikan Pangkat">
+          <a class="nav-link sidebar-link" href="#" onclick="toggleSubmenu(event, this)">
             <div class="link-content">
-              <i class="fas fa-file-alt nav-icon"></i>
-              <span class="nav-text">Laporan</span>
+              <i class="fas fa-file-export nav-icon"></i>
+              <span class="nav-text">Kenaikan Pangkat</span>
+              <i class="fas fa-chevron-down submenu-arrow"></i>
             </div>
             <div class="link-hover-effect"></div>
           </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a href="laporan.php" class="submenu-link">
+                <i class="fas fa-chart-bar"></i>
+                <span>Laporan</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a href="approval.php" class="submenu-link">
+                <i class="fas fa-check-circle"></i>
+                <span>Approval</span>
+              </a>
+            </li>
+          </ul>
         </li>
-
-        <!-- Approval -->
-        <li class="nav-item" data-tooltip="Approval">
-          <a class="nav-link sidebar-link" href="approval.php">
+ 
+        <li class="nav-item has-submenu" data-tooltip="Pensiun Pegawai">
+          <a class="nav-link sidebar-link" href="#" onclick="toggleSubmenu(event, this)">
             <div class="link-content">
-              <i class="fas fa-check-circle nav-icon"></i>
-              <span class="nav-text">Approval</span>
+              <i class="fas fa-user-graduate nav-icon"></i>
+              <span class="nav-text">Pensiun Pegawai</span>
+              <i class="fas fa-chevron-down submenu-arrow"></i>
             </div>
             <div class="link-hover-effect"></div>
           </a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a href="laporan_pensiun.php" class="submenu-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Laporan Pensiun</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a href="approval_pensiun.php" class="submenu-link">
+                <i class="fas fa-check-double"></i>
+                <span>Approval Pensiun</span>
+              </a>
+            </li>
+          </ul>
         </li>
         <?php endif; ?>
 

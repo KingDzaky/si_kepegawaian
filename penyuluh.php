@@ -191,6 +191,17 @@ $pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM 
             </div>
           </div>
 
+          <div class="filter-group">
+  <label class="filter-label">
+    <i class="fas fa-toggle-on me-2"></i>Status Pegawai
+  </label>
+  <select class="form-select filter-select" id="filterStatus">
+    <option value="">Semua Status</option>
+    <option value="aktif">Aktif</option>
+    <option value="nonaktif">Nonaktif</option>
+  </select>
+</div>
+
           <div class="filter-actions">
     <div class="action-buttons">
         <button type="button" class="btn btn-primary" id="applyFilter">
@@ -252,6 +263,7 @@ $pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM 
           <th>Jenis Kelamin</th>
           <th>Pendidikan</th>
           <th>TMT</th>
+          <th>Status</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -368,6 +380,16 @@ function renderTable() {
             </td>
             <td>
                 <small>${item.tmt_pangkat || '-'}</small>
+            </td>
+
+            <td>
+             <span class="badge ${item.status_pegawai === 'aktif' ? 'bg-success' : 'bg-danger'}">
+                <i class="fas ${item.status_pegawai === 'aktif' ? 'fa-check-circle' : 'fa-times-circle'} me-1"></i>
+                ${item.status_pegawai === 'aktif' ? 'Aktif' : 'Nonaktif'}
+            </span>
+            ${item.alasan_nonaktif 
+                ? `<small class="d-block text-muted mt-1">${item.alasan_nonaktif}</small>` 
+                : ''}
             </td>
             <td>
                 <div class="action-buttons">

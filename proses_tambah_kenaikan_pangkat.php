@@ -179,6 +179,20 @@ $query = "INSERT INTO kenaikan_pangkat (
 $placeholder_count = substr_count($query, '?');
 error_log("Jumlah placeholder (?): $placeholder_count");
 
+// Cek duplikat nomor_usulan sebelum INSERT
+$cek = $koneksi->prepare("SELECT id FROM kenaikan_pangkat WHERE nomor_usulan = ?");
+$cek->bind_param("s", $nomor_usulan);
+$cek->execute();
+$cek->store_result();
+
+if ($cek->num_rows > 0) {
+    $cek->close();
+    alertGagal('form_tambah_kenaikan_pangkat.php', 
+        'Nomor usulan sudah digunakan! Silakan gunakan nomor lain.');
+    exit;
+}
+$cek->close();
+
 $stmt = $koneksi->prepare($query);
 
 if (!$stmt) {

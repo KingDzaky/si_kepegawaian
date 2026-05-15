@@ -8,7 +8,7 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
-// ✅ Query mengambil semua data dari kenaikan_pangkat + kepala_opd
+// Query mengambil semua data dari kenaikan_pangkat + kepala_opd (join by status aktif)
 $query = "SELECT 
     k.*,
     o.nama as nama_kepala_opd,
@@ -19,7 +19,7 @@ $query = "SELECT
     o.gelar_belakang,
     o.golongan as golongan_kepala_opd
 FROM kenaikan_pangkat k
-LEFT JOIN kepala_opd o ON k.id_opd = o.id
+LEFT JOIN kepala_opd o ON o.status = 'aktif'
 WHERE k.id = ?
 LIMIT 1";
 
@@ -35,84 +35,89 @@ if ($result->num_rows === 0) {
 $data = $result->fetch_assoc();
 $stmt->close();
 
-// ✅ ========================================
-// FORMAT TTL dari tempat_lahir + tanggal_lahir
-// ========================================
+// Array nama bulan Indonesia — didefinisikan di sini agar bisa dipakai di seluruh file
+$bulan_indo = [
+    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+];
+
+// Function format NIP: 197307191993021002 → 19730719 199302 1 002
+function format_nip($nip) {
+    $nip = preg_replace('/\s+/', '', $nip);
+    if (strlen($nip) === 18) {
+        return substr($nip, 0, 8) . ' ' . substr($nip, 8, 6) . ' ' . substr($nip, 14, 1) . ' ' . substr($nip, 15, 3);
+    }
+    return $nip;
+}
+
+// FORMAT TTL
 $ttl_formatted = '-';
 if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
     $timestamp = strtotime($data['tanggal_lahir']);
     if ($timestamp !== false) {
-        // Array nama bulan dalam Bahasa Indonesia
-        $bulan_indo = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        
-        $hari = date('d', $timestamp);
+        $hari  = date('d', $timestamp);
         $bulan = $bulan_indo[(int)date('m', $timestamp)];
         $tahun = date('Y', $timestamp);
-        
-        // Output: "Banjarmasin, 12 April 2000"
         $ttl_formatted = $data['tempat_lahir'] . ', ' . $hari . ' ' . $bulan . ' ' . $tahun;
     }
 } elseif (!empty($data['tempat_lahir'])) {
-    // Jika hanya ada tempat lahir tanpa tanggal
     $ttl_formatted = $data['tempat_lahir'];
 }
-// ========================================
 
-$nama_kepala = $data['atasan_nama'];
-$jabatan_kepala = $data['atasan_jabatan'];
-$nip_kepala = $data['atasan_nip'];
-$pangkat_kepala = $data['atasan_pangkat'];
+// Data kepala OPD dari database (bukan fallback manual)
+$nama_kepala     = '';
+$jabatan_kepala  = '';
+$nip_kepala      = '';
+$pangkat_kepala  = '';
 $golongan_kepala = '';
 
 if (!empty($data['nama_kepala_opd'])) {
-    $gelar_depan = !empty($data['gelar_depan']) ? $data['gelar_depan'] . ' ' : '';
-    $gelar_belakang = !empty($data['gelar_belakang']) ? ', ' . $data['gelar_belakang'] : '';
-    $nama_kepala = $gelar_depan . $data['nama_kepala_opd'] . $gelar_belakang;
-    $jabatan_kepala = $data['jabatan_kepala_opd'];
-    $nip_kepala = $data['nip_kepala_opd'];
-    $pangkat_kepala = $data['pangkat_kepala_opd'];
+    $gelar_depan     = !empty($data['gelar_depan'])    ? $data['gelar_depan'] . '. ' : '';
+    $gelar_belakang  = !empty($data['gelar_belakang']) ? ', ' . $data['gelar_belakang'] : '';
+    $nama_kepala     = $gelar_depan . $data['nama_kepala_opd'] . $gelar_belakang;
+    $jabatan_kepala  = $data['jabatan_kepala_opd'];
+    $nip_kepala      = format_nip($data['nip_kepala_opd']);
+    $pangkat_kepala  = $data['pangkat_kepala_opd'];
     $golongan_kepala = $data['golongan_kepala_opd'];
 }
 
-// ========================================
-// PERHITUNGAN MASA KERJA YANG BENAR
-// ========================================
-
-// BARIS 1: Masa Kerja Golongan SAAT INI (dari database - mk_golongan)
+// PERHITUNGAN MASA KERJA
 $mkg_saat_ini_tahun = $data['mk_golongan_tahun'];
 $mkg_saat_ini_bulan = $data['mk_golongan_bulan'];
 
-// BARIS 2: Masa Kerja yang AKAN BERTAMBAH (dari TMT lama ke TMT baru)
 $tmt_lama = new DateTime($data['tmt_pangkat_lama']);
 $tmt_baru = new DateTime($data['tmt_pangkat_baru']);
 $interval_tambahan = $tmt_lama->diff($tmt_baru);
 $tambahan_tahun = $interval_tambahan->y;
 $tambahan_bulan = $interval_tambahan->m;
 
-// Format tanggal untuk kolom "Mulai dari sampai Dengan"
-$tanggal_dari = $tmt_lama->format('d-m-Y');
+$tanggal_dari   = $tmt_lama->format('d-m-Y');
 $tanggal_sampai = $tmt_baru->format('d-m-Y');
 $mk_dari_sampai = $tanggal_dari . ' s/d ' . $tanggal_sampai;
 
-// BARIS 3: TOTAL = Baris 1 + Baris 2
 $total_bulan = $mkg_saat_ini_bulan + $tambahan_bulan;
 $total_tahun = $mkg_saat_ini_tahun + $tambahan_tahun;
 
-// Normalisasi jika bulan >= 12
 if ($total_bulan >= 12) {
     $total_tahun += floor($total_bulan / 12);
-    $total_bulan = $total_bulan % 12;
+    $total_bulan  = $total_bulan % 12;
+}
+
+// Ambil tahun dari nomor_usulan
+$nomor_parts  = explode('/', $data['nomor_usulan']);
+$nomor_prefix = isset($nomor_parts[0]) ? $nomor_parts[0] : '';
+$tahun_usulan = '2025';
+if (isset($nomor_parts[3]) && is_numeric($nomor_parts[3])) {
+    $tahun_usulan = $nomor_parts[3];
+} elseif (!empty($data['tanggal_usulan'])) {
+    $tahun_usulan = date('Y', strtotime($data['tanggal_usulan']));
 }
 
 $koneksi->close();
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>Daftar Usul Mutasi Kenaikan Pangkat</title>
@@ -121,157 +126,33 @@ $koneksi->close();
             size: A4;
             margin: 0.8cm 1cm;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9.5pt;
-            padding: 5px;
-            line-height: 1.15;
-        }
-
-        .header {
-            text-align: right;
-            margin-bottom: 2px;
-            margin-right: 10px;
-        }
-
-        .header p {
-            margin: 0;
-            font-size: 8.5pt;
-            line-height: 1.1;
-        }
-
-        .title {
-            text-align: center;
-            margin: 5px 0 2px 0;
-        }
-
-        .title h3 {
-            font-size: 11pt;
-            font-weight: bold;
-            margin: 2px 0;
-            text-decoration: underline;
-        }
-
-        .nomor {
-            text-align: center;
-            font-size: 9.5pt;
-            margin-bottom: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #000;
-        }
-
-        th {
-            background-color: #d9d9d9;
-            padding: 3px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 9.5pt;
-        }
-
-        td {
-            padding: 2px 4px;
-            vertical-align: top;
-            font-size: 9.5pt;
-        }
-
-        .no-border {
-            border: none !important;
-        }
-
-        .col-no {
-            width: 35px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        /* Inner table untuk alignment titik dua */
-        .align-table {
-            width: 100%;
-            border: none;
-        }
-
-        .align-table td {
-            border: none;
-            padding: 1px 0;
-        }
-
-        .label-col {
-            width: 230px;
-        }
-
-        .colon-col {
-            width: 15px;
-        }
-
-        .upright-col {
-            writing-mode: vertical-rl;
-            text-orientation: upright;
-            width: 15px;
-        }
-
-        .value-col {
-            padding-left: 5px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 9.5pt; padding: 5px; line-height: 1.15; }
+        .header { text-align: right; margin-bottom: 2px; margin-right: 10px; }
+        .header p { margin: 0; font-size: 8.5pt; line-height: 1.1; }
+        .title { text-align: center; margin: 5px 0 2px 0; }
+        .title h3 { font-size: 11pt; font-weight: bold; margin: 2px 0; text-decoration: underline; }
+        .nomor { text-align: center; font-size: 9.5pt; margin-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; }
+        table, th, td { border: 1px solid #000; }
+        th { background-color: #d9d9d9; padding: 3px; text-align: center; font-weight: bold; font-size: 9.5pt; }
+        td { padding: 2px 4px; vertical-align: top; font-size: 9.5pt; }
+        .col-no { width: 35px; text-align: center; font-weight: bold; }
+        .label-col { width: 230px; }
+        .colon-col { width: 15px; }
+        .upright-col { writing-mode: vertical-rl; text-orientation: upright; width: 15px; }
+        .value-col { padding-left: 5px; }
         @media print {
-            .no-print {
-                display: none !important;
-            }
-
-            @page {
-                margin: 0.8cm 1cm;
-            }
-
-            body {
-                padding: 0;
-            }
+            .no-print { display: none !important; }
+            @page { margin: 0.8cm 1cm; }
+            body { padding: 0; }
         }
-
-        .btn-container {
-            text-align: center;
-            margin: 15px 0;
-            padding: 10px;
-            background: #f5f5f5;
-        }
-
-        .btn {
-            padding: 10px 25px;
-            font-size: 11pt;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            margin: 0 5px;
-            font-weight: bold;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
+        .btn-container { text-align: center; margin: 15px 0; padding: 10px; background: #f5f5f5; }
+        .btn { padding: 10px 25px; font-size: 11pt; cursor: pointer; border: none; border-radius: 4px; margin: 0 5px; font-weight: bold; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
     </style>
 </head>
-
 <body>
 
     <!-- Header Kanan Atas -->
@@ -290,23 +171,6 @@ $koneksi->close();
 
     <!-- Nomor -->
     <div class="nomor">
-        <?php
-        // Ambil tahun dari nomor_usulan (format: 800.1.3.2/012/DPPKBPM-BJM/2026)
-        $nomor_parts = explode('/', $data['nomor_usulan']);
-        
-        // Bagian pertama (800.1.3.2)
-        $nomor_prefix = isset($nomor_parts[0]) ? $nomor_parts[0] : '';
-        
-        // Tahun dari bagian terakhir atau dari tanggal_usulan sebagai fallback
-        $tahun_usulan = '2025'; // Default
-        if (isset($nomor_parts[3]) && is_numeric($nomor_parts[3])) {
-            // Ambil tahun dari nomor usulan (bagian terakhir)
-            $tahun_usulan = $nomor_parts[3];
-        } else if (!empty($data['tanggal_usulan'])) {
-            // Fallback: ambil dari tanggal usulan
-            $tahun_usulan = date('Y', strtotime($data['tanggal_usulan']));
-        }
-        ?>
         Nomor : <?= htmlspecialchars($nomor_prefix) ?>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/DPPKBPM-BJM/<?= htmlspecialchars($tahun_usulan) ?>
     </div>
 
@@ -333,19 +197,18 @@ $koneksi->close();
                 <td class="label-col" colspan="2">NIP/Seri Karpeg/Pendidikan</td>
                 <td class="colon-col">:</td>
                 <td class="value-col">
-                    <?= htmlspecialchars($data['nip']) ?> / 
+                    <?= htmlspecialchars(format_nip($data['nip'])) ?> / 
                     <?= htmlspecialchars($data['kartu_pegawai']) ?> / 
                     <?= htmlspecialchars($data['pendidikan_terakhir'] . ' ' . $data['prodi']) ?>
                 </td>
             </tr>
 
-            <!-- ✅ Row 3: TTL - UPDATED dengan Format Indonesia -->
+            <!-- Row 3: TTL -->
             <tr>
                 <td class="col-no">3.</td>
                 <td class="label-col" colspan="2">Tempat Tanggal Lahir</td>
                 <td class="colon-col">:</td>
-                <td class="value-col"><?= $ttl_formatted ?></td>
-                <!-- ✅ JANGAN pakai htmlspecialchars() karena sudah diformat di atas -->
+                <td class="value-col"><?= htmlspecialchars($ttl_formatted) ?></td>
             </tr>
 
             <!-- Row 4: Pangkat LAMA -->
@@ -358,18 +221,11 @@ $koneksi->close();
                     <?= htmlspecialchars($data['pangkat_lama']) ?> / 
                     <?= htmlspecialchars($data['golongan_lama']) ?> / 
                     <?php
-                    // Format tanggal: 01 October 2021
                     $tmt_lama_obj = new DateTime($data['tmt_pangkat_lama']);
-                    $bulan_inggris = [
-                        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-                        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-                        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
-                    ];
-                    echo $tmt_lama_obj->format('d') . ' ' . $bulan_inggris[(int)$tmt_lama_obj->format('m')] . ' ' . $tmt_lama_obj->format('Y');
+                    echo $tmt_lama_obj->format('d') . ' ' . $bulan_indo[(int)$tmt_lama_obj->format('m')] . ' ' . $tmt_lama_obj->format('Y');
                     ?>
                 </td>
             </tr>
-
             <tr>
                 <td class="label-col">b. Masa Kerja</td>
                 <td class="colon-col">:</td>
@@ -378,13 +234,11 @@ $koneksi->close();
                     <?= str_pad($data['masa_kerja_bulan_lama'], 2, '0', STR_PAD_LEFT) ?> Bulan
                 </td>
             </tr>
-
             <tr>
                 <td class="label-col">c. Gaji Pokok</td>
                 <td class="colon-col">:</td>
-                <td class="value-col"><?= number_format($data['gaji_pokok_lama'], 0, ',', '.') ?>,-</td>
+                <td class="value-col">Rp <?= number_format($data['gaji_pokok_lama'], 0, ',', '.') ?>,-</td>
             </tr>
-
             <tr>
                 <td class="label-col">d. Jabatan</td>
                 <td class="colon-col">:</td>
@@ -401,13 +255,11 @@ $koneksi->close();
                     <?= htmlspecialchars($data['pangkat_baru']) ?> / 
                     <?= htmlspecialchars($data['golongan_baru']) ?> / 
                     <?php
-                    // Format tanggal: 02 December 2025
                     $tmt_baru_obj = new DateTime($data['tmt_pangkat_baru']);
                     echo $tmt_baru_obj->format('d') . ' ' . $bulan_indo[(int)$tmt_baru_obj->format('m')] . ' ' . $tmt_baru_obj->format('Y');
                     ?>
                 </td>
             </tr>
-
             <tr>
                 <td class="label-col">b. Masa Kerja</td>
                 <td class="colon-col">:</td>
@@ -416,39 +268,36 @@ $koneksi->close();
                     <?= str_pad($data['masa_kerja_bulan_baru'], 2, '0', STR_PAD_LEFT) ?> Bulan
                 </td>
             </tr>
-
             <tr>
                 <td class="label-col">c. Gaji Pokok</td>
                 <td class="colon-col">:</td>
                 <td class="value-col">Rp <?= number_format($data['gaji_pokok_baru'], 0, ',', '.') ?>,-</td>
             </tr>
-
             <tr>
                 <td class="label-col">d. Jabatan</td>
                 <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($data['jabatan_baru']) ?></td>
             </tr>
 
-            <!-- Row 6: Atasan Langsung -->
+            <!-- Row 6: Atasan Langsung — DIPERBAIKI (nama/NIP/pangkat/jabatan tidak tertukar) -->
             <tr>
                 <td class="col-no" rowspan="4">6.</td>
                 <td class="label-col" colspan="2">Atasan Langsung</td>
                 <td class="colon-col">:</td>
                 <td class="value-col"></td>
             </tr>
-
             <tr>
-                <td class="label-col" colspan="2">Nama / NIP</td>
+                <td class="label-col" colspan="2">Nama</td>
                 <td class="colon-col">:</td>
                 <td class="value-col"><?= htmlspecialchars($nama_kepala) ?></td>
             </tr>
-
             <tr>
-                <td class="label-col" colspan="2">Pangkat / Gol. Ruang</td>
+                <td class="label-col" colspan="2">Pangkat / Gol. Ruang / TMT</td>
                 <td class="colon-col">:</td>
-                <td class="value-col"><?= htmlspecialchars($nip_kepala) ?></td>
+                <td class="value-col">
+                    <?= htmlspecialchars($nip_kepala) ?>
+                </td>
             </tr>
-
             <tr>
                 <td class="label-col" colspan="2">Jabatan</td>
                 <td class="colon-col">:</td>
@@ -483,14 +332,9 @@ $koneksi->close();
                         <tr style="background-color: #f0f0f0;">
                             <td style="border-right: 1px solid #000; border-top: 1px solid #000;"></td>
                             <td style="border-right: 1px solid #000; border-top: 1px solid #000;"></td>
-                            <td style="width: 15%; text-align: center; padding: 2px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;">
-                                <strong>Tahun</strong>
-                            </td>
-                            <td style="width: 15%; text-align: center; padding: 2px; border-top: 1px solid #000; font-size: 8.5pt;">
-                                <strong>Bulan</strong>
-                            </td>
+                            <td style="width: 15%; text-align: center; padding: 2px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;"><strong>Tahun</strong></td>
+                            <td style="width: 15%; text-align: center; padding: 2px; border-top: 1px solid #000; font-size: 8.5pt;"><strong>Bulan</strong></td>
                         </tr>
-                        
                         <!-- Baris 1: MKG Saat Ini -->
                         <tr>
                             <td style="text-align: center; padding: 4px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;">
@@ -506,7 +350,6 @@ $koneksi->close();
                                 <?= str_pad($mkg_saat_ini_bulan, 2, '0', STR_PAD_LEFT) ?>
                             </td>
                         </tr>
-                        
                         <!-- Baris 2: Tambahan MKG -->
                         <tr>
                             <td style="text-align: center; padding: 4px; border-right: 1px solid #000; border-top: 1px solid #000; font-size: 8.5pt;">
@@ -522,7 +365,6 @@ $koneksi->close();
                                 <?= str_pad($tambahan_bulan, 2, '0', STR_PAD_LEFT) ?>
                             </td>
                         </tr>
-                        
                         <!-- Baris 3: TOTAL -->
                         <tr style="background-color: #f0f0f0;">
                             <td colspan="2" style="border-right: 1px solid #000; border-top: 1px solid #000;"></td>
@@ -536,11 +378,10 @@ $koneksi->close();
                     </table>
                 </td>
             </tr>
-
         </tbody>
     </table>
 
-    <!-- Footer dengan Kotak -->
+    <!-- Footer TTD -->
     <table style="margin-top: 4px;">
         <tr>
             <td style="width: 60%; vertical-align: top; padding: 6px;">
@@ -557,7 +398,9 @@ $koneksi->close();
                 <p style="margin: 1px 0; font-size: 9.5pt;">Banjarmasin,</p>
                 <p style="margin: 1px 0; font-size: 9.5pt;"><strong>KEPALA DINAS,</strong></p>
                 <div style="height: 45px;"></div>
-                <p style="margin: 1px 0; font-size: 9.5pt;"><strong><?= htmlspecialchars($nama_kepala) ?></strong></p>
+                <p style="margin: 1px 0; font-size: 9.5pt; text-decoration: underline;">
+                    <strong><?= htmlspecialchars($nama_kepala) ?></strong>
+                </p>
                 <p style="margin: 1px 0; font-size: 9.5pt;">
                     <strong><?= htmlspecialchars($pangkat_kepala) ?><?= !empty($golongan_kepala) ? ' / ' . htmlspecialchars($golongan_kepala) : '' ?></strong>
                 </p>

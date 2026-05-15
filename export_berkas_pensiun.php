@@ -58,6 +58,15 @@ function tanggal_indonesia($tanggal) {
     return $split[2] . ' ' . $bulan[(int)$split[1]] . ' ' . $split[0];
 }
 
+// Function untuk format NIP: 197307191993021002 → 19730719 199302 1 002
+function format_nip($nip) {
+    $nip = preg_replace('/\s+/', '', $nip); // hapus spasi jika ada
+    if (strlen($nip) === 18) {
+        return substr($nip, 0, 8) . ' ' . substr($nip, 8, 6) . ' ' . substr($nip, 14, 1) . ' ' . substr($nip, 15, 3);
+    }
+    return $nip; // kembalikan apa adanya jika format tidak sesuai
+}
+
 // Generate nomor surat unik
 $tahun = date('Y');
 $bulan_romawi = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
@@ -594,15 +603,13 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                 <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
                 <div style="height: 60px;"></div>
                 <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">
-                    <?= htmlspecialchars($data['kadis_gelar_depan'] ?? 'Drs.') ?> 
-                    <?= htmlspecialchars($data['kadis_nama'] ?? 'M. HELFIANNOOR') ?>, 
-                    <?= htmlspecialchars($data['kadis_gelar_belakang'] ?? 'M.Si') ?>
+                    <?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
                 </p>
                 <p style="margin: 2px 0; line-height: 1.3;">
-                    <?= htmlspecialchars($data['kadis_pangkat'] ?? 'Pembina Utama Muda') ?>
+                    <?= htmlspecialchars($data['kadis_pangkat']) ?>
                 </p>
                 <p style="margin: 2px 0; line-height: 1.3;">
-                    NIP. <?= htmlspecialchars($data['kadis_nip'] ?? '197307191993021002') ?>
+                    NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
                 </p>
             </td>
         </tr>
@@ -688,16 +695,14 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                     <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
                     <div style="height: 60px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">
-                        <?= htmlspecialchars($data['kadis_gelar_depan'] ?? 'Drs.') ?> 
-                        <?= htmlspecialchars($data['kadis_nama'] ?? 'M. Helfiannoor') ?>, 
-                        <?= htmlspecialchars($data['kadis_gelar_belakang'] ?? 'M.Si') ?>
+                        <?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
-                        <?= htmlspecialchars($data['kadis_pangkat'] ?? 'Pembina Utama Muda') ?> 
-                        (<?= htmlspecialchars($data['kadis_golongan'] ?? 'IV/c') ?>)
+                        <?= htmlspecialchars($data['kadis_pangkat']) ?> 
+                        (<?= htmlspecialchars($data['kadis_golongan']) ?>)
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
-                        NIP. <?= htmlspecialchars($data['kadis_nip'] ?? '19730719 199302 1 002') ?>
+                        NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
                     </p>
                 </td>
             </tr>
@@ -747,27 +752,25 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                 <tr>
                     <td>N a m a</td>
                     <td>:</td>
-                    <td><?= htmlspecialchars($data['kadis_gelar_depan'] ?? 'Drs.') ?> 
-                        <?= htmlspecialchars($data['kadis_nama'] ?? 'M. HELFIANNOOR') ?>, 
-                        <?= htmlspecialchars($data['kadis_gelar_belakang'] ?? 'M.Si.') ?>
+                    <td><?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
                     </td>
                 </tr>
                 <tr>
                     <td>N I P</td>
                     <td>:</td>
-                    <td><?= htmlspecialchars($data['kadis_nip'] ?? '197307191993021002') ?></td>
+                    <td><?= htmlspecialchars(format_nip($data['kadis_nip'])) ?></td>
                 </tr>
                 <tr>
                     <td>Pangkat/Golongan Ruang</td>
                     <td>:</td>
-                    <td><?= htmlspecialchars($data['kadis_pangkat'] ?? 'Pembina Utama Muda') ?> 
-                        (<?= htmlspecialchars($data['kadis_golongan'] ?? 'IV/c') ?>)
+                    <td><?= htmlspecialchars($data['kadis_pangkat']) ?> 
+                        (<?= htmlspecialchars($data['kadis_golongan']) ?>)
                     </td>
                 </tr>
                 <tr>
                     <td>Jabatan</td>
                     <td>:</td>
-                    <td><?= htmlspecialchars($data['kadis_jabatan'] ?? 'Kepala DPPKBPM Kota Banjarmasin') ?></td>
+                    <td><?= htmlspecialchars($data['kadis_jabatan']) ?></td>
                 </tr>
             </table>
             
@@ -817,15 +820,13 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                     <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala DPPKBPM,</strong></p>
                     <div style="height: 60px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">
-                        <?= htmlspecialchars($data['kadis_gelar_depan'] ?? 'Drs.') ?> 
-                        <?= htmlspecialchars($data['kadis_nama'] ?? 'M. HELFIANNOOR') ?>, 
-                        <?= htmlspecialchars($data['kadis_gelar_belakang'] ?? 'M.Si') ?>
+                        <?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
-                        <?= htmlspecialchars($data['kadis_pangkat'] ?? 'Pembina Utama Muda') ?>
+                        <?= htmlspecialchars($data['kadis_pangkat']) ?>
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
-                        NIP. <?= htmlspecialchars($data['kadis_nip'] ?? '197307191993021002') ?>
+                        NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
                     </p>
                 </td>
             </tr>
