@@ -600,7 +600,7 @@ function exportTemplate1() {
     // Header
     doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('DAFTAR PENYULUH PERTANIAN', 148, 15, { align: 'center' });
+    doc.text('DAFTAR DATA PENYULUH', 148, 15, { align: 'center' });
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.text('DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA', 148, 22, { align: 'center' });

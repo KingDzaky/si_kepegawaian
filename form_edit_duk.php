@@ -313,88 +313,88 @@ function val($field, $data, $default = '') {
                     </div>
 
                     <div class="form-group fade-in">
-                      <label for="eselon" class="form-label">
-                        <i class="fas fa-sitemap"></i>
-                        Eselon <span class="required">*</span>
-                      </label>
-                      <div class="input-group">
-                        <select name="eselon" id="eselon" class="form-select" required
-                                data-original="<?= htmlspecialchars($data['eselon'] ?? '') ?>">
-                          <?php $esel = val('eselon', $data); ?>
-                          <option value="">-- Pilih Eselon --</option>
-                          <option value="Non-Eselon" <?= $esel === 'Non-Eselon' ? 'selected' : '' ?>>Non-Eselon</option>
-                          <option value="IV.b" <?= $esel === 'IV.b' ? 'selected' : '' ?>>IV.b</option>
-                          <option value="IV.a" <?= $esel === 'IV.a' ? 'selected' : '' ?>>IV.a</option>
-                          <option value="III.b" <?= $esel === 'III.b' ? 'selected' : '' ?>>III.b</option>
-                          <option value="III.a" <?= $esel === 'III.a' ? 'selected' : '' ?>>III.a</option>
-                          <option value="II.b" <?= $esel === 'II.b' ? 'selected' : '' ?>>II.b</option>
-                          <option value="II.a" <?= $esel === 'II.a' ? 'selected' : '' ?>>II.a</option>
-                          <option value="I.b" <?= $esel === 'I.b' ? 'selected' : '' ?>>I.b</option>
-                          <option value="I.a" <?= $esel === 'I.a' ? 'selected' : '' ?>>I.a</option>
-                        </select>
-                        <span class="change-indicator"><i class="fas fa-edit"></i></span>
-                      </div>
-                    </div>
+  <label for="eselon" class="form-label">
+    <i class="fas fa-sitemap"></i>
+    Eselon <span class="required">*</span>
+  </label>
+  <div class="input-group">
+    <select name="eselon" id="eselon" class="form-select" required
+            data-original="<?= htmlspecialchars($data['eselon'] ?? '') ?>">
+      <?php $esel = val('eselon', $data); ?>
+      <option value="">-- Pilih Eselon --</option>
+      <option value="Non-Eselon" <?= $esel === 'Non-Eselon' ? 'selected' : '' ?>>Non-Eselon</option>
+      <option value="IV.b"       <?= $esel === 'IV.b'       ? 'selected' : '' ?>>IV.b</option>
+      <option value="IV.a"       <?= $esel === 'IV.a'       ? 'selected' : '' ?>>IV.a</option>
+      <option value="III.b"      <?= $esel === 'III.b'      ? 'selected' : '' ?>>III.b</option>
+      <option value="III.a"      <?= $esel === 'III.a'      ? 'selected' : '' ?>>III.a</option>
+      <option value="II.b"       <?= $esel === 'II.b'       ? 'selected' : '' ?>>II.b</option>
+      <option value="II.a"       <?= $esel === 'II.a'       ? 'selected' : '' ?>>II.a</option>
+      <option value="I.b"        <?= $esel === 'I.b'        ? 'selected' : '' ?>>I.b</option>
+      <option value="I.a"        <?= $esel === 'I.a'        ? 'selected' : '' ?>>I.a</option>
+    </select>
+    <span class="change-indicator"><i class="fas fa-edit"></i></span>
+  </div>
+</div>
 
-                    <!-- Sub Dropdown untuk Non-Eselon: JFT/JFU -->
-                    <div class="form-group fade-in" id="jenis_jabatan_group" style="display: none;">
-                      <label for="jenis_jabatan" class="form-label">
-                        <i class="fas fa-briefcase"></i>
-                        Jenis Jabatan
-                      </label>
-                      <div class="input-group">
-                        <select name="jenis_jabatan" id="jenis_jabatan" class="form-select"
-                                data-original="<?= htmlspecialchars($data['jenis_jabatan'] ?? '') ?>">
-                          <?php $jenis_jab = val('jenis_jabatan', $data); ?>
-                          <option value="">-- Pilih Jenis Jabatan --</option>
-                          <option value="JFT" <?= $jenis_jab === 'JFT' ? 'selected' : '' ?>>JFT (Jabatan Fungsional Tertentu)</option>
-                          <option value="JFU" <?= $jenis_jab === 'JFU' ? 'selected' : '' ?>>JFU (Jabatan Fungsional Umum)</option>
-                        </select>
-                        <span class="change-indicator"><i class="fas fa-edit"></i></span>
-                      </div>
-                    </div>
+<!-- Sub Dropdown: JFT/JFU -->
+<div class="form-group fade-in" id="jenis_jabatan_group" style="display: none;">
+  <label for="jenis_jabatan" class="form-label">
+    <i class="fas fa-briefcase"></i>
+    Jenis Jabatan
+  </label>
+  <div class="input-group">
+    <select name="jenis_jabatan" id="jenis_jabatan" class="form-select"
+            data-original="<?= htmlspecialchars($data['jenis_jabatan'] ?? '') ?>">
+      <?php $jenis_jab = val('jenis_jabatan', $data); ?>
+      <option value="">-- Pilih Jenis Jabatan --</option>
+      <option value="JFT" <?= $jenis_jab === 'JFT' ? 'selected' : '' ?>>JFT (Jabatan Fungsional Tertentu)</option>
+      <option value="JFU" <?= $jenis_jab === 'JFU' ? 'selected' : '' ?>>JFU (Jabatan Fungsional Umum)</option>
+    </select>
+    <span class="change-indicator"><i class="fas fa-edit"></i></span>
+  </div>
+</div>
 
-                    <!-- Sub Dropdown untuk JFT -->
-                    <div class="form-group fade-in" id="jft_tingkat_group" style="display: none;">
-                      <label for="jft_tingkat" class="form-label">
-                        <i class="fas fa-star"></i>
-                        Tingkat JFT
-                      </label>
-                      <div class="input-group">
-                        <select name="jft_tingkat" id="jft_tingkat" class="form-select"
-                                data-original="<?= htmlspecialchars($data['jft_tingkat'] ?? '') ?>">
-                          <?php $jft = val('jft_tingkat', $data); ?>
-                          <option value="">-- Pilih Tingkat JFT --</option>
-                          <option value="Ahli Pratama" <?= $jft === 'Ahli Pratama' ? 'selected' : '' ?>>Ahli Pratama</option>
-                          <option value="Ahli Muda" <?= $jft === 'Ahli Muda' ? 'selected' : '' ?>>Ahli Muda</option>
-                          <option value="Ahli Madya" <?= $jft === 'Ahli Madya' ? 'selected' : '' ?>>Ahli Madya</option>
-                          <option value="Pemula" <?= $jft === 'Pemula' ? 'selected' : '' ?>>Pemula</option>
-                          <option value="Terampil" <?= $jft === 'Terampil' ? 'selected' : '' ?>>Terampil</option>
-                          <option value="Mahir" <?= $jft === 'Mahir' ? 'selected' : '' ?>>Mahir</option>
-                          <option value="Penyelia" <?= $jft === 'Penyelia' ? 'selected' : '' ?>>Penyelia</option>
-                        </select>
-                        <span class="change-indicator"><i class="fas fa-edit"></i></span>
-                      </div>
-                    </div>
+<!-- Sub Dropdown: Tingkat JFT -->
+<div class="form-group fade-in" id="jft_tingkat_group" style="display: none;">
+  <label for="jft_tingkat" class="form-label">
+    <i class="fas fa-star"></i>
+    Tingkat JFT
+  </label>
+  <div class="input-group">
+    <select name="jft_tingkat" id="jft_tingkat" class="form-select"
+            data-original="<?= htmlspecialchars($data['jft_tingkat'] ?? '') ?>">
+      <?php $jft = val('jft_tingkat', $data); ?>
+      <option value="">-- Pilih Tingkat JFT --</option>
+      <option value="Ahli Pratama" <?= $jft === 'Ahli Pratama' ? 'selected' : '' ?>>Ahli Pratama</option>
+      <option value="Ahli Muda"    <?= $jft === 'Ahli Muda'    ? 'selected' : '' ?>>Ahli Muda</option>
+      <option value="Ahli Madya"   <?= $jft === 'Ahli Madya'   ? 'selected' : '' ?>>Ahli Madya</option>
+      <option value="Pemula"       <?= $jft === 'Pemula'       ? 'selected' : '' ?>>Pemula</option>
+      <option value="Terampil"     <?= $jft === 'Terampil'     ? 'selected' : '' ?>>Terampil</option>
+      <option value="Mahir"        <?= $jft === 'Mahir'        ? 'selected' : '' ?>>Mahir</option>
+      <option value="Penyelia"     <?= $jft === 'Penyelia'     ? 'selected' : '' ?>>Penyelia</option>
+    </select>
+    <span class="change-indicator"><i class="fas fa-edit"></i></span>
+  </div>
+</div>
 
-                    <!-- Sub Dropdown untuk JFU -->
-                    <div class="form-group fade-in" id="jfu_kelas_group" style="display: none;">
-                      <label for="jfu_kelas" class="form-label">
-                        <i class="fas fa-list-ol"></i>
-                        Kelas JFU
-                      </label>
-                      <div class="input-group">
-                        <select name="jfu_kelas" id="jfu_kelas" class="form-select"
-                                data-original="<?= htmlspecialchars($data['jfu_kelas'] ?? '') ?>">
-                          <?php $jfu = val('jfu_kelas', $data); ?>
-                          <option value="">-- Pilih Kelas JFU --</option>
-                          <option value="5" <?= $jfu === '5' ? 'selected' : '' ?>>Kelas 5</option>
-                          <option value="6" <?= $jfu === '6' ? 'selected' : '' ?>>Kelas 6</option>
-                          <option value="7" <?= $jfu === '7' ? 'selected' : '' ?>>Kelas 7</option>
-                        </select>
-                        <span class="change-indicator"><i class="fas fa-edit"></i></span>
-                      </div>
-                    </div>
+<!-- Sub Dropdown: Kelas JFU -->
+<div class="form-group fade-in" id="jfu_kelas_group" style="display: none;">
+  <label for="jfu_kelas" class="form-label">
+    <i class="fas fa-list-ol"></i>
+    Kelas JFU
+  </label>
+  <div class="input-group">
+    <select name="jfu_kelas" id="jfu_kelas" class="form-select"
+            data-original="<?= htmlspecialchars($data['jfu_kelas'] ?? '') ?>">
+      <?php $jfu = val('jfu_kelas', $data); ?>
+      <option value="">-- Pilih Kelas JFU --</option>
+      <option value="5" <?= $jfu === '5' ? 'selected' : '' ?>>Kelas 5</option>
+      <option value="6" <?= $jfu === '6' ? 'selected' : '' ?>>Kelas 6</option>
+      <option value="7" <?= $jfu === '7' ? 'selected' : '' ?>>Kelas 7</option>
+    </select>
+    <span class="change-indicator"><i class="fas fa-edit"></i></span>
+  </div>
+</div>
 
                     <div class="form-group fade-in">
                       <label for="tmt_eselon" class="form-label">
@@ -599,11 +599,83 @@ window.addEventListener('DOMContentLoaded', function() {
     idOpdSelect.dispatchEvent(new Event('change'));
   }
 });
+
+// =============================================
+// Show/Hide JFT-JFU berdasarkan pilihan Eselon
+// =============================================
+function handleEselonChange(eselonVal, jenis_jabatanVal, jft_tingkatVal, jfu_kelasVal) {
+    const jenisGroup = document.getElementById('jenis_jabatan_group');
+    const jftGroup   = document.getElementById('jft_tingkat_group');
+    const jfuGroup   = document.getElementById('jfu_kelas_group');
+
+    if (eselonVal === 'Non-Eselon') {
+        jenisGroup.style.display = 'block';
+
+        // Set nilai jenis_jabatan jika ada
+        if (jenis_jabatanVal) {
+            document.getElementById('jenis_jabatan').value = jenis_jabatanVal;
+        }
+
+        handleJenisJabatanChange(
+            document.getElementById('jenis_jabatan').value,
+            jft_tingkatVal,
+            jfu_kelasVal
+        );
+    } else {
+        jenisGroup.style.display = 'none';
+        jftGroup.style.display   = 'none';
+        jfuGroup.style.display   = 'none';
+    }
+}
+
+function handleJenisJabatanChange(jenisVal, jft_tingkatVal, jfu_kelasVal) {
+    const jftGroup = document.getElementById('jft_tingkat_group');
+    const jfuGroup = document.getElementById('jfu_kelas_group');
+
+    if (jenisVal === 'JFT') {
+        jftGroup.style.display = 'block';
+        jfuGroup.style.display = 'none';
+        if (jft_tingkatVal) {
+            document.getElementById('jft_tingkat').value = jft_tingkatVal;
+        }
+    } else if (jenisVal === 'JFU') {
+        jfuGroup.style.display = 'block';
+        jftGroup.style.display = 'none';
+        if (jfu_kelasVal) {
+            document.getElementById('jfu_kelas').value = jfu_kelasVal;
+        }
+    } else {
+        jftGroup.style.display = 'none';
+        jfuGroup.style.display = 'none';
+    }
+}
+
+// Event listener saat user ganti eselon
+document.getElementById('eselon').addEventListener('change', function() {
+    handleEselonChange(this.value, '', '', '');
+});
+
+// Event listener saat user ganti jenis jabatan
+document.getElementById('jenis_jabatan').addEventListener('change', function() {
+    handleJenisJabatanChange(this.value, '', '');
+});
+
+// ← INI YANG PALING PENTING: jalankan saat halaman load
+// supaya data yang sudah ada di DB langsung tampil
+document.addEventListener('DOMContentLoaded', function() {
+    const eselonVal       = document.getElementById('eselon').value;
+    const jenisJabatanVal = document.getElementById('jenis_jabatan').value;
+    const jftTingkatVal   = document.getElementById('jft_tingkat').value;
+    const jfuKelasVal     = document.getElementById('jfu_kelas').value;
+
+    handleEselonChange(eselonVal, jenisJabatanVal, jftTingkatVal, jfuKelasVal);
+});
+
 </script>
 
 </main>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="js/form_edit_duk.js"></script>
+
 
 <?php require_once 'includes/footer.php'; ?>

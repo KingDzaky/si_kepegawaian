@@ -139,7 +139,7 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                         <i class="fas fa-user"></i> Nama <span class="required">*</span>
                       </label>
                       <input type="text" name="nama" class="form-control" 
-                             value="<?= htmlspecialchars($data['nama']) ?>" required>
+                             value="<?= htmlspecialchars($data['nama']) ?>" readonly>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -148,7 +148,7 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                         <i class="fas fa-id-badge"></i> Kartu Pegawai <span class="required">*</span>
                       </label>
                       <input type="text" name="kartu_pegawai" class="form-control" 
-                             value="<?= htmlspecialchars($data['kartu_pegawai']) ?>" required>
+                             value="<?= htmlspecialchars($data['kartu_pegawai']) ?>" readonly>
                     </div>
                   </div>
                   
@@ -156,22 +156,22 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-map-marker-alt"></i> Tempat Lahir <span class="required">*</span>
+                        <i class="fas fa-map-marker-alt"></i> Tempat Lahir <span class="readonly">*</span>
                       </label>
                       <input type="text" name="tempat_lahir" class="form-control" 
                              value="<?= htmlspecialchars($data['tempat_lahir'] ?? '') ?>" 
                              placeholder="Contoh: Banjarmasin"
-                             required>
+                             readonly>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-calendar-alt"></i> Tanggal Lahir <span class="required">*</span>
+                        <i class="fas fa-calendar-alt"></i> Tanggal Lahir <span class="readonly">*</span>
                       </label>
                       <input type="date" name="tanggal_lahir" class="form-control" 
                              value="<?= htmlspecialchars($data['tanggal_lahir'] ?? '') ?>" 
-                             required>
+                             readonly>
                       <small class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
                         Format: YYYY-MM-DD
@@ -182,10 +182,10 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-graduation-cap"></i> Pendidikan <span class="required">*</span>
+                        <i class="fas fa-graduation-cap"></i> Pendidikan <span class="readonly">*</span>
                       </label>
                       <input type="text" name="pendidikan_terakhir" class="form-control" 
-                             value="<?= htmlspecialchars($data['pendidikan_terakhir']) ?>" required>
+                             value="<?= htmlspecialchars($data['pendidikan_terakhir']) ?>" readonly>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -194,7 +194,7 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                         <i class="fas fa-book"></i> Program Studi <span class="required">*</span>
                       </label>
                       <input type="text" name="prodi" class="form-control" 
-                             value="<?= htmlspecialchars($data['prodi']) ?>" required>
+                             value="<?= htmlspecialchars($data['prodi']) ?>" readonly>
                     </div>
                   </div>
                 </div>
@@ -209,28 +209,28 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                     </div>
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-medal"></i> Pangkat <span class="required">*</span>
+                        <i class="fas fa-medal"></i> Pangkat <span class="readonly">*</span>
                       </label>
                       <input type="text" name="pangkat_lama" class="form-control" 
-                             value="<?= htmlspecialchars($data['pangkat_lama']) ?>" required>
+                             value="<?= htmlspecialchars($data['pangkat_lama']) ?>" readonly>
                     </div>
                     <div class="row">
                       <div class="col-6">
                         <div class="form-group">
                           <label class="form-label">
-                            <i class="fas fa-layer-group"></i> Golongan <span class="required">*</span>
+                            <i class="fas fa-layer-group"></i> Golongan <span class="readonly">*</span>
                           </label>
                           <input type="text" name="golongan_lama" class="form-control" 
-                                 value="<?= htmlspecialchars($data['golongan_lama']) ?>" required>
+                                 value="<?= htmlspecialchars($data['golongan_lama']) ?>" readonly>
                         </div>
                       </div>
                       <div class="col-6">
                         <div class="form-group">
                           <label class="form-label">
-                            <i class="fas fa-calendar-check"></i> TMT <span class="required">*</span>
+                            <i class="fas fa-calendar-check"></i> TMT <span class="readonly">*</span>
                           </label>
                           <input type="date" name="tmt_pangkat_lama" class="form-control" 
-                                 value="<?= $data['tmt_pangkat_lama'] ?>" required>
+                                 value="<?= $data['tmt_pangkat_lama'] ?>" readonly>
                         </div>
                       </div>
                     </div>
@@ -238,7 +238,7 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                       <div class="col-6">
                         <div class="form-group">
                           <label class="form-label">
-                            <i class="fas fa-clock"></i> MK (Tahun) <span class="required">*</span>
+                            <i class="fas fa-clock"></i> MK (Tahun) <span class="readonly">*</span>
                           </label>
                           <input type="number" name="masa_kerja_tahun_lama" class="form-control" 
                                  value="<?= $data['masa_kerja_tahun_lama'] ?>" required min="0">
@@ -289,8 +289,18 @@ if (!empty($data['tempat_lahir']) && !empty($data['tanggal_lahir'])) {
                           <label class="form-label">
                             <i class="fas fa-layer-group"></i> Golongan <span class="required">*</span>
                           </label>
-                          <input type="text" name="golongan_baru" class="form-control" 
-                                 value="<?= htmlspecialchars($data['golongan_baru']) ?>" required>
+                <!-- JADI INI: -->
+                <select name="golongan_lama" class="form-select" required>
+                  <option value="">-- Pilih --</option>
+                  <?php
+                  $golongan_list = ['I/a','I/b','I/c','I/d','II/a','II/b','II/c','II/d',
+                                    'III/a','III/b','III/c','III/d','IV/a','IV/b','IV/c','IV/d'];
+                  foreach ($golongan_list as $gol): ?>
+                    <option value="<?= $gol ?>" <?= $data['golongan_baru'] == $gol ? 'selected' : '' ?>>
+                      <?= $gol ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
                         </div>
                       </div>
                       <div class="col-6">
@@ -531,6 +541,46 @@ document.addEventListener('DOMContentLoaded', function() {
         input.value = value;
     }
 });
+
+// Auto-generate field "mk_dari_sampai" + hitung masa kerja golongan
+function updateDariSampai() {
+    const tmtLama = document.querySelector('[name="tmt_pangkat_lama"]').value;
+    const tmtBaru = document.querySelector('[name="tmt_pangkat_baru"]').value;
+    const fieldDariSampai = document.querySelector('[name="mk_dari_sampai"]');
+
+    if (!tmtLama || !tmtBaru) return;
+
+    // Format tanggal: YYYY-MM-DD → DD-MM-YYYY
+    function formatTanggal(dateStr) {
+        const [y, m, d] = dateStr.split('-');
+        return `${d}-${m}-${y}`;
+    }
+
+    // Auto-generate teks "dari s/d"
+    fieldDariSampai.value = `${formatTanggal(tmtLama)} s/d ${formatTanggal(tmtBaru)}`;
+
+    // Auto-hitung jumlah tahun & bulan
+    const d1 = new Date(tmtLama);
+    const d2 = new Date(tmtBaru);
+    let tahun = d2.getFullYear() - d1.getFullYear();
+    let bulan = d2.getMonth() - d1.getMonth();
+    if (bulan < 0) { tahun--; bulan += 12; }
+
+    document.querySelector('[name="mk_golongan_tahun"]').value = tahun;
+    document.querySelector('[name="mk_golongan_bulan"]').value = bulan;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tmtLamaInput = document.querySelector('[name="tmt_pangkat_lama"]');
+    const tmtBaruInput = document.querySelector('[name="tmt_pangkat_baru"]');
+
+    if (tmtLamaInput) tmtLamaInput.addEventListener('change', updateDariSampai);
+    if (tmtBaruInput) tmtBaruInput.addEventListener('change', updateDariSampai);
+
+    // Untuk form edit: langsung hitung saat halaman dibuka
+    updateDariSampai();
+});
+
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

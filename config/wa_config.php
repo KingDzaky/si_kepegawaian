@@ -16,8 +16,8 @@ define('WA_GATEWAY', 'WABLAS'); // Ganti: WABLAS, WOOWA, atau FONNTE
 // ============================================
 // KONFIGURASI WABLAS
 // ============================================
-define('WABLAS_TOKEN', 'GS6Dum7rKBgjLR0gP7CKh3GEdQOTRZFppCAdjTVUzxO9l34EnJOiFav'); // Token dari dashboard Wablas
-define('WABLAS_SECRET_KEY', 'YHViIfuj'); // Secret key dari dashboard Wablas
+define('WABLAS_TOKEN', 'SighJfdBcLvXzyhs0kLuTgiesI16KgjbHqEALoNNbE2E8lfS6HfFbH5'); // Token dari dashboard Wablas
+define('WABLAS_SECRET_KEY', 'GuIxCvyt'); // Secret key dari dashboard Wablas
 define('WABLAS_URL', 'https://bdg.wablas.com/'); // Domain Wablas Anda
 
 // ============================================

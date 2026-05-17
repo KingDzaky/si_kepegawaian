@@ -4,11 +4,7 @@ require_once 'check_session.php';
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
 
-// Hanya superadmin dan admin yang bisa akses
-if (!isAdmin()) {
-    header('Location: dashboard.php?error=Akses ditolak');
-    exit;
-}
+
 
 ?>
 
@@ -25,7 +21,7 @@ if (!isAdmin()) {
         </div>
         <div class="header-text">
           <h1>Pusat Bantuan</h1>
-          <p>Panduan Penggunaan Sistem Informasi Kepegawaian</p>
+          <p>Panduan Penggunaan Sistem Administrasi Kepegawaian</p>
         </div>
       </div>
       
@@ -94,12 +90,12 @@ if (!isAdmin()) {
             
             <div class="content-card">
               <h5>Selamat Datang di Sistem Informasi Kepegawaian</h5>
-              <p>Sistem ini dirancang untuk memudahkan pengelolaan data pegawai DUK (Daftar Urusan Kepegawaian) dan data Penyuluh Pertanian di Dinas Pertanian Kota Banjarmasin.</p>
+              <p>Sistem ini dirancang untuk memudahkan pengelolaan data pegawai DUK (Daftar Urusan Kepegawaian) dan data Penyuluh di DPPKBPM Kota Banjarmasin.</p>
               
               <h6 class="mt-4">Fitur Utama:</h6>
               <ul class="feature-list">
                 <li><i class="fas fa-check text-success me-2"></i>Manajemen Data DUK Pegawai</li>
-                <li><i class="fas fa-check text-success me-2"></i>Manajemen Data Penyuluh Pertanian</li>
+                <li><i class="fas fa-check text-success me-2"></i>Manajemen Data Penyuluh</li>
                 <li><i class="fas fa-check text-success me-2"></i>Export Data ke PDF dan Excel</li>
                 <li><i class="fas fa-check text-success me-2"></i>Filter dan Pencarian Data</li>
                 <li><i class="fas fa-check text-success me-2"></i>Dashboard Statistik Real-time</li>
@@ -186,7 +182,7 @@ if (!isAdmin()) {
               </ol>
 
               <h5 class="mt-4">Perbedaan Data Penyuluh dengan DUK</h5>
-              <p>Data penyuluh tidak memiliki field Eselon dan TMT Eselon karena penyuluh pertanian memiliki struktur jabatan fungsional.</p>
+              <p>Data penyuluh tidak memiliki field Eselon dan TMT Eselon karena penyuluh memiliki struktur jabatan fungsional.</p>
             </div>
           </section>
 

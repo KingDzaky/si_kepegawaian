@@ -65,6 +65,14 @@ function namaBulan($bulan) {
     return $bulanIndo[(int)$bulan];
 }
 
+function format_nip($nip) {
+    $nip = preg_replace('/\s+/', '', $nip);
+    if (strlen($nip) === 18) {
+        return substr($nip, 0, 8) . ' ' . substr($nip, 8, 6) . ' ' . substr($nip, 14, 1) . ' ' . substr($nip, 15, 3);
+    }
+    return $nip;
+}
+
 // Format tanggal SK
 $tgl_sk = date('d', strtotime($tanggal_sk));
 $bln_sk = namaBulan(date('n', strtotime($tanggal_sk)));
@@ -310,7 +318,7 @@ $tahun_sekarang = date('Y');
                     <tr>
                         <td class="label">NIP</td>
                         <td class="colon">:</td>
-                        <td><?= htmlspecialchars($nip_kepala) ?></td>
+                        <td><?= htmlspecialchars(format_nip($nip_kepala)) ?></td>
                     </tr>
                     <tr>
                         <td class="label">Pangkat / Golongan</td>
@@ -337,7 +345,7 @@ $tahun_sekarang = date('Y');
                     <tr>
                         <td class="label">NIP</td>
                         <td class="colon">:</td>
-                        <td><?= htmlspecialchars($nip_pegawai) ?></td>
+                        <td><?= htmlspecialchars(format_nip($nip_pegawai)) ?></td>
                     </tr>
                     <tr>
                         <td class="label">Pangkat / Golongan</td>
@@ -369,7 +377,7 @@ $tahun_sekarang = date('Y');
                     <div style="height: 70px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;"><?= htmlspecialchars($pangkat_kepala) ?> (<?= htmlspecialchars($golongan_kepala) ?>)</p>
-                    <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars($nip_kepala) ?></p>
+                    <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars(format_nip($nip_kepala)) ?></p>
                 </td>
             </tr>
         </table>

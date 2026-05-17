@@ -12,7 +12,7 @@ require_once __DIR__ . '/../config/koneksi.php';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SISTEM INFORMASI - Kepegawaian</title>
+  <title>SISTEM ADMINISTRASI- Kepegawaian DPPKBPM</title>
 
   <!-- Bootstrap & FontAwesome & DataTables CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -658,8 +658,8 @@ body {
             <i class="fas fa-building"></i>
           </div>
           <div class="brand-text">
-            <span class="brand-title">SISTEM INFORMASI</span>
-            <small class="brand-subtitle">Kepegawaian</small>
+            <span class="brand-title">SISTEM ADMINISTRASI</span>
+            <small class="brand-subtitle">Kepegawaian DPPKBPM</small>
           </div>
         </a>
       </div>

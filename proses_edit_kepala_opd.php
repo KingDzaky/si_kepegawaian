@@ -140,7 +140,7 @@ if ($stmt->execute()) {
     error_log("✅ Data Kepala OPD berhasil diupdate - ID: $id | Nama: $nama | Status: $status");
     
     // ✅ Redirect ke halaman list dengan SweetAlert
-    alertSuksesUbah('kepala_opd.php', "Data Kepala OPD <strong>$nama</strong> berhasil diperbarui!");
+    alertSuksesUbah('kepala_opd.php', "Data Kepala OPD $nama berhasil diperbarui!");
     exit;
     
 } else {

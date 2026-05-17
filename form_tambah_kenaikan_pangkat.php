@@ -188,14 +188,14 @@ $nomor_usulan = "800.1.3.2/" . $urutan . "/DPPKBPM-BJM/" . $tahun;
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Pangkat Lama <span class="required">*</span></label>
-                      <input type="text" name="pangkat_lama" id="pangkat_lama" class="form-control" readonly required>
+                      <label class="form-label">Pangkat Lama <span class="readonly">*</span></label>
+                      <input type="text" name="pangkat_lama" id="pangkat_lama" class="form-control" readonly>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Golongan Lama <span class="required">*</span></label>
-                      <select name="golongan_lama" id="golongan_lama" class="form-select" required>
+                      <label class="form-label">Golongan Lama <span class="readonly">*</span></label>
+                      <select name="golongan_lama" id="golongan_lama" class="form-select" readonly>
                         <option value="">-- Pilih --</option>
                         <option value="I/a">I/a</option><option value="I/b">I/b</option>
                         <option value="I/c">I/c</option><option value="I/d">I/d</option>
@@ -218,12 +218,22 @@ $nomor_usulan = "800.1.3.2/" . $urutan . "/DPPKBPM-BJM/" . $tahun;
                     <div class="form-group">
                       <label class="form-label">Masa Kerja (Tahun)</label>
                       <input type="number" name="masa_kerja_tahun_lama" class="form-control" required min="0">
+                      <!-- Di bawah field masa_kerja_tahun_lama dan masa_kerja_bulan_lama -->
+                      <small class="text-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Dihitung otomatis dari TMT. Sesuaikan dengan SK jika berbeda.
+                      </small>
                     </div>
                   </div>
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Masa Kerja (Bulan)</label>
                       <input type="number" name="masa_kerja_bulan_lama" class="form-control" required min="0" max="11">
+                      <!-- Di bawah field masa_kerja_tahun_lama dan masa_kerja_bulan_lama -->
+                        <small class="text-warning">
+                          <i class="fas fa-exclamation-triangle me-1"></i>
+                          Dihitung otomatis dari TMT. Sesuaikan dengan SK jika berbeda.
+                        </small>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -467,6 +477,10 @@ $(document).ready(function() {
                     $('#golongan_lama').val(response.data.golongan_lama);
                     $('#tmt_pangkat_lama').val(response.data.tmt_pangkat_lama);
                     $('#jabatan_lama').val(response.data.jabatan_lama);
+
+                    // Tambahkan setelah baris $('#jabatan_lama').val(response.data.jabatan_lama);
+                    $('[name="masa_kerja_tahun_lama"]').val(response.data.masa_kerja_tahun_lama);
+                    $('[name="masa_kerja_bulan_lama"]').val(response.data.masa_kerja_bulan_lama);
                     
                     // Isi data atasan
                     $('#atasan_nama').val(response.data.atasan_nama);
@@ -502,6 +516,45 @@ $(document).ready(function() {
     });
 });
 
+// Auto-generate field "mk_dari_sampai" + hitung masa kerja golongan
+function updateDariSampai() {
+    const tmtLama = document.querySelector('[name="tmt_pangkat_lama"]').value;
+    const tmtBaru = document.querySelector('[name="tmt_pangkat_baru"]').value;
+    const fieldDariSampai = document.querySelector('[name="mk_dari_sampai"]');
+
+    if (!tmtLama || !tmtBaru) return;
+
+    // Format tanggal: YYYY-MM-DD → DD-MM-YYYY
+    function formatTanggal(dateStr) {
+        const [y, m, d] = dateStr.split('-');
+        return `${d}-${m}-${y}`;
+    }
+
+    // Auto-generate teks "dari s/d"
+    fieldDariSampai.value = `${formatTanggal(tmtLama)} s/d ${formatTanggal(tmtBaru)}`;
+
+    // Auto-hitung jumlah tahun & bulan
+    const d1 = new Date(tmtLama);
+    const d2 = new Date(tmtBaru);
+    let tahun = d2.getFullYear() - d1.getFullYear();
+    let bulan = d2.getMonth() - d1.getMonth();
+    if (bulan < 0) { tahun--; bulan += 12; }
+
+    document.querySelector('[name="mk_golongan_tahun"]').value = tahun;
+    document.querySelector('[name="mk_golongan_bulan"]').value = bulan;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tmtLamaInput = document.querySelector('[name="tmt_pangkat_lama"]');
+    const tmtBaruInput = document.querySelector('[name="tmt_pangkat_baru"]');
+
+    if (tmtLamaInput) tmtLamaInput.addEventListener('change', updateDariSampai);
+    if (tmtBaruInput) tmtBaruInput.addEventListener('change', updateDariSampai);
+
+    // Untuk form edit: langsung hitung saat halaman dibuka
+    updateDariSampai();
+});
+
 // Fungsi untuk mengosongkan field
 function clearFormFields() {
     $('#nama, #kartu_pegawai, #tempat_lahir, #tanggal_lahir, #pendidikan_terakhir, #prodi').val('');
@@ -532,6 +585,8 @@ function showNotification(type, message) {
         });
     }, 5000);
 }
+
+
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

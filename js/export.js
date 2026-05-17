@@ -248,7 +248,7 @@ async function exportToPDF() {
             doc.text('PEMERINTAH KOTA BANJARMASIN', pageWidth / 2, currentY, { align: 'center' });
             currentY += 7;
             
-            doc.text('DINAS PERTANIAN', pageWidth / 2, currentY, { align: 'center' });
+            doc.text('DINAS PENGENDALIAN PENDUDUK KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT', pageWidth / 2, currentY, { align: 'center' });
             currentY += 10;
             
             // Line separator
@@ -351,7 +351,7 @@ async function exportToPDF() {
         if (finalY < pageHeight - 60) {
             doc.setFontSize(10);
             doc.text('Mengetahui,', pageWidth - 60, finalY);
-            doc.text('Kepala Dinas Pertanian', pageWidth - 60, finalY + 5);
+            doc.text('Kepala Dinas', pageWidth - 60, finalY + 5);
             doc.text('Kota Banjarmasin', pageWidth - 60, finalY + 10);
             
             // Signature line
@@ -401,7 +401,7 @@ async function exportToExcel() {
         // Header rows
         if (includeHeader) {
             wsData.push(['PEMERINTAH KOTA BANJARMASIN']);
-            wsData.push(['DINAS PERTANIAN']);
+            wsData.push(['DINAS PENGENDALIAN PENDUDUK KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT']);
             wsData.push(['']); // Empty row
             currentRow += 3;
         }
@@ -482,7 +482,7 @@ async function exportToExcel() {
         if (includeHeader) {
             ws['!merges'] = [
                 { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }, // PEMERINTAH KOTA
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }, // DINAS PERTANIAN
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }, // DPPKBPM
                 { s: { r: 3, c: 0 }, e: { r: 3, c: 10 } }  // Title
             ];
         }
@@ -601,7 +601,7 @@ function printReport() {
         <body>
             <div class="header">
                 <h1>PEMERINTAH KOTA BANJARMASIN</h1>
-                <h2>DINAS PERTANIAN</h2>
+                <h2>DINAS PENGENDALIAN PENDUDUK KELUARGA BERENCANA DAN PEMBDERDAYAN MASYARAKAT</h2>
                 <h2>DAFTAR URUSAN KEPEGAWAIAN</h2>
             </div>
             
@@ -645,7 +645,7 @@ function printReport() {
             
             <div class="signature">
                 <div>Mengetahui,</div>
-                <div>Kepala Dinas Pertanian</div>
+                <div>Kepala Dinas</div>
                 <div>Kota Banjarmasin</div>
                 <div class="signature-line"></div>
                 <div>NIP. ____________________</div>

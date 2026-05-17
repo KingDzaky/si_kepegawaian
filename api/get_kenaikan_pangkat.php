@@ -57,10 +57,10 @@ try {
     
     $query .= " ORDER BY kp.tanggal_usulan DESC";
     
-    $result = mysqli_query($conn, $query);
+    $result = mysqli_query($koneksi, $query);
     
     if (!$result) {
-        throw new Exception(mysqli_error($conn));
+        throw new Exception(mysqli_error($koneksi));
     }
     
     $data = [];
@@ -83,7 +83,7 @@ try {
         }
         
         // Cek apakah sudah pernah dikirim reminder
-        $check_notif = mysqli_query($conn, "SELECT id FROM notifikasi_wa 
+        $check_notif = mysqli_query($koneksi, "SELECT id FROM notifikasi_wa 
                                             WHERE id_kenaikan_pangkat = {$row['id']} 
                                             AND status = 'terkirim'
                                             AND pesan LIKE '%PENGINGAT KENAIKAN PANGKAT%'

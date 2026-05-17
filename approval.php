@@ -27,9 +27,21 @@ $result = $koneksi->query($query);
 $stats_query = "SELECT 
     (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'diajukan') as pending,
     (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'disetujui') as disetujui,
-    (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'ditolak') as ditolak";
+    (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'ditolak') as ditolak,
+     (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'sk_terbit')  AS sk_terbit";
 $stats_result = $koneksi->query($stats_query);
 $stats = $stats_result->fetch_assoc();
+
+// Tambahkan setelah $stats_result
+$query_disetujui = "SELECT 
+    k.id, k.nomor_usulan, k.tanggal_usulan,
+    k.nip, k.nama, k.pangkat_lama, k.golongan_lama,
+    k.pangkat_baru, k.golongan_baru, k.jabatan_baru,
+    k.tmt_pangkat_baru, k.status, k.created_at
+FROM kenaikan_pangkat k
+WHERE k.status = 'disetujui'
+ORDER BY k.updated_at DESC";
+$result_disetujui = $koneksi->query($query_disetujui);
 
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
@@ -39,7 +51,7 @@ require_once 'includes/sidebar.php';
 <style>
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
@@ -197,6 +209,10 @@ require_once 'includes/sidebar.php';
             <h3><?= $stats['ditolak'] ?></h3>
             <p><i class="fas fa-times-circle"></i> Ditolak</p>
         </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <h3><?= $stats['sk_terbit'] ?></h3>
+    <p><i class="fas fa-stamp"></i> SK Terbit</p>
+</div>
     </div>
     
     <!-- Daftar Usulan -->
@@ -259,6 +275,60 @@ require_once 'includes/sidebar.php';
             </div>
         </div>
     <?php endif; ?>
+
+
+    <!-- ↓ Section SK Terbit MASUK DI SINI, masih di dalam <main> -->
+    <?php if ($result_disetujui && $result_disetujui->num_rows > 0): ?>
+    <div style="margin-top: 40px;">
+        <h4 style="color: #28a745; margin-bottom: 20px;">
+            <i class="fas fa-certificate"></i> Usulan Disetujui — Menunggu Konfirmasi SK Terbit
+        </h4>
+        <?php while ($row = $result_disetujui->fetch_assoc()): ?>
+        <div class="approval-card" style="border-left: 4px solid #28a745;">
+            <h4 style="margin-bottom: 15px; color: #333;">
+                <i class="fas fa-user-circle text-success"></i>
+                <?= htmlspecialchars($row['nama']) ?>
+                <span class="badge bg-success ms-2" style="font-size: 0.75rem;">Disetujui</span>
+            </h4>
+            <div class="approval-info">
+                <div class="info-item">
+                    <label>NIP</label>
+                    <strong><?= htmlspecialchars($row['nip']) ?></strong>
+                </div>
+                <div class="info-item">
+                    <label>Nomor Usulan</label>
+                    <strong><?= htmlspecialchars($row['nomor_usulan']) ?></strong>
+                </div>
+                <div class="info-item">
+                    <label>Pangkat Lama → Baru</label>
+                    <strong>
+                        <?= htmlspecialchars($row['pangkat_lama']) ?> (<?= htmlspecialchars($row['golongan_lama']) ?>)
+                        → <span style="color:#28a745"><?= htmlspecialchars($row['pangkat_baru']) ?> (<?= htmlspecialchars($row['golongan_baru']) ?>)</span>
+                    </strong>
+                </div>
+                <div class="info-item">
+                    <label>TMT Pangkat Baru</label>
+                    <strong><?= date('d F Y', strtotime($row['tmt_pangkat_baru'])) ?></strong>
+                </div>
+            </div>
+            <div class="approval-actions">
+                <a href="export_kenaikan_pangkat_pdf.php?id=<?= $row['id'] ?>" 
+                   class="btn btn-info btn-sm" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Lihat PDF
+                </a>
+                <form method="POST" action="proses_sk_terbit.php" style="display:inline;"
+                      onsubmit="return confirm('Konfirmasi SK BKN sudah terbit?\nData DUK akan diperbarui.')">
+                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-certificate"></i> Konfirmasi SK Terbit
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endwhile; ?>
+    </div>
+    <?php endif; ?>
+    
 </main>
 
 <!-- Modal Approve -->

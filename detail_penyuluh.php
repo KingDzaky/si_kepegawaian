@@ -11,7 +11,7 @@ require_once 'includes/sidebar.php';
 $id = $_GET['id'] ?? 0;
 
 if (!$id || !is_numeric($id)) {
-    header('Location: datapenyuluh.php?error=ID tidak valid');
+    header('Location: penyuluh.php?error=ID tidak valid');
     exit;
 }
 
@@ -23,7 +23,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    header('Location: datapenyuluh.php?error=Data tidak ditemukan');
+    header('Location: penyuluh.php?error=Data tidak ditemukan');
     exit;
 }
 
@@ -71,26 +71,19 @@ $masaKerjaPangkat = hitungMasaKerja($penyuluh['tmt_pangkat']);
               <a href="dashboard.php"><i class="fas fa-home"></i> Dashboard</a>
             </li>
             <li class="breadcrumb-item">
-              <a href="datapenyuluh.php"><i class="fas fa-chalkboard-teacher"></i> Data Penyuluh</a>
+              <a href="penyuluh.php"><i class="fas fa-chalkboard-teacher"></i> Data Penyuluh</a>
             </li>
             <li class="breadcrumb-item active">Detail Penyuluh</li>
           </ol>
         </nav>
         
         <div class="page-actions">
-          <a href="datapenyuluh.php" class="btn btn-outline-secondary btn-sm">
+          <a href="penyuluh.php" class="btn btn-outline-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
           </a>
           <a href="form_edit_penyuluh.php?id=<?= $id ?>" class="btn btn-warning btn-sm">
             <i class="fas fa-edit me-1"></i>Edit Data
           </a>
-          <button class="btn btn-primary btn-sm" onclick="printDetail()">
-            <i class="fas fa-print me-1"></i>Cetak
-          </button>
-          <div class="dropdown d-inline">
-            <button class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-              <i class="fas fa-share me-1"></i>Aksi
-            </button>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
                 <i class="fas fa-file-pdf me-2"></i>Export PDF

@@ -2,7 +2,6 @@
 session_start();
 require_once 'config/koneksi.php';
 
-// Header JSON
 header('Content-Type: application/json');
 
 // Validasi parameter NIP
@@ -27,8 +26,9 @@ if (!preg_match('/^[0-9]{18}$/', $nip)) {
     exit;
 }
 
-// ✅ Query ambil data dari DUK + Kepala OPD
-// Tambahkan kolom status_pegawai, alasan_nonaktif, nonaktif_at
+// ========================================
+// Query ambil data dari DUK + Kepala OPD
+// ========================================
 $query = "SELECT 
     d.nama,
     d.nip,
@@ -44,10 +44,10 @@ $query = "SELECT
     d.status_pegawai,
     d.alasan_nonaktif,
     d.nonaktif_at,
-    o.nama as nama_kepala_opd,
-    o.nip as nip_kepala_opd,
-    o.pangkat as pangkat_kepala_opd,
-    o.jabatan as jabatan_kepala_opd,
+    o.nama      AS nama_kepala_opd,
+    o.nip       AS nip_kepala_opd,
+    o.pangkat   AS pangkat_kepala_opd,
+    o.jabatan   AS jabatan_kepala_opd,
     o.gelar_depan,
     o.gelar_belakang
 FROM duk d
@@ -74,7 +74,6 @@ $result = $stmt->get_result();
 if ($result->num_rows === 0) {
     $stmt->close();
     $koneksi->close();
-
     echo json_encode([
         'success' => false,
         'type'    => 'error',
@@ -87,15 +86,14 @@ $pegawai = $result->fetch_assoc();
 $stmt->close();
 
 // ========================================
-// ✅ CEK STATUS PEGAWAI (Nonaktif / Pensiun / Pindah)
+// CEK STATUS PEGAWAI (Nonaktif)
 // ========================================
 if (isset($pegawai['status_pegawai']) && $pegawai['status_pegawai'] === 'nonaktif') {
 
-    // Format tanggal nonaktif ke bahasa Indonesia
     $bulan_indo = [
-        1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',
-        5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',
-        9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
+        1=>'Januari', 2=>'Februari', 3=>'Maret',    4=>'April',
+        5=>'Mei',     6=>'Juni',     7=>'Juli',      8=>'Agustus',
+        9=>'September',10=>'Oktober',11=>'November', 12=>'Desember'
     ];
 
     $ts_nonaktif   = strtotime($pegawai['nonaktif_at']);
@@ -103,7 +101,6 @@ if (isset($pegawai['status_pegawai']) && $pegawai['status_pegawai'] === 'nonakti
                    . $bulan_indo[(int)date('m', $ts_nonaktif)] . ' '
                    . date('Y', $ts_nonaktif);
 
-    // Hitung kapan 6 bulan selesai (boleh digunakan kembali untuk riwayat saja)
     $ts_bisa_lagi  = strtotime('+6 months', $ts_nonaktif);
     $tgl_bisa_lagi = date('d', $ts_bisa_lagi) . ' '
                    . $bulan_indo[(int)date('m', $ts_bisa_lagi)] . ' '
@@ -112,10 +109,9 @@ if (isset($pegawai['status_pegawai']) && $pegawai['status_pegawai'] === 'nonakti
     $alasan = $pegawai['alasan_nonaktif'] ?? 'Tidak diketahui';
 
     $koneksi->close();
-
     echo json_encode([
         'success' => false,
-        'type'    => 'warning',   // ← kuning di JS, beda dari error merah
+        'type'    => 'warning',
         'message' => "Pegawai ini berstatus NONAKTIF sejak {$tgl_nonaktif} "
                    . "dengan alasan: {$alasan}. "
                    . "Data hanya tersedia sebagai riwayat. "
@@ -125,25 +121,64 @@ if (isset($pegawai['status_pegawai']) && $pegawai['status_pegawai'] === 'nonakti
 }
 
 // ========================================
-// ✅ PARSE TTL - handle berbagai format
+// CEK USULAN KENAIKAN PANGKAT YANG MASIH AKTIF
+// (diajukan atau disetujui tapi SK belum terbit)
 // ========================================
-$tempat_lahir = '';
+$cek_aktif = $koneksi->prepare("
+    SELECT id, nomor_usulan, status, tmt_pangkat_baru 
+    FROM kenaikan_pangkat 
+    WHERE nip = ? 
+      AND status IN ('diajukan', 'disetujui')
+      AND deleted_at IS NULL
+    ORDER BY created_at DESC 
+    LIMIT 1
+");
+$cek_aktif->bind_param("s", $nip);
+$cek_aktif->execute();
+$usulan_aktif = $cek_aktif->get_result()->fetch_assoc();
+$cek_aktif->close();
+
+if ($usulan_aktif) {
+    $status_aktif = $usulan_aktif['status'];
+    $no_usulan    = $usulan_aktif['nomor_usulan'];
+    $tmt_baru     = date('d/m/Y', strtotime($usulan_aktif['tmt_pangkat_baru']));
+
+    $pesan = "Pegawai ini masih memiliki usulan kenaikan pangkat yang <strong>{$status_aktif}</strong> "
+           . "(No: {$no_usulan}, TMT Baru: {$tmt_baru}). ";
+
+    if ($status_aktif === 'disetujui') {
+        $pesan .= "Silakan klik tombol <strong>'SK Terbit'</strong> di halaman approval "
+               . "untuk mengonfirmasi SK BKN sudah keluar sebelum membuat usulan baru.";
+    } else {
+        $pesan .= "Selesaikan atau batalkan usulan tersebut terlebih dahulu.";
+    }
+
+    $koneksi->close();
+    echo json_encode([
+        'success' => false,
+        'type'    => 'warning',
+        'message' => $pesan
+    ]);
+    exit;
+}
+
+// ========================================
+// PARSE TTL — handle berbagai format
+// ========================================
+$tempat_lahir  = '';
 $tanggal_lahir = '';
 
 if (!empty($pegawai['ttl'])) {
     $ttl = trim($pegawai['ttl']);
 
     if (strpos($ttl, ',') !== false) {
-        // Format: "Banjarmasin, 02-08-1969" atau "Banjarmasin, 1969-08-02"
         list($tempat_lahir, $tanggal_raw) = explode(',', $ttl, 2);
         $tempat_lahir = trim($tempat_lahir);
         $tanggal_raw  = trim($tanggal_raw);
     } elseif (preg_match('/^(.+?)\s+(\d{4}-\d{2}-\d{2})$/', $ttl, $m)) {
-        // Format: "Banjarmasin 1990-01-19"
         $tempat_lahir = trim($m[1]);
         $tanggal_raw  = trim($m[2]);
     } elseif (preg_match('/^(.+?)\s+(\d{2}-\d{2}-\d{4})$/', $ttl, $m)) {
-        // Format: "Banjarmasin 19-01-1990"
         $tempat_lahir = trim($m[1]);
         $tanggal_raw  = trim($m[2]);
     } else {
@@ -151,7 +186,6 @@ if (!empty($pegawai['ttl'])) {
         $tanggal_raw  = '';
     }
 
-    // Normalisasi nama bulan Indonesia jika ada
     if (!empty($tanggal_raw)) {
         $bulan_map = [
             'Januari'=>'01','Februari'=>'02','Maret'=>'03','April'=>'04',
@@ -165,7 +199,6 @@ if (!empty($pegawai['ttl'])) {
             }
         }
 
-        // Parse ke Y-m-d
         $formats = ['Y-m-d', 'd-m-Y', 'd/m/Y', 'Y/m/d'];
         foreach ($formats as $fmt) {
             $date_obj = DateTime::createFromFormat($fmt, $tanggal_raw);
@@ -175,7 +208,6 @@ if (!empty($pegawai['ttl'])) {
             }
         }
 
-        // Fallback strtotime
         if (empty($tanggal_lahir)) {
             $ts = strtotime($tanggal_raw);
             if ($ts !== false) {
@@ -186,25 +218,50 @@ if (!empty($pegawai['ttl'])) {
 }
 
 // ========================================
-// ✅ FORMAT NAMA KEPALA OPD
+// HITUNG MASA KERJA LAMA OTOMATIS
+// Dihitung dari tmt_pangkat di DUK sampai hari ini.
+// Karena DUK hanya diupdate setelah SK terbit (proses_sk_terbit.php),
+// nilai tmt_pangkat selalu merupakan TMT pangkat yang sedang berjalan.
 // ========================================
-$nama_kepala   = '';
-$nip_kepala    = '';
+$mk_tahun_lama = 0;
+$mk_bulan_lama = 0;
+
+if (!empty($pegawai['tmt_pangkat'])) {
+    $tmt = new DateTime($pegawai['tmt_pangkat']);
+    $now = new DateTime();
+
+    // Jika TMT pangkat lebih dari hari ini (masa depan),
+    // masa kerja = 0 karena belum mulai berjalan
+    if ($tmt > $now) {
+        $mk_tahun_lama = 0;
+        $mk_bulan_lama = 0;
+    } else {
+        $diff = $tmt->diff($now);
+        $mk_tahun_lama = $diff->y;
+        $mk_bulan_lama = $diff->m;
+    }
+}
+
+// ========================================
+// FORMAT NAMA KEPALA OPD
+// ========================================
+$nama_kepala    = '';
+$nip_kepala     = '';
 $pangkat_kepala = '';
 $jabatan_kepala = '';
 
 if (!empty($pegawai['nama_kepala_opd'])) {
-    $gelar_depan   = !empty($pegawai['gelar_depan'])   ? $pegawai['gelar_depan'] . ' ' : '';
+    $gelar_depan    = !empty($pegawai['gelar_depan'])    ? $pegawai['gelar_depan'] . ' '    : '';
     $gelar_belakang = !empty($pegawai['gelar_belakang']) ? ', ' . $pegawai['gelar_belakang'] : '';
 
-    $nama_kepala   = $gelar_depan . $pegawai['nama_kepala_opd'] . $gelar_belakang;
-    $nip_kepala    = $pegawai['nip_kepala_opd'];
+    $nama_kepala    = $gelar_depan . $pegawai['nama_kepala_opd'] . $gelar_belakang;
+    $nip_kepala     = $pegawai['nip_kepala_opd'];
     $pangkat_kepala = $pegawai['pangkat_kepala_opd'];
     $jabatan_kepala = $pegawai['jabatan_kepala_opd'];
 }
 
 // ========================================
-// ✅ RESPONSE JSON
+// RESPONSE JSON
 // ========================================
 $koneksi->close();
 
@@ -213,21 +270,23 @@ echo json_encode([
     'type'    => 'success',
     'message' => 'Data pegawai ditemukan',
     'data'    => [
-        'nama'                => $pegawai['nama'],
-        'nip'                 => $pegawai['nip'],
-        'kartu_pegawai'       => $pegawai['kartu_pegawai'],
-        'tempat_lahir'        => $tempat_lahir,
-        'tanggal_lahir'       => $tanggal_lahir,
-        'pendidikan_terakhir' => $pegawai['pendidikan_terakhir'],
-        'prodi'               => $pegawai['prodi'],
-        'pangkat_lama'        => $pegawai['pangkat_terakhir'],
-        'golongan_lama'       => $pegawai['golongan'],
-        'tmt_pangkat_lama'    => $pegawai['tmt_pangkat'],
-        'jabatan_lama'        => $pegawai['jabatan_terakhir'],
-        'id_opd'              => $pegawai['id_opd'],
-        'atasan_nama'         => $nama_kepala,
-        'atasan_nip'          => $nip_kepala,
-        'atasan_pangkat'      => $pangkat_kepala,
-        'atasan_jabatan'      => $jabatan_kepala
+        'nama'                  => $pegawai['nama'],
+        'nip'                   => $pegawai['nip'],
+        'kartu_pegawai'         => $pegawai['kartu_pegawai'],
+        'tempat_lahir'          => $tempat_lahir,
+        'tanggal_lahir'         => $tanggal_lahir,
+        'pendidikan_terakhir'   => $pegawai['pendidikan_terakhir'],
+        'prodi'                 => $pegawai['prodi'],
+        'pangkat_lama'          => $pegawai['pangkat_terakhir'],
+        'golongan_lama'         => $pegawai['golongan'],
+        'tmt_pangkat_lama'      => $pegawai['tmt_pangkat'],
+        'jabatan_lama'          => $pegawai['jabatan_terakhir'],
+        'masa_kerja_tahun_lama' => $mk_tahun_lama,
+        'masa_kerja_bulan_lama' => $mk_bulan_lama,
+        'id_opd'                => $pegawai['id_opd'],
+        'atasan_nama'           => $nama_kepala,
+        'atasan_nip'            => $nip_kepala,
+        'atasan_pangkat'        => $pangkat_kepala,
+        'atasan_jabatan'        => $jabatan_kepala
     ]
 ]);

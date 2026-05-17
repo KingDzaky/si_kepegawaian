@@ -13,7 +13,7 @@ $total_penyuluh = $koneksi->query("SELECT COUNT(*) as total FROM penyuluh")->fet
 $total_user = $koneksi->query("SELECT COUNT(*) as total FROM users")->fetch_assoc()['total'] ?? 0;
 $total_pegawai = $total_duk + $total_penyuluh;
 
-// TAMBAHAN: Statistik Kenaikan Pangkat
+// Statistik Kenaikan Pangkat
 $total_usulan = $koneksi->query("SELECT COUNT(*) as total FROM kenaikan_pangkat")->fetch_assoc()['total'] ?? 0;
 $usulan_draft = $koneksi->query("SELECT COUNT(*) as total FROM kenaikan_pangkat WHERE status = 'draft'")->fetch_assoc()['total'] ?? 0;
 $usulan_diajukan = $koneksi->query("SELECT COUNT(*) as total FROM kenaikan_pangkat WHERE status = 'diajukan'")->fetch_assoc()['total'] ?? 0;
@@ -41,7 +41,7 @@ $kp_reguler = $koneksi->query("SELECT COUNT(*) as total FROM kenaikan_pangkat WH
 $ada_nip = $koneksi->query("SELECT COUNT(*) as total FROM duk WHERE nip IS NOT NULL AND nip != ''")->fetch_assoc()['total'] ?? 0;
 $belum_nip = $total_duk - $ada_nip;
 
-// BARU: Statistik Reminder & Notifikasi
+// Statistik Reminder & Notifikasi
 $perlu_reminder = $koneksi->query("
     SELECT COUNT(*) as total 
     FROM kenaikan_pangkat kp
@@ -83,10 +83,8 @@ $labels_jk = [];
 $data_jk = [];
 while ($row = $jk->fetch_assoc()) {
     $labels_jk[] = $row['jenis_kelamin'];
-    $data_jk[] = $row['total'];
+    $data_jk[] = (int)$row['total'];
 }
-
-
 
 // Data pendidikan terakhir untuk bar chart
 $pendidikan = $koneksi->query("SELECT pendidikan_terakhir, COUNT(*) as total FROM duk GROUP BY pendidikan_terakhir");
@@ -94,9 +92,8 @@ $labels_pendidikan = [];
 $data_pendidikan = [];
 while ($row = $pendidikan->fetch_assoc()) {
     $labels_pendidikan[] = $row['pendidikan_terakhir'];
-    $data_pendidikan[] = $row['total'];
+    $data_pendidikan[] = (int)$row['total'];
 }
-
 
 // Query untuk chart jabatan
 $jabatan_query = $koneksi->query("
@@ -109,7 +106,7 @@ $labels_jabatan = [];
 $data_jabatan = [];
 while ($row = $jabatan_query->fetch_assoc()) {
     $labels_jabatan[] = $row['jenis_jabatan'];
-    $data_jabatan[] = $row['total'];
+    $data_jabatan[] = (int)$row['total'];
 }
 
 // Query untuk chart eselon
@@ -132,10 +129,10 @@ $labels_eselon = [];
 $data_eselon = [];
 while ($row = $eselon_query->fetch_assoc()) {
     $labels_eselon[] = $row['eselon_group'];
-    $data_eselon[] = $row['total'];
+    $data_eselon[] = (int)$row['total'];
 }
 
-// Query untuk chart golongan (yang sudah ada tapi perlu diperbaiki)
+// Query untuk chart golongan
 $golongan_query = $koneksi->query("
     SELECT golongan, COUNT(*) as total 
     FROM duk 
@@ -147,7 +144,7 @@ $labels_golongan = [];
 $data_golongan = [];
 while ($row = $golongan_query->fetch_assoc()) {
     $labels_golongan[] = $row['golongan'];
-    $data_golongan[] = $row['total'];
+    $data_golongan[] = (int)$row['total'];
 }
 
 // Query untuk tabel DUK
@@ -158,22 +155,76 @@ $result_duk = $koneksi->query($sql_duk);
 
 <link rel="stylesheet" href="css/dashboard.css">
 
+<style>
+/* =============================================
+   CHART WRAPPER & TIDAK ADA DATA
+   ============================================= */
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    min-height: 300px;
+}
+
+/* Pastikan card-body tidak collapse sehingga wrapper kebaca tingginya */
+.chart-card .card-body {
+    min-height: 320px;
+    padding: 1rem;
+}
+
+.chart-wrapper canvas {
+    display: block;
+    max-width: 100%;
+}
+
+.chart-no-data {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(248, 249, 250, 0.97);
+    border-radius: 8px;
+    z-index: 10;
+    gap: 10px;
+}
+
+.chart-no-data i {
+    font-size: 3rem;
+    color: #ced4da;
+}
+
+.chart-no-data span {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #adb5bd;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.chart-no-data small {
+    font-size: 0.8rem;
+    color: #ced4da;
+}
+</style>
+
 <main class="main-content">
   <!-- Header Section -->
   <div class="page-header fade-in">
-  <div class="d-flex align-items-center">
-    <!-- Logo -->
-    <div class="header-logo me-4">
-      <img src="assets/img/logo.png" alt="Logo Banjarmasin" class="logo-image">
-    </div>
-    
-    <!-- Text Content -->
-    <div class="header-text">
-      <h1><i class="fas fa-tachometer-alt me-3"></i>Dashboard DPPKBPM</h1>
-      <p class="page-subtitle">Sistem Informasi Dinas Pemberdayaan Perempuan, Perlindungan Anak, Kependudukan dan Keluarga Berencana Kota Banjarmasin</p>
+    <div class="d-flex align-items-center">
+      <!-- Logo -->
+      <div class="header-logo me-4">
+        <img src="assets/img/logo.png" alt="Logo Banjarmasin" class="logo-image">
+      </div>
+      <!-- Text Content -->
+      <div class="header-text">
+        <h1><i class="fas fa-tachometer-alt me-3"></i>Dashboard DPPKBPM</h1>
+        <p class="page-subtitle">Sistem Administrasi Kepegawaian Dinas Pengendalian Penduduk Keluarga Berencana dan Pemberdayaan Masyarakat Kota Banjarmasin</p>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- Statistik Cards Row 1: Data Pegawai -->
   <div class="row stat-card justify-content-center mb-4">
@@ -325,7 +376,7 @@ $result_duk = $koneksi->query($sql_duk);
     </div>
   </div>
 
-  <!-- BARU: Statistik Cards Row 3: Reminder & Notifikasi -->
+  <!-- Statistik Cards Row 3: Reminder & Notifikasi -->
   <div class="row stat-card justify-content-center mb-5">
     <!-- Card Perlu Reminder -->
     <div class="col-md-3 fade-in">
@@ -402,7 +453,7 @@ $result_duk = $koneksi->query($sql_duk);
     </div>
   </div>
 
-  <!-- BARU: Widget Quick Actions untuk Reminder -->
+  <!-- Widget Quick Actions untuk Reminder -->
   <?php if ($perlu_reminder > 0): ?>
   <div class="alert alert-warning fade-in mb-4" style="border-left: 4px solid #f5576c;">
     <div class="d-flex align-items-center">
@@ -423,52 +474,51 @@ $result_duk = $koneksi->query($sql_duk);
     </div>
   </div>
 
-<!-- Row: Kelengkapan Data -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card" style="border-left: 4px solid #667eea;">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">
-                    <i class="fas fa-clipboard-check me-2"></i>
-                    Monitoring Kelengkapan Data Pegawai
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="p-3 border rounded">
-                            <i class="fas fa-id-card fa-2x mb-2" style="color: #667eea;"></i>
-                            <h4 class="mb-0"><?= $tanpa_karpeg ?></h4>
-                            <small class="text-muted">Tanpa Kartu Pegawai</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3 border rounded">
-                            <i class="fas fa-phone-slash fa-2x mb-2" style="color: #f5576c;"></i>
-                            <h4 class="mb-0"><?= $pegawai_tanpa_wa ?></h4>
-                            <small class="text-muted">Tanpa No. WhatsApp</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3 border rounded">
-                            <i class="fas fa-id-badge fa-2x mb-2" style="color: #28a745;"></i>
-                            <h4 class="mb-0"><?= $ada_nip ?></h4>
-                            <small class="text-muted">Sudah Punya NIP</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="p-3 border rounded">
-                            <i class="fas fa-user-times fa-2x mb-2" style="color: #ffc107;"></i>
-                            <h4 class="mb-0"><?= $belum_nip ?></h4>
-                            <small class="text-muted">Belum Punya NIP</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-  
+  <!-- Row: Kelengkapan Data -->
+  <div class="row mb-4">
+      <div class="col-12">
+          <div class="card" style="border-left: 4px solid #667eea;">
+              <div class="card-header bg-light">
+                  <h5 class="mb-0">
+                      <i class="fas fa-clipboard-check me-2"></i>
+                      Monitoring Kelengkapan Data Pegawai
+                  </h5>
+              </div>
+              <div class="card-body">
+                  <div class="row text-center">
+                      <div class="col-md-3">
+                          <div class="p-3 border rounded">
+                              <i class="fas fa-id-card fa-2x mb-2" style="color: #667eea;"></i>
+                              <h4 class="mb-0"><?= $tanpa_karpeg ?></h4>
+                              <small class="text-muted">Tanpa Kartu Pegawai</small>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="p-3 border rounded">
+                              <i class="fas fa-phone-slash fa-2x mb-2" style="color: #f5576c;"></i>
+                              <h4 class="mb-0"><?= $pegawai_tanpa_wa ?></h4>
+                              <small class="text-muted">Tanpa No. WhatsApp</small>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="p-3 border rounded">
+                              <i class="fas fa-id-badge fa-2x mb-2" style="color: #28a745;"></i>
+                              <h4 class="mb-0"><?= $ada_nip ?></h4>
+                              <small class="text-muted">Sudah Punya NIP</small>
+                          </div>
+                      </div>
+                      <div class="col-md-3">
+                          <div class="p-3 border rounded">
+                              <i class="fas fa-user-times fa-2x mb-2" style="color: #ffc107;"></i>
+                              <h4 class="mb-0"><?= $belum_nip ?></h4>
+                              <small class="text-muted">Belum Punya NIP</small>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
   <?php endif; ?>
 
   <!-- Data Table Section -->
@@ -558,8 +608,9 @@ $result_duk = $koneksi->query($sql_duk);
     </div>
   </div>
 
-  <!-- Charts Section -->
+  <!-- Charts Section Row 1: Jenis Kelamin & Pendidikan -->
   <div class="row mb-5">
+    <!-- Chart Jenis Kelamin -->
     <div class="col-md-6 fade-in">
       <div class="chart-card">
         <div class="card-header">
@@ -570,11 +621,14 @@ $result_duk = $koneksi->query($sql_duk);
             <div class="loading-spinner"></div>
             Memuat data...
           </div>
-          <canvas id="chartJenisKelamin" style="display: none; height: 300px;"></canvas>
+          <div class="chart-wrapper" id="wrapperJK" style="display:none;">
+            <canvas id="chartJenisKelamin"></canvas>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Chart Pendidikan -->
     <div class="col-md-6 fade-in">
       <div class="chart-card">
         <div class="card-header">
@@ -585,118 +639,125 @@ $result_duk = $koneksi->query($sql_duk);
             <div class="loading-spinner"></div>
             Memuat data...
           </div>
-          <canvas id="chartPendidikan" style="display: none; height: 300px;"></canvas>
+          <div class="chart-wrapper" id="wrapperPendidikan" style="display:none;">
+            <canvas id="chartPendidikan"></canvas>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Charts Section Row 2: Jabatan & Eselon -->
   <div class="row mb-5">
-    <!-- Jenis Jabatan -->
+    <!-- Chart Jenis Jabatan -->
     <div class="col-md-6 fade-in">
         <div class="chart-card">
             <div class="card-header">
                 <i class="fas fa-briefcase me-2"></i> Distribusi Jenis Jabatan
             </div>
             <div class="card-body">
-                <canvas id="chartJabatan" style="height: 300px;"></canvas>
+                <div class="chart-wrapper" id="wrapperJabatan">
+                    <canvas id="chartJabatan"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    <!--  Eselon -->
+    <!-- Chart Eselon -->
     <div class="col-md-6 fade-in">
         <div class="chart-card">
             <div class="card-header">
                 <i class="fas fa-layer-group me-2"></i> Distribusi Eselon
             </div>
             <div class="card-body">
-                <canvas id="chartEselon" style="height: 300px;"></canvas>
+                <div class="chart-wrapper" id="wrapperEselon">
+                    <canvas id="chartEselon"></canvas>
+                </div>
             </div>
         </div>
     </div>
-</div>
+  </div>
 
-<!--  Golongan (Full Width) -->
-<div class="row mb-5">
-    <div class="col-12 fade-in">
-        <div class="chart-card">
-            <div class="card-header">
-                <i class="fas fa-chart-line me-2"></i> Distribusi Pegawai Per Golongan
+  <!-- Chart Golongan (Full Width) -->
+  <div class="row mb-5">
+      <div class="col-12 fade-in">
+          <div class="chart-card">
+              <div class="card-header">
+                  <i class="fas fa-chart-line me-2"></i> Distribusi Pegawai Per Golongan
+              </div>
+              <div class="card-body">
+                  <div class="chart-wrapper" id="wrapperGolongan">
+                      <canvas id="chartGolongan"></canvas>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Carousel Foto -->
+  <div class="carousel-container fade-in">
+    <div class="chart-card">
+      <div class="card-header">
+        <i class="fas fa-images me-2"></i> Galeri DPPKBPM Kota Banjarmasin
+      </div>
+      <div class="card-body p-0">
+        <div id="fotoCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="3"></button>
+            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="4"></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="assets/img/DPPKBPM_f.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Kegiatan Rapat">
+              <div class="carousel-caption">
+                <h5><i class="fas fa-users me-2"></i>Kegiatan Rapat Koordinasi</h5>
+                <p>Dokumentasi rapat internal dinas yang membahas program kerja strategis tahun ini.</p>
+              </div>
             </div>
-            <div class="card-body">
-                <canvas id="chartGolongan" style="height: 300px;"></canvas>
+            <div class="carousel-item">
+              <img src="assets/img/Depan.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Penyuluhan">
+              <div class="carousel-caption">
+                <h5><i class="fas fa-bullhorn me-2"></i>Penyuluhan Masyarakat</h5>
+                <p>Kegiatan sosialisasi dan edukasi bersama masyarakat.</p>
+              </div>
             </div>
+            <div class="carousel-item">
+              <img src="assets/img/Foto.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Pelatihan">
+              <div class="carousel-caption">
+                <h5><i class="fas fa-graduation-cap me-2"></i>Pelatihan Pegawai</h5>
+                <p>Program pengembangan SDM melalui pelatihan.</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img src="assets/img/Olahraga.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Lapangan">
+              <div class="carousel-caption">
+                <h5><i class="fas fa-eye me-2"></i>Monitoring Lapangan</h5>
+                <p>Kegiatan pengawasan dan evaluasi langsung di lapangan.</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img src="assets/img/Apel.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Workshop">
+              <div class="carousel-caption">
+                <h5><i class="fas fa-laptop-code me-2"></i>Workshop Teknologi</h5>
+                <p>Pelatihan penggunaan sistem informasi kepegawaian berbasis teknologi.</p>
+              </div>
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#fotoCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#fotoCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
         </div>
-    </div>
-</div>
-
- <!-- Carousel Foto -->
-<div class="carousel-container fade-in">
-  <div class="chart-card">
-    <div class="card-header">
-      <i class="fas fa-images me-2"></i> Galeri DPPKBPM Kota Banjarmasin
-    </div>
-    <div class="card-body p-0">
-      <div id="fotoCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-        <div class="carousel-indicators">
-          <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="0" class="active"></button>
-          <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="1"></button>
-          <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="2"></button>
-          <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="3"></button>
-          <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="4"></button>
-        </div>
-
-        <div class="carousel-inner">
-          <div class="carousel-item active">
-            <img src="assets/img/DPPKBPM_f.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Kegiatan Rapat">
-            <div class="carousel-caption">
-              <h5><i class="fas fa-users me-2"></i>Kegiatan Rapat Koordinasi</h5>
-              <p>Dokumentasi rapat internal dinas yang membahas program kerja strategis tahun ini.</p>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="assets/img/Depan.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Penyuluhan">
-            <div class="carousel-caption">
-              <h5><i class="fas fa-bullhorn me-2"></i>Penyuluhan Masyarakat</h5>
-              <p>Kegiatan sosialisasi dan edukasi bersama masyarakat.</p>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="assets/img/Foto.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Pelatihan">
-            <div class="carousel-caption">
-              <h5><i class="fas fa-graduation-cap me-2"></i>Pelatihan Pegawai</h5>
-              <p>Program pengembangan SDM melalui pelatihan.</p>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="assets/img/Olahraga.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Lapangan">
-            <div class="carousel-caption">
-              <h5><i class="fas fa-eye me-2"></i>Monitoring Lapangan</h5>
-              <p>Kegiatan pengawasan dan evaluasi langsung di lapangan.</p>
-            </div>
-          </div>
-          <div class="carousel-item">
-            <img src="assets/img/Apel.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Workshop">
-            <div class="carousel-caption">
-              <h5><i class="fas fa-laptop-code me-2"></i>Workshop Teknologi</h5>
-              <p>Pelatihan penggunaan sistem informasi kepegawaian berbasis teknologi.</p>
-            </div>
-          </div>
-        </div>
-
-        <button class="carousel-control-prev" type="button" data-bs-target="#fotoCarousel" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#fotoCarousel" data-bs-slide="next">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
       </div>
     </div>
   </div>
-</div>
 
   <!-- Visi Misi -->
   <div class="vision-mission fade-in">
@@ -737,13 +798,20 @@ $result_duk = $koneksi->query($sql_duk);
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+
+    // =============================================
+    // COUNTER ANIMASI
+    // =============================================
     const counters = document.querySelectorAll('.counter');
     counters.forEach(counter => {
         const target = parseInt(counter.getAttribute('data-target'));
+        if (isNaN(target) || target === 0) {
+            counter.textContent = 0;
+            return;
+        }
         const increment = target / 100;
         let current = 0;
-        
         const updateCounter = () => {
             if (current < target) {
                 current += increment;
@@ -753,83 +821,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 counter.textContent = target;
             }
         };
-        
         setTimeout(updateCounter, 500);
     });
 
-    setTimeout(() => {
-        document.getElementById('loadingJK').style.display = 'none';
-        document.getElementById('chartJenisKelamin').style.display = 'block';
-        
-        const ctxJK = document.getElementById('chartJenisKelamin').getContext('2d');
-        new Chart(ctxJK, {
-            type: 'doughnut',
-            data: {
-                labels: <?= json_encode($labels_jk) ?>,
-                datasets: [{
-                    data: <?= json_encode($data_jk) ?>,
-                    backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'],
-                    borderWidth: 0,
-                    hoverBorderWidth: 3,
-                    hoverBorderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: { size: 12 }
-                        }
-                    }
-                },
-                cutout: '60%'
-            }
-        });
-    }, 1000);
-
-    setTimeout(() => {
-        document.getElementById('loadingPendidikan').style.display = 'none';
-        document.getElementById('chartPendidikan').style.display = 'block';
-        
-        const ctxPendidikan = document.getElementById('chartPendidikan').getContext('2d');
-        new Chart(ctxPendidikan, {
-            type: 'bar',
-            data: {
-                labels: <?= json_encode($labels_pendidikan) ?>,
-                datasets: [{
-                    label: 'Jumlah Pegawai',
-                    data: <?= json_encode($data_pendidikan) ?>,
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderColor: 'rgba(102, 126, 234, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.1)' },
-                        ticks: { font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 11 } }
-                    }
-                }
-            }
-        });
-    }, 1500);
-
+    // =============================================
+    // FADE IN OBSERVER
+    // =============================================
     const observeElements = document.querySelectorAll('.fade-in');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -839,194 +836,239 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
     observeElements.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px)';
         observer.observe(el);
     });
-});
 
-document.addEventListener('DOMContentLoaded', function() {
-    const counters = document.querySelectorAll('.counter');
-    counters.forEach(counter => {
-        const target = parseInt(counter.getAttribute('data-target'));
-        const increment = target / 100;
-        let current = 0;
-        
-        const updateCounter = () => {
-            if (current < target) {
-                current += increment;
-                counter.textContent = Math.ceil(current);
-                setTimeout(updateCounter, 20);
-            } else {
-                counter.textContent = target;
-            }
-        };
-        
-        setTimeout(updateCounter, 500);
-    });
+    // =============================================
+    // HELPER: CEK DATA KOSONG
+    // =============================================
+    function isDataEmpty(data) {
+        return !data || data.length === 0 || data.every(v => v === 0);
+    }
 
+    // =============================================
+    // HELPER: TAMPILKAN PESAN TIDAK ADA DATA
+    // =============================================
+    function tampilkanTidakAdaData(wrapperId) {
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+
+        // Sembunyikan canvas di dalam wrapper
+        const canvas = wrapper.querySelector('canvas');
+        if (canvas) canvas.style.display = 'none';
+
+        // Buat overlay pesan
+        const noData = document.createElement('div');
+        noData.className = 'chart-no-data';
+        noData.innerHTML = `
+            <i class="fas fa-inbox"></i>
+            <span>Tidak Ada Data</span>
+            <small>Belum ada data yang tersedia</small>
+        `;
+        wrapper.appendChild(noData);
+    }
+
+    // =============================================
+    // CHART JENIS KELAMIN (Doughnut)
+    // =============================================
     setTimeout(() => {
         document.getElementById('loadingJK').style.display = 'none';
-        document.getElementById('chartJenisKelamin').style.display = 'block';
-        
-        const ctxJK = document.getElementById('chartJenisKelamin').getContext('2d');
-        new Chart(ctxJK, {
-            type: 'doughnut',
-            data: {
-                labels: <?= json_encode($labels_jk) ?>,
-                datasets: [{
-                    data: <?= json_encode($data_jk) ?>,
-                    backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'],
-                    borderWidth: 0,
-                    hoverBorderWidth: 3,
-                    hoverBorderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 20,
-                            font: { size: 12 }
-                        }
-                    }
+        document.getElementById('wrapperJK').style.display = 'block';
+
+        const dataJK     = <?= json_encode($data_jk) ?>;
+        const labelsJK   = <?= json_encode($labels_jk) ?>;
+
+        if (isDataEmpty(dataJK)) {
+            tampilkanTidakAdaData('wrapperJK');
+        } else {
+            const ctxJK = document.getElementById('chartJenisKelamin').getContext('2d');
+            new Chart(ctxJK, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsJK,
+                    datasets: [{
+                        data: dataJK,
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c'],
+                        borderWidth: 0,
+                        hoverBorderWidth: 3,
+                        hoverBorderColor: '#fff'
+                    }]
                 },
-                cutout: '60%'
-            }
-        });
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true, padding: 20, font: { size: 12 } }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
     }, 1000);
 
+    // =============================================
+    // CHART PENDIDIKAN (Bar)
+    // =============================================
     setTimeout(() => {
         document.getElementById('loadingPendidikan').style.display = 'none';
-        document.getElementById('chartPendidikan').style.display = 'block';
-        
-        const ctxPendidikan = document.getElementById('chartPendidikan').getContext('2d');
-        new Chart(ctxPendidikan, {
-            type: 'bar',
-            data: {
-                labels: <?= json_encode($labels_pendidikan) ?>,
-                datasets: [{
-                    label: 'Jumlah Pegawai',
-                    data: <?= json_encode($data_pendidikan) ?>,
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderColor: 'rgba(102, 126, 234, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.1)' },
-                        ticks: { font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 11 } }
+        document.getElementById('wrapperPendidikan').style.display = 'block';
+
+        const dataPendidikan   = <?= json_encode($data_pendidikan) ?>;
+        const labelsPendidikan = <?= json_encode($labels_pendidikan) ?>;
+
+        if (isDataEmpty(dataPendidikan)) {
+            tampilkanTidakAdaData('wrapperPendidikan');
+        } else {
+            const ctxPendidikan = document.getElementById('chartPendidikan').getContext('2d');
+            new Chart(ctxPendidikan, {
+                type: 'bar',
+                data: {
+                    labels: labelsPendidikan,
+                    datasets: [{
+                        label: 'Jumlah Pegawai',
+                        data: dataPendidikan,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            ticks: { font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 } }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }, 1500);
 
-    const observeElements = document.querySelectorAll('.fade-in');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    });
+    // =============================================
+    // CHART JENIS JABATAN (Doughnut)
+    // =============================================
+    setTimeout(() => {
+        const dataJabatan   = <?= json_encode($data_jabatan) ?>;
+        const labelsJabatan = <?= json_encode($labels_jabatan) ?>;
 
-    observeElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        observer.observe(el);
-    });
-});
-
-// Chart Jenis Jabatan (Doughnut)
-setTimeout(() => {
-    const ctxJabatan = document.getElementById('chartJabatan').getContext('2d');
-    new Chart(ctxJabatan, {
-        type: 'doughnut',
-        data: {
-            labels: <?= json_encode($labels_jabatan) ?>,
-            datasets: [{
-                data: <?= json_encode($data_jabatan) ?>,
-                backgroundColor: ['#667eea', '#28a745', '#f5576c', '#ffc107'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
+        if (isDataEmpty(dataJabatan)) {
+            tampilkanTidakAdaData('wrapperJabatan');
+        } else {
+            // Pastikan wrapper visible sebelum Chart.js render
+            const wrapperJabatan = document.getElementById('wrapperJabatan');
+            wrapperJabatan.style.display = 'block';
+            requestAnimationFrame(() => {
+                const ctxJabatan = document.getElementById('chartJabatan').getContext('2d');
+                new Chart(ctxJabatan, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labelsJabatan,
+                        datasets: [{
+                            data: dataJabatan,
+                            backgroundColor: ['#667eea', '#28a745', '#f5576c', '#ffc107'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            });
         }
-    });
-}, 2500);
+    }, 2500);
 
-// Chart Eselon (Bar Horizontal)
-setTimeout(() => {
-    const ctxEselon = document.getElementById('chartEselon').getContext('2d');
-    new Chart(ctxEselon, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($labels_eselon) ?>,
-            datasets: [{
-                label: 'Jumlah Pegawai',
-                data: <?= json_encode($data_eselon) ?>,
-                backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
+    // =============================================
+    // CHART ESELON (Bar Horizontal)
+    // =============================================
+    setTimeout(() => {
+        const dataEselon   = <?= json_encode($data_eselon) ?>;
+        const labelsEselon = <?= json_encode($labels_eselon) ?>;
+
+        if (isDataEmpty(dataEselon)) {
+            tampilkanTidakAdaData('wrapperEselon');
+        } else {
+            const wrapperEselon = document.getElementById('wrapperEselon');
+            wrapperEselon.style.display = 'block';
+            requestAnimationFrame(() => {
+                const ctxEselon = document.getElementById('chartEselon').getContext('2d');
+                new Chart(ctxEselon, {
+                    type: 'bar',
+                    data: {
+                        labels: labelsEselon,
+                        datasets: [{
+                            label: 'Jumlah Pegawai',
+                            data: dataEselon,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            });
         }
-    });
-}, 3000);
+    }, 3000);
 
-// Chart Golongan (Line)
-setTimeout(() => {
-    const ctxGolongan = document.getElementById('chartGolongan').getContext('2d');
-    new Chart(ctxGolongan, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($labels_golongan) ?>,
-            datasets: [{
-                label: 'Jumlah Pegawai',
-                data: <?= json_encode($data_golongan) ?>,
-                backgroundColor: 'rgba(118, 75, 162, 0.1)',
-                borderColor: 'rgba(118, 75, 162, 1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
+    // =============================================
+    // CHART GOLONGAN (Line)
+    // =============================================
+    setTimeout(() => {
+        const dataGolongan   = <?= json_encode($data_golongan) ?>;
+        const labelsGolongan = <?= json_encode($labels_golongan) ?>;
+
+        if (isDataEmpty(dataGolongan)) {
+            tampilkanTidakAdaData('wrapperGolongan');
+        } else {
+            const wrapperGolongan = document.getElementById('wrapperGolongan');
+            wrapperGolongan.style.display = 'block';
+            requestAnimationFrame(() => {
+                const ctxGolongan = document.getElementById('chartGolongan').getContext('2d');
+                new Chart(ctxGolongan, {
+                    type: 'line',
+                    data: {
+                        labels: labelsGolongan,
+                        datasets: [{
+                            label: 'Jumlah Pegawai',
+                            data: dataGolongan,
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            borderColor: 'rgba(118, 75, 162, 1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            });
         }
-    });
-}, 3500);
+    }, 3500);
 
+}); // END DOMContentLoaded
 </script>
 <script src="js/scripts.js"></script>

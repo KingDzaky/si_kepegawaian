@@ -2,12 +2,11 @@
 // proses_approval.php
 session_start();
 
-// ✅ Urutan include yang benar
 require_once 'check_session.php';
 require_once 'config/koneksi.php';
 require_once 'includes/alert_functions.php';
 
-// Cek akses (semua user yang login bisa approve)
+// Cek akses
 if (!isset($_SESSION['user_id'])) {
     alertWarning('login.php', 'Silakan login terlebih dahulu!');
     exit;
@@ -25,8 +24,8 @@ if (!isset($_POST['action']) || !isset($_POST['id'])) {
     exit;
 }
 
-$id = (int)$_POST['id'];
-$action = $_POST['action'];
+$id         = (int)$_POST['id'];
+$action     = $_POST['action'];
 $keterangan = trim($_POST['keterangan'] ?? '');
 
 // Validasi action
@@ -36,7 +35,11 @@ if (!in_array($action, ['approve', 'reject'])) {
 }
 
 // ========== CEK DATA USULAN EXISTS ==========
-$check_stmt = $koneksi->prepare("SELECT id, nomor_usulan, nip, nama, status FROM kenaikan_pangkat WHERE id = ?");
+$check_stmt = $koneksi->prepare("
+    SELECT id, nomor_usulan, nip, nama, status 
+    FROM kenaikan_pangkat 
+    WHERE id = ?
+");
 $check_stmt->bind_param("i", $id);
 $check_stmt->execute();
 $result = $check_stmt->get_result();
@@ -60,23 +63,22 @@ if ($usulan['status'] !== 'diajukan') {
 // ========== TENTUKAN STATUS BARU ==========
 if ($action === 'approve') {
     $status = 'disetujui';
-    $message_type = 'setujui';
-    $icon = 'success';
-} else { // reject
+} else {
     $status = 'ditolak';
-    $message_type = 'tolak';
-    $icon = 'error';
-    
-    // Validasi keterangan wajib untuk reject
+
+    // Keterangan wajib diisi saat menolak
     if (empty($keterangan)) {
         alertWarning('approval.php', 'Alasan penolakan wajib diisi!');
         exit;
     }
 }
 
-// ========== UPDATE STATUS ==========
+// ========== UPDATE STATUS KENAIKAN PANGKAT ==========
+// CATATAN: DUK *tidak* diupdate di sini.
+// DUK baru diupdate setelah SK BKN benar-benar terbit,
+// melalui tombol "SK Terbit" → proses_sk_terbit.php
 $update_query = "UPDATE kenaikan_pangkat 
-                 SET status = ?, 
+                 SET status     = ?, 
                      keterangan = ?,
                      updated_at = NOW()
                  WHERE id = ?";
@@ -92,34 +94,27 @@ if (!$stmt) {
 $stmt->bind_param("ssi", $status, $keterangan, $id);
 
 if ($stmt->execute()) {
-    // ========== UPDATE BERHASIL ==========
     $stmt->close();
     $koneksi->close();
-    
-    // Log untuk debugging
-    $user_name = $_SESSION['username'] ?? 'Unknown';
-    error_log("✅ Approval $status - ID: $id | Nama: {$usulan['nama']} | NIP: {$usulan['nip']} | By: $user_name");
-    
-    // Pesan alert berbeda untuk approve dan reject
-    if ($action === 'approve') {
-        alertSuksesApproval('approval.php', "Data Approval $nama Disetujui");
 
+    $nama      = $usulan['nama'];
+    $user_name = $_SESSION['username'] ?? 'Unknown';
+
+    error_log("✅ Approval $status - ID: $id | Nama: {$usulan['nama']} | NIP: {$usulan['nip']} | By: $user_name");
+
+    if ($action === 'approve') {
+        alertSuksesApproval('approval.php', "Data Approval $nama Disetujui. Klik 'SK Terbit' setelah SK BKN keluar untuk memperbarui data DUK.");
     } else {
         alertGagalApproval('approval.php', "Data Approval $nama Ditolak");
     }
     exit;
-    
+
 } else {
-    // ========== UPDATE GAGAL ==========
     $error_message = $stmt->error;
     $stmt->close();
     $koneksi->close();
-    
-    // Log error
+
     error_log("❌ Error approval - ID: $id | Error: $error_message");
-    
-    // Redirect dengan alert error
     alertWarning('approval.php', 'Gagal memproses approval: ' . $error_message);
     exit;
 }
-?>

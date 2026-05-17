@@ -57,7 +57,7 @@ if (strlen($nomor_wa) < 10) {
 
 // Update database
 $sql = "UPDATE duk SET nomor_wa = ? WHERE id = ?";
-$stmt = mysqli_prepare($conn, $sql);
+$stmt = mysqli_prepare($koneksi, $sql);
 mysqli_stmt_bind_param($stmt, 'si', $nomor_wa, $id);
 
 if (mysqli_stmt_execute($stmt)) {
@@ -68,7 +68,7 @@ if (mysqli_stmt_execute($stmt)) {
 } else {
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal mengupdate nomor WhatsApp: ' . mysqli_error($conn)
+        'message' => 'Gagal mengupdate nomor WhatsApp: ' . mysqli_error($koneksi)
     ]);
 }
 

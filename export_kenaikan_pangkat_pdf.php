@@ -82,10 +82,12 @@ if (!empty($data['nama_kepala_opd'])) {
     $golongan_kepala = $data['golongan_kepala_opd'];
 }
 
-// PERHITUNGAN MASA KERJA
-$mkg_saat_ini_tahun = $data['mk_golongan_tahun'];
-$mkg_saat_ini_bulan = $data['mk_golongan_bulan'];
+// SESUDAH (BENAR):
+// Baris 1: MK dalam pangkat terakhir — diambil dari DB (diisi manual sesuai SK)
+$mkg_saat_ini_tahun = $data['masa_kerja_tahun_lama']; // ← pakai kolom ini
+$mkg_saat_ini_bulan = $data['masa_kerja_bulan_lama']; // ← bukan mk_golongan_tahun
 
+// Baris 2: Selisih TMT lama ke TMT baru — hitung otomatis
 $tmt_lama = new DateTime($data['tmt_pangkat_lama']);
 $tmt_baru = new DateTime($data['tmt_pangkat_baru']);
 $interval_tambahan = $tmt_lama->diff($tmt_baru);
@@ -96,6 +98,7 @@ $tanggal_dari   = $tmt_lama->format('d-m-Y');
 $tanggal_sampai = $tmt_baru->format('d-m-Y');
 $mk_dari_sampai = $tanggal_dari . ' s/d ' . $tanggal_sampai;
 
+// Total = baris 1 + baris 2
 $total_bulan = $mkg_saat_ini_bulan + $tambahan_bulan;
 $total_tahun = $mkg_saat_ini_tahun + $tambahan_tahun;
 

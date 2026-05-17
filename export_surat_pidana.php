@@ -60,6 +60,15 @@ function namaBulan($bulan) {
 
 $bulan_sekarang = namaBulan(date('n'));
 $tahun_sekarang = date('Y');
+
+function format_nip($nip) {
+    $nip = preg_replace('/\s+/', '', $nip);
+    if (strlen($nip) === 18) {
+        return substr($nip, 0, 8) . ' ' . substr($nip, 8, 6) . ' ' . substr($nip, 14, 1) . ' ' . substr($nip, 15, 3);
+    }
+    return $nip;
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -299,7 +308,7 @@ $tahun_sekarang = date('Y');
                     <tr>
                         <td class="label">N I P</td>
                         <td class="colon">:</td>
-                        <td><?= htmlspecialchars($nip_kepala) ?></td>
+                        <td><?= htmlspecialchars(format_nip($nip_kepala)) ?></td>
                     </tr>
                     <tr>
                         <td class="label">Pangkat / Golongan</td>
@@ -326,7 +335,7 @@ $tahun_sekarang = date('Y');
                     <tr>
                         <td class="label">N I P</td>
                         <td class="colon">:</td>
-                        <td><?= htmlspecialchars($nip_pegawai) ?></td>
+                        <td><?= htmlspecialchars(format_nip($nip_pegawai)) ?></td>
                     </tr>
                     <tr>
                         <td class="label">Pangkat / Golongan</td>
@@ -375,7 +384,7 @@ $tahun_sekarang = date('Y');
                     <div style="height: 50px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;"><?= htmlspecialchars($pangkat_kepala) ?> / <?= htmlspecialchars($golongan_kepala) ?></p>
-                    <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars($nip_kepala) ?></p>
+                    <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars(format_nip($nip_kepala)) ?></p>
                 </td>
             </tr>
         </table>

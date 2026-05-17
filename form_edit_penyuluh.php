@@ -282,7 +282,7 @@ $error = $_GET['error'] ?? '';
                              name="jabatan_terakhir" 
                              id="jabatan_terakhir" 
                              class="form-control enhanced-input"
-                             placeholder="Contoh: Penyuluh Pertanian Ahli Pertama"
+                             placeholder="Contoh: Penyuluh Ahli Pertama"
                              value="<?= htmlspecialchars($penyuluh['jabatan_terakhir']) ?>">
                       <div class="input-feedback"></div>
                     </div>
@@ -300,7 +300,7 @@ $error = $_GET['error'] ?? '';
                               class="form-select enhanced-select">
                         <option value="">-- Pilih Pendidikan --</option>
                         <?php
-                        $pendidikan_list = ['SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S1 Pertanian', 'S1 Penyuluhan', 'S2', 'S3'];
+                        $pendidikan_list = ['SD', 'SMP', 'SMA/SMK', 'D1', 'D2', 'D3', 'D4', 'S1', 'S2', 'S3'];
                         foreach($pendidikan_list as $pend):
                         ?>
                           <option value="<?= $pend ?>" <?= $penyuluh['pendidikan_terakhir'] === $pend ? 'selected' : '' ?>>
