@@ -213,30 +213,77 @@ $result = $koneksi->query($query);
               }
               
               // TAMBAHAN: Status Reminder
-              $reminderStatus = '';
-              $reminderBtn = '';
-              if ($row['status'] === 'disetujui') {
-                  if ($row['reminder_terkirim'] > 0) {
-                      $reminderStatus = '<span class="badge bg-success"><i class="fas fa-check"></i> Terkirim</span>';
-                  } else if ($perlu_reminder) {
-                      $reminderStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-exclamation"></i> Perlu Kirim</span>';
-                  } else {
-                      $reminderStatus = '<span class="badge bg-secondary">-</span>';
-                  }
-                  
-                  // Tombol kirim reminder
-                  if (!empty($row['nomor_wa'])) {
-                      $reminderBtn = '<br><button class="btn btn-warning btn-sm mt-1" onclick="kirimReminder(' . $row['id'] . ')" title="Kirim Reminder Persiapan Berkas">
-                        <i class="fas fa-bell"></i> Kirim Reminder
-                      </button>';
-                  } else {
-                      $reminderBtn = '<br><button class="btn btn-secondary btn-sm mt-1" disabled title="Nomor WA tidak ada">
-                        <i class="fas fa-bell-slash"></i> No WA
-                      </button>';
-                  }
-              } else {
-                  $reminderStatus = '<span class="badge bg-secondary">-</span>';
-              }
+              // Status Reminder
+                          $reminderStatus = '';
+                          $reminderBtn = '';
+
+                          if ($row['status'] === 'disetujui') {
+                              // Sudah pernah kirim reminder
+                              if ($row['reminder_terkirim'] > 0) {
+                                  $reminderStatus = '<span class="badge bg-success"><i class="fas fa-check"></i> Terkirim</span>';
+                              } elseif ($perlu_reminder) {
+                                  // Masuk window waktu tapi belum kirim
+                                  $reminderStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Belum Terkirim</span>';
+                              } else {
+                                  // Disetujui tapi belum masuk window waktu → tampil info sisa waktu
+                                  if ($hari < 0) {
+                                      $reminderStatus = '<span class="badge bg-dark">TMT Sudah Lewat</span>';
+                                  } elseif ($hari <= 334) {
+                                      // Sudah dekat tapi di luar window (< 335 hari)
+                                      $sisa_bulan = round($hari / 30);
+                                      $reminderStatus = '<span class="badge bg-light text-secondary border" 
+                                                          title="Belum masuk periode reminder">
+                                                          <i class="fas fa-hourglass-start"></i> ~' . $sisa_bulan . ' bln lagi
+                                                        </span>';
+                                  } else {
+                                      // Masih jauh (> 395 hari)
+                                      $sisa_tahun = round($hari / 365, 1);
+                                      $reminderStatus = '<span class="badge bg-light text-secondary border"
+                                                          title="Reminder aktif ±1 tahun sebelum TMT">
+                                                          <i class="fas fa-hourglass-start"></i> ~' . $sisa_tahun . ' thn lagi
+                                                        </span>';
+                                  }
+                              }
+
+                              // Tombol kirim reminder
+                              if (!empty($row['nomor_wa'])) {
+                                  if ($row['reminder_terkirim'] > 0) {
+                                      // Sudah terkirim → tombol kirim ulang (disabled style tapi bisa diklik)
+                                      $reminderBtn = '<br><button class="btn btn-outline-success btn-sm mt-1" 
+                                                        onclick="kirimReminder(' . $row['id'] . ')" 
+                                                        title="Kirim ulang reminder">
+                                                        <i class="fas fa-redo"></i> Kirim Ulang
+                                                      </button>';
+                                  } else {
+                                      $reminderBtn = '<br><button class="btn btn-warning btn-sm mt-1" 
+                                                        onclick="kirimReminder(' . $row['id'] . ')" 
+                                                        title="Kirim Reminder Persiapan Berkas">
+                                                        <i class="fas fa-bell"></i> Kirim Reminder
+                                                      </button>';
+                                  }
+                              } else {
+                                  $reminderBtn = '<br><button class="btn btn-secondary btn-sm mt-1" disabled 
+                                                    title="Nomor WA tidak ada">
+                                                    <i class="fas fa-bell-slash"></i> No WA
+                                                  </button>';
+                              }
+
+                          } elseif ($row['status'] === 'diajukan') {
+                              // Belum disetujui — beri info yang lebih ramah dari sekadar "-"
+                              $reminderStatus = '<span class="badge bg-light text-secondary border"
+                                                  title="Reminder aktif setelah disetujui">
+                                                  <i class="fas fa-lock"></i> Perlu Disetujui
+                                                </span>';
+                          } elseif ($row['status'] === 'ditolak') {
+                              $reminderStatus = '<span class="badge bg-light text-danger border">
+                                                  <i class="fas fa-ban"></i> Ditolak
+                                                </span>';
+                          } else {
+                              // Draft
+                              $reminderStatus = '<span class="badge bg-light text-secondary border">
+                                                  <i class="fas fa-file"></i> Draft
+                                                </span>';
+                          }
           ?>
             <tr data-status="<?= $row['status'] ?>" data-reminder="<?= $perlu_reminder ? '1' : '0' ?>">
               <td class="text-center"><strong><?= $no++ ?></strong></td>
@@ -306,7 +353,6 @@ $result = $koneksi->query($query);
       </table>
     </div>
   </div>
-</main>
 
 <!-- Modal Detail Notifikasi -->
 <div class="modal fade" id="modalDetailNotif" tabindex="-1">
@@ -336,67 +382,137 @@ function confirmDelete(id, nomor) {
   }
 }
 
-// Fungsi kirim notifikasi WhatsApp (approval)
+// Fungsi kirim notifikasi WhatsApp Fixed
 function kirimNotifWA(id) {
-  if (!confirm('Yakin ingin mengirim notifikasi WhatsApp ke pegawai ini?')) {
-    return;
-  }
-  
-  showAlertWA('info', '<i class="fas fa-spinner fa-spin"></i> Mengirim notifikasi WhatsApp...');
-  
-  fetch('api/kirim_notifikasi.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'id_kenaikan_pangkat=' + id
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showAlertWA('success', '<i class="fas fa-check-circle"></i> ' + data.message);
-      setTimeout(() => location.reload(), 2000);
-    } else {
-      showAlertWA('danger', '<i class="fas fa-times-circle"></i> ' + data.message);
-    }
-  })
-  .catch(error => {
-    showAlertWA('danger', '<i class="fas fa-times-circle"></i> Terjadi kesalahan saat mengirim notifikasi');
-    console.error('Error:', error);
+  Swal.fire({
+    title: 'Kirim Notifikasi?',
+    text: 'Kirim notifikasi hasil kenaikan pangkat ke pegawai ini via WhatsApp?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#0d6efd',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<i class="fab fa-whatsapp"></i> Ya, Kirim!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    // Loading
+    Swal.fire({
+      title: 'Mengirim...',
+      text: 'Sedang mengirim notifikasi WhatsApp',
+      icon: 'info',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    fetch('api/kirim_notifikasi.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'id_kenaikan_pangkat=' + id
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Terkirim!',
+          text: data.message,
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: data.message,
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Terjadi kesalahan koneksi, coba lagi.',
+        confirmButtonColor: '#dc3545'
+      });
+    });
   });
 }
 
 // TAMBAHAN: Fungsi kirim reminder
 function kirimReminder(id) {
-  if (!confirm('Kirim reminder persiapan berkas kenaikan pangkat ke pegawai ini?')) {
-    return;
-  }
-  
-  showAlertWA('info', '<i class="fas fa-spinner fa-spin"></i> Mengirim reminder WhatsApp...');
-  
-  fetch('api/kirim_reminder.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ id_kenaikan_pangkat: id })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      let msg = '<i class="fas fa-check-circle"></i> ' + data.message;
-      if (data.data && data.data.sudah_pernah_terkirim) {
-        msg += '<br><small class="text-muted">Catatan: Reminder sudah pernah dikirim sebelumnya</small>';
+  Swal.fire({
+    title: 'Kirim Reminder?',
+    text: 'Kirim reminder persiapan berkas kenaikan pangkat ke pegawai ini via WhatsApp?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<i class="fas fa-paper-plane"></i> Ya, Kirim!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: 'Mengirim...',
+      text: 'Sedang mengirim reminder WhatsApp',
+      icon: 'info',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    fetch('api/kirim_reminder.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_kenaikan_pangkat: id })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        let extraText = '';
+        if (data.data && data.data.sudah_pernah_terkirim) {
+          extraText = 'Catatan: Reminder sudah pernah dikirim sebelumnya';
+        }
+        Swal.fire({
+          icon: 'success',
+          title: 'Terkirim!',
+          text: data.message,
+          footer: extraText ? `<small class="text-muted">${extraText}</small>` : '',
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        }).then(() => {
+          window.location.href = 'kenaikan_pangkat.php'; // ✅ redirect bersih
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: data.message,
+          confirmButtonColor: '#dc3545'
+        });
       }
-      showAlertWA('success', msg);
-      setTimeout(() => location.reload(), 2000);
-    } else {
-      showAlertWA('danger', '<i class="fas fa-times-circle"></i> ' + data.message);
-    }
-  })
-  .catch(error => {
-    showAlertWA('danger', '<i class="fas fa-times-circle"></i> Terjadi kesalahan saat mengirim reminder');
-    console.error('Error:', error);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Terjadi kesalahan koneksi, coba lagi.',
+        confirmButtonColor: '#dc3545'
+      });
+    });
   });
 }
 
@@ -642,13 +758,7 @@ function formatDateTime(dateString) {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-if (!response.success) {
-    if (response.type === 'warning') {
-        showNotification('warning', response.message); // tampil kuning
-    } else {
-        showNotification('error', response.message);   // tampil merah
-    }
-}
+
 
 </script>
 

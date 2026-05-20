@@ -24,7 +24,7 @@ $stmt->close();
 // ── Riwayat Kenaikan Pangkat ──────────────────────────────────────────────────
 $stmt_kp = $koneksi->prepare(
     "SELECT id, nomor_usulan, tanggal_usulan, pangkat_lama, golongan_lama,
-            pangkat_baru, golongan_baru, tmt_pangkat_baru, jabatan_baru, status, jenis_kenaikan
+            pangkat_baru, golongan_baru, tmt_pangkat_baru, masa_kerja_tahun_baru, jabatan_baru, status, jenis_kenaikan
      FROM kenaikan_pangkat
      WHERE nip = ? AND deleted_at IS NULL
      ORDER BY tmt_pangkat_baru ASC"
@@ -67,7 +67,7 @@ function formatTglIndo($tgl, $bulan_indo) {
 }
 
 $usia             = hitungUsia($duk['ttl']);
-$masaKerjaPangkat = masaKerja($duk['tmt_pangkat']);
+$masaKerjaPangkat = masaKerja($duk['tmt_pangkat_awal']);
 $masaKerjaEselon  = masaKerja($duk['tmt_eselon']);
 $status_pegawai   = $duk['status_pegawai'] ?? 'aktif';
 
@@ -379,8 +379,8 @@ if ($duk['eselon'] === 'Non-Eselon') {
                         <p><strong><?= htmlspecialchars($duk['pangkat_terakhir'] ?: '-') ?></strong></p>
                         <small class="text-muted">
                           <i class="fas fa-calendar me-1"></i>
-                          TMT: <?= formatTglIndo($duk['tmt_pangkat'], $bulan_indo) ?>
-                          <?php if ($masaKerjaPangkat): ?> · Masa kerja: <?= $masaKerjaPangkat ?><?php endif; ?>
+                          TMT: <?= formatTglIndo($duk['tmt_pangkat_awal'], $bulan_indo) ?>
+                          <?php if ($masaKerjaPangkat): ?> · Total Masa kerja: <?= $masaKerjaPangkat ?><?php endif; ?>
                         </small>
                       </div>
                     </div>

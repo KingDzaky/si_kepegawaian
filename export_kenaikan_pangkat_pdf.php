@@ -123,7 +123,7 @@ $koneksi->close();
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Daftar Usul Mutasi Kenaikan Pangkat</title>
+    <title>Daftar Usul Mutasi Kenaikan Pangkat  <?= htmlspecialchars($data['nama']) ?> </title>
     <style>
         @page {
             size: A4;

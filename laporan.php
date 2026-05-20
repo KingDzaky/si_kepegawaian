@@ -149,7 +149,6 @@ require_once 'includes/sidebar.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $page_title ?> - SI Kepegawaian</title>
-    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/dataduk.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -219,17 +218,67 @@ require_once 'includes/sidebar.php';
             margin-bottom: 30px;
         }
         
-        @media (max-width: 1200px) {
-            .stats-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .stats-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+/* Fix grid stuck saat zoom */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)); /* ganti 1fr → minmax(0,1fr) */
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    min-width: 0;      /* tambah ini */
+    overflow: hidden;  /* tambah ini */
+    word-break: break-word; /* tambah ini */
+}
+
+.stat-card h3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem); /* responsive font size */
+    margin: 0 0 5px 0;
+    font-weight: bold;
+}
+
+/* Fix tabel stuck */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* tambah ini */
+    min-width: 600px;   /* tambah ini — biar ada scroll horizontal kalau sempit */
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+}
+
+/* Fix filter section stuck */
+.filter-section .row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap; /* sudah ada, pastikan ini ada */
+}
+
+.filter-section .form-group {
+    flex: 1 1 150px; /* ganti dari flex:1 → flex: 1 1 150px (bisa shrink) */
+    min-width: 0;    /* tambah ini */
+}
+
+.filter-section .form-control {
+    width: 100%;
+    min-width: 0; /* tambah ini */
+    box-sizing: border-box; /* tambah ini */
+}
+
+@media (max-width: 1200px) {
+    .stats-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+    .stats-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+    .stats-container { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+}
         
         .stat-card {
             background: linear-gradient(135deg,  #2c3e50 0%, #34495e 100%);

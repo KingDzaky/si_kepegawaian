@@ -137,6 +137,22 @@ if ($check_result->num_rows > 0) {
 }
 $check_stmt->close();
 
+if (empty($nomor_wa)) {
+    if ($sumber_data === 'penyuluh') {
+        $fetch_wa = $koneksi->prepare("SELECT nomor_wa FROM penyuluh WHERE nip = ? AND deleted_at IS NULL LIMIT 1");
+    } else {
+        $fetch_wa = $koneksi->prepare("SELECT nomor_wa FROM duk WHERE nip = ? AND deleted_at IS NULL LIMIT 1");
+    }
+    $fetch_wa->bind_param("s", $nip);
+    $fetch_wa->execute();
+    $res_wa = $fetch_wa->get_result()->fetch_assoc();
+    $fetch_wa->close();
+    
+    if (!empty($res_wa['nomor_wa'])) {
+        $nomor_wa = mysqli_real_escape_string($koneksi, $res_wa['nomor_wa']);
+    }
+}
+
 // DEBUG
 error_log("Cek duplikasi lolos. Memulai INSERT...");
 

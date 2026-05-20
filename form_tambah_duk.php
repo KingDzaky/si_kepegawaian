@@ -304,7 +304,7 @@ $success = $_GET['success'] ?? '';
                     <div class="form-group fade-in">
                       <label for="tmt_pangkat" class="form-label">
                         <i class="fas fa-calendar-alt"></i>
-                        T.M.T Pangkat <span class="required">*</span>
+                        T.M.T Pangkat Terakhir <span class="required">*</span>
                       </label>
                       <div class="input-group">
                         <input type="date" name="tmt_pangkat" id="tmt_pangkat" class="form-control with-icon" required>
@@ -312,6 +312,22 @@ $success = $_GET['success'] ?? '';
                       </div>
                       <div class="invalid-feedback"></div>
                       <div class="valid-feedback">Tanggal valid!</div>
+                    </div>
+
+                    <div class="form-group fade-in">
+                      <label for="tmt_pangkat_awal" class="form-label">
+                        <i class="fas fa-calendar-check"></i>
+                        T.M.T Pangkat Awal
+                        <span class="text-muted fw-normal">(untuk hitung masa kerja)</span>
+                      </label>
+                      <div class="input-group">
+                        <input type="date" name="tmt_pangkat_awal" id="tmt_pangkat_awal" class="form-control with-icon">
+                        <i class="input-icon fas fa-calendar-check"></i>
+                      </div>
+                      <small class="text-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Isi sesuai SK jika masa kerja dipotong. Kosongkan = otomatis sama dengan TMT Pangkat Terakhir.
+                      </small>
                     </div>
                   </div>
 
@@ -557,6 +573,9 @@ function validateField(field) {
 // Multilevel Dropdown Logic (sama seperti sebelumnya)
 document.getElementById('eselon').addEventListener('change', function() {
   const eselonValue = this.value;
+  const tmtEselonLabel = document.querySelector('label[for="tmt_eselon"]');
+
+
   const jenisJabatanGroup = document.getElementById('jenis_jabatan_group');
   const jftTingkatGroup = document.getElementById('jft_tingkat_group');
   const jfuKelasGroup = document.getElementById('jfu_kelas_group');
@@ -580,10 +599,17 @@ document.getElementById('eselon').addEventListener('change', function() {
   jenisJabatanSelect.removeAttribute('required');
   jftTingkatSelect.removeAttribute('required');
   jfuKelasSelect.removeAttribute('required');
-  
+
   if (eselonValue === 'Non-Eselon') {
-    jenisJabatanGroup.style.display = 'block';
-    jenisJabatanSelect.setAttribute('required', 'required');
+    tmtEselonLabel.innerHTML = `
+      <i class="fas fa-calendar-check"></i>
+      T.M.T Jabatan Fungsional <span class="required">*</span>
+    `;
+  } else {
+    tmtEselonLabel.innerHTML = `
+      <i class="fas fa-calendar-check"></i>
+      T.M.T Eselon <span class="required">*</span>
+    `;
   }
   
   validateField(this);

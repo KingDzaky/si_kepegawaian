@@ -30,12 +30,18 @@ if (!in_array($jenis_reminder, ['1_tahun', '1_bulan', '1_minggu'])) {
 
 // ✅ FIX: JOIN ke tabel duk untuk ambil nomor_wa
 $stmt = $koneksi->prepare("
-    SELECT up.*, d.nomor_wa 
+    SELECT up.*,
+        CASE 
+            WHEN up.sumber_data = 'penyuluh' THEN p.nomor_wa
+            ELSE d.nomor_wa
+        END AS nomor_wa
     FROM usulan_pensiun up
-    LEFT JOIN duk d ON d.nip = up.nip
+    LEFT JOIN duk d ON d.nip = up.nip AND d.deleted_at IS NULL
+    LEFT JOIN penyuluh p ON p.nip = up.nip AND p.deleted_at IS NULL
     WHERE up.id = ?
     LIMIT 1
 ");
+
 $stmt->bind_param('i', $id_usulan_pensiun);
 $stmt->execute();
 $usulan = $stmt->get_result()->fetch_assoc();

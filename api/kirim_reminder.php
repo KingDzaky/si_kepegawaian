@@ -1,9 +1,10 @@
 <?php
+header('Content-Type: application/json');
 session_start();
 require_once __DIR__ . '/../config/koneksi.php';
 require_once __DIR__ . '/../includes/wa_functions.php';
 
-header('Content-Type: application/json');
+
 
 // Cek login
 if (!isset($_SESSION['username'])) {
@@ -77,7 +78,7 @@ try {
     $status_notif  = $result_kirim['success'] ? 'terkirim' : 'gagal';
     $response_api  = $result_kirim['response'] ?? '';
     $keterangan    = $result_kirim['message'] ?? '';
-    $pesan_log     = buatPesanReminderPensiun($data, 'reminder_1_tahun'); // fallback log
+    
 
     // Buat ulang pesan reminder untuk log
     $tmt_baru  = date('d/m/Y', strtotime($data['tmt_pangkat_baru']));

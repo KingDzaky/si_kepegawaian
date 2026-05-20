@@ -33,7 +33,7 @@ $jabatan_options    = $koneksi->query("SELECT DISTINCT jabatan_terakhir FROM duk
 $pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM duk WHERE pendidikan_terakhir != '' AND deleted_at IS NULL ORDER BY pendidikan_terakhir")->fetch_all(MYSQLI_ASSOC);
 
 $sql_duk = "SELECT id, nama, nip, kartu_pegawai, pangkat_terakhir, golongan, jabatan_terakhir, ttl, jenis_kelamin, 
-            pendidikan_terakhir, prodi, tmt_pangkat, tmt_eselon, eselon, jenis_jabatan, jft_tingkat, jfu_kelas,
+            pendidikan_terakhir, prodi, tmt_pangkat, tmt_eselon,tmt_pangkat_awal, eselon, jenis_jabatan, jft_tingkat, jfu_kelas,
             status_pegawai, alasan_nonaktif, nonaktif_at
             FROM duk 
             WHERE deleted_at IS NULL 
@@ -431,7 +431,7 @@ tr.row-selected {
               <td><span class="badge badge-info"><?= htmlspecialchars($row['pendidikan_terakhir'] ?: '-') ?></span></td>
               <td>
                 <div>
-                  <small><strong>TMT:</strong> <?= htmlspecialchars($row['tmt_eselon'] ?: '-') ?></small>
+                  <small><strong>TMT:</strong> <?= htmlspecialchars($row['tmt_pangkat_awal'] ?: '-') ?></small>
                   <br><small><strong>Eselon:</strong> <?= htmlspecialchars($row['eselon'] ?: '-') ?></small>
                 </div>
               </td>

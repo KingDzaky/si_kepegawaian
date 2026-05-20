@@ -239,31 +239,61 @@ $result = $koneksi->query($query);
               }
               
               // Status Reminder
+              // Status Reminder
               $reminderStatus = '';
               if ($row['status'] === 'disetujui') {
                   $badges = [];
                   
-                  if ($row['reminder_1_tahun_terkirim'] > 0) {
-                      $badges[] = '<span class="badge bg-info" title="Reminder 1 Tahun Terkirim"><i class="fas fa-check"></i> 1 Th</span>';
-                  } else if ($perlu_reminder_1_tahun) {
-                      $badges[] = '<span class="badge bg-warning text-dark" title="Perlu Kirim Reminder 1 Tahun"><i class="fas fa-exclamation"></i> 1 Th</span>';
+                  // Sudah lewat masa pensiun
+                  if ($hari < 0) {
+                      $reminderStatus = '<span class="badge bg-dark">Sudah Pensiun</span>';
+                  } else {
+                      // --- 1 Tahun ---
+                      if ($row['reminder_1_tahun_terkirim'] > 0) {
+                          $badges[] = '<span class="badge bg-success"><i class="fas fa-check"></i> 1 Th Terkirim</span>';
+                      } elseif ($hari > 380) {
+                          // Belum waktunya, tapi beri tanda "belum dijadwalkan"
+                          $sisa_tahun = round($hari / 365, 1);
+                          $badges[] = '<span class="badge bg-light text-secondary border" title="Reminder 1 tahun belum saatnya dikirim">
+                                          <i class="fas fa-hourglass-start"></i> 1 Th (~' . $sisa_tahun . ' th lagi)
+                                      </span>';
+                      } elseif ($perlu_reminder_1_tahun) {
+                          $badges[] = '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> 1 Th Belum Terkirim</span>';
+                      }
+                      
+                      // --- 1 Bulan ---
+                      if ($row['reminder_1_bulan_terkirim'] > 0) {
+                          $badges[] = '<span class="badge bg-success"><i class="fas fa-check"></i> 1 Bl Terkirim</span>';
+                      } elseif ($hari > 40 && $hari <= 380) {
+                          // Sudah lewat window 1 tahun tapi belum masuk window 1 bulan
+                          $sisa_bulan = round($hari / 30);
+                          $badges[] = '<span class="badge bg-light text-secondary border" title="Reminder 1 bulan belum saatnya">
+                                          <i class="fas fa-hourglass-start"></i> 1 Bl (~' . $sisa_bulan . ' bl lagi)
+                                      </span>';
+                      } elseif ($perlu_reminder_1_bulan) {
+                          $badges[] = '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> 1 Bl Belum Terkirim</span>';
+                      }
+                      
+                      // --- 1 Minggu ---
+                      if ($row['reminder_1_minggu_terkirim'] > 0) {
+                          $badges[] = '<span class="badge bg-success"><i class="fas fa-check"></i> 1 Mg Terkirim</span>';
+                      } elseif ($hari > 10 && $hari <= 40) {
+                          $badges[] = '<span class="badge bg-light text-secondary border" title="Reminder 1 minggu belum saatnya">
+                                          <i class="fas fa-hourglass-start"></i> 1 Mg (~' . $hari . ' hari lagi)
+                                      </span>';
+                      } elseif ($perlu_reminder_1_minggu) {
+                          $badges[] = '<span class="badge bg-danger text-white"><i class="fas fa-clock"></i> 1 Mg Belum Terkirim</span>';
+                      }
+                      
+                      $reminderStatus = !empty($badges) 
+                          ? implode('<br>', $badges) 
+                          : '<span class="badge bg-secondary">Menunggu Approval</span>';
                   }
-                  
-                  if ($row['reminder_1_bulan_terkirim'] > 0) {
-                      $badges[] = '<span class="badge bg-info" title="Reminder 1 Bulan Terkirim"><i class="fas fa-check"></i> 1 Bl</span>';
-                  } else if ($perlu_reminder_1_bulan) {
-                      $badges[] = '<span class="badge bg-warning text-dark" title="Perlu Kirim Reminder 1 Bulan"><i class="fas fa-exclamation"></i> 1 Bl</span>';
-                  }
-                  
-                  if ($row['reminder_1_minggu_terkirim'] > 0) {
-                      $badges[] = '<span class="badge bg-info" title="Reminder 1 Minggu Terkirim"><i class="fas fa-check"></i> 1 Mg</span>';
-                  } else if ($perlu_reminder_1_minggu) {
-                      $badges[] = '<span class="badge bg-danger text-white" title="Perlu Kirim Reminder 1 Minggu"><i class="fas fa-exclamation"></i> 1 Mg</span>';
-                  }
-                  
-                  $reminderStatus = !empty($badges) ? implode('<br>', $badges) : '<span class="badge bg-secondary">-</span>';
               } else {
-                  $reminderStatus = '<span class="badge bg-secondary">-</span>';
+                  // Belum disetujui
+                  $reminderStatus = !empty($badges) 
+                          ? '<div style="display:flex; flex-direction:column; gap:4px;">' . implode('', $badges) . '</div>'
+                          : '<span class="badge bg-secondary">Menunggu Approval</span>';
               }
               
               // Data attributes untuk filter
@@ -312,26 +342,46 @@ $result = $koneksi->query($query);
                   <?php if ($row['status'] === 'disetujui' && !empty($row['nomor_wa'])): ?>
                     <div class="mb-2">
                       <small class="d-block text-muted mb-1"><strong>Reminder:</strong></small>
-                      <?php if ($perlu_reminder_1_tahun && $row['reminder_1_tahun_terkirim'] == 0): ?>
-                        <button onclick="kirimReminder(<?= $row['id'] ?>, '1_tahun')" 
-                                class="btn btn-info btn-sm mb-1" style="width: 100px;" title="Kirim Reminder 1 Tahun">
-                          <i class="fas fa-bell"></i> 1 Tahun
-                        </button>
+                      
+                      <?php if ($perlu_reminder_1_tahun): ?>
+                        <?php if ($row['reminder_1_tahun_terkirim'] == 0): ?>
+                          <button onclick="kirimReminder(<?= $row['id'] ?>, '1_tahun')" 
+                                  class="btn btn-info btn-sm mb-1" style="width: 110px;">
+                            <i class="fas fa-bell"></i> 1 Tahun
+                          </button>
+                        <?php else: ?>
+                          <span class="badge bg-success d-block mb-1" style="width: 110px; padding: 6px;">
+                            <i class="fas fa-check"></i> 1 Th Terkirim
+                          </span>
+                        <?php endif; ?>
                       <?php endif; ?>
                       
-                      <?php if ($perlu_reminder_1_bulan && $row['reminder_1_bulan_terkirim'] == 0): ?>
-                        <button onclick="kirimReminder(<?= $row['id'] ?>, '1_bulan')" 
-                                class="btn btn-warning btn-sm mb-1" style="width: 100px;" title="Kirim Reminder 1 Bulan">
-                          <i class="fas fa-bell"></i> 1 Bulan
-                        </button>
+                      <?php if ($perlu_reminder_1_bulan): ?>
+                        <?php if ($row['reminder_1_bulan_terkirim'] == 0): ?>
+                          <button onclick="kirimReminder(<?= $row['id'] ?>, '1_bulan')" 
+                                  class="btn btn-warning btn-sm mb-1" style="width: 110px;">
+                            <i class="fas fa-bell"></i> 1 Bulan
+                          </button>
+                        <?php else: ?>
+                          <span class="badge bg-success d-block mb-1" style="width: 110px; padding: 6px;">
+                            <i class="fas fa-check"></i> 1 Bl Terkirim
+                          </span>
+                        <?php endif; ?>
                       <?php endif; ?>
                       
-                      <?php if ($perlu_reminder_1_minggu && $row['reminder_1_minggu_terkirim'] == 0): ?>
-                        <button onclick="kirimReminder(<?= $row['id'] ?>, '1_minggu')" 
-                                class="btn btn-danger btn-sm mb-1" style="width: 100px;" title="Kirim Reminder 1 Minggu">
-                          <i class="fas fa-bell"></i> 1 Minggu
-                        </button>
+                      <?php if ($perlu_reminder_1_minggu): ?>
+                        <?php if ($row['reminder_1_minggu_terkirim'] == 0): ?>
+                          <button onclick="kirimReminder(<?= $row['id'] ?>, '1_minggu')" 
+                                  class="btn btn-danger btn-sm mb-1" style="width: 110px;">
+                            <i class="fas fa-bell"></i> 1 Minggu
+                          </button>
+                        <?php else: ?>
+                          <span class="badge bg-success d-block mb-1" style="width: 110px; padding: 6px;">
+                            <i class="fas fa-check"></i> 1 Mg Terkirim
+                          </span>
+                        <?php endif; ?>
                       <?php endif; ?>
+                      
                     </div>
                   <?php endif; ?>
                   
@@ -408,10 +458,8 @@ $result = $koneksi->query($query);
 </main>
 
 <script>
-// Store current filter
 let currentFilter = 'all';
 
-// Update badge saat halaman load
 document.addEventListener('DOMContentLoaded', function() {
   updateBadges();
 });
@@ -422,7 +470,6 @@ function confirmDelete(id, nomor) {
   }
 }
 
-// Fungsi kirim reminder
 function kirimReminder(id, jenis) {
   const jenisLabel = {
     '1_tahun': '1 Tahun',
@@ -430,38 +477,70 @@ function kirimReminder(id, jenis) {
     '1_minggu': '1 Minggu'
   };
   
-  if (!confirm(`Kirim reminder ${jenisLabel[jenis]} sebelum pensiun ke pegawai ini?`)) {
-    return;
-  }
-  
-  showAlertWA('info', '<i class="fas fa-spinner fa-spin"></i> Mengirim reminder WhatsApp...');
-  
-  fetch('api/kirim_reminder_pensiun.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ 
-      id_usulan_pensiun: id,
-      jenis_reminder: jenis
+  Swal.fire({
+    title: 'Kirim Reminder?',
+    text: `Kirim reminder ${jenisLabel[jenis]} sebelum pensiun ke pegawai ini via WhatsApp?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: '<i class="fas fa-paper-plane"></i> Ya, Kirim!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: 'Mengirim...',
+      text: 'Sedang mengirim reminder WhatsApp',
+      icon: 'info',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    fetch('api/kirim_reminder_pensiun.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        id_usulan_pensiun: id,
+        jenis_reminder: jenis
+      })
     })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showAlertWA('success', '<i class="fas fa-check-circle"></i> ' + data.message);
-      setTimeout(() => location.reload(), 2000);
-    } else {
-      showAlertWA('danger', '<i class="fas fa-times-circle"></i> ' + data.message);
-    }
-  })
-  .catch(error => {
-    showAlertWA('danger', '<i class="fas fa-times-circle"></i> Terjadi kesalahan saat mengirim reminder');
-    console.error('Error:', error);
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Terkirim!',
+          text: data.message,
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        }).then(() => {
+          window.location.href = 'usulan_pensiun.php';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal!',
+          text: data.message,
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Terjadi kesalahan koneksi, coba lagi.',
+        confirmButtonColor: '#dc3545'
+      });
+    });
   });
 }
 
-// Fungsi filter tabel (gabungan pencarian + filter tab)
 function filterTable() {
   const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
   const rows = document.querySelectorAll('#tablePensiun tbody tr:not(#emptyRow)');
@@ -475,13 +554,11 @@ function filterTable() {
     const rowSumber = row.getAttribute('data-sumber');
     const rowReminder = row.getAttribute('data-reminder');
     
-    // Cek pencarian
     const matchSearch = searchValue === '' || 
                        nama.includes(searchValue) || 
                        nip.includes(searchValue) || 
                        nomorUsulan.includes(searchValue);
     
-    // Cek filter status/tab
     let matchFilter = false;
     if (currentFilter === 'all') {
       matchFilter = true;
@@ -497,7 +574,6 @@ function filterTable() {
       matchFilter = (rowStatus === currentFilter);
     }
     
-    // Tampilkan jika semua kondisi terpenuhi
     if (matchSearch && matchFilter) {
       row.style.display = '';
       visibleCount++;
@@ -506,27 +582,20 @@ function filterTable() {
     }
   });
   
-  // Update badge tampil
-  document.getElementById('badgeTampil').textContent = 'Ditampilkan: ' + visibleCount;
-  
-  // Show/hide empty row
   const emptyRow = document.getElementById('emptyRow');
   if (emptyRow) {
-    emptyRow.style.display = visibleCount === 0 && rows.length > 0 ? '' : 'none';
+    emptyRow.style.display = visibleCount === 0 ? '' : 'none';
   }
 }
 
-// Fungsi filter status (dari tab)
 function filterStatus(filter, element) {
   currentFilter = filter;
   
-  // Update active nav
   document.querySelectorAll('.nav-pills .nav-link').forEach(link => {
     link.classList.remove('active');
   });
   element.classList.add('active');
   
-  // Show/hide info box
   const infoBox = document.getElementById('reminderInfo');
   const infoText = document.getElementById('reminderInfoText');
   
@@ -543,55 +612,38 @@ function filterStatus(filter, element) {
     infoBox.style.display = 'none';
   }
   
-  // Trigger filter dengan pencarian yang ada
   filterTable();
 }
 
-// Fungsi reset pencarian
 function resetSearch() {
   document.getElementById('searchInput').value = '';
   filterTable();
 }
 
-// Fungsi update badges
 function updateBadges() {
   const rows = document.querySelectorAll('#tablePensiun tbody tr:not(#emptyRow)');
   
-  let total = rows.length;
-  let disetujui = 0;
-  let diajukan = 0;
-  let draft = 0;
   let reminder1Tahun = 0;
   let reminder1Bulan = 0;
   let reminder1Minggu = 0;
   
   rows.forEach(row => {
-    const status = row.getAttribute('data-status');
     const reminder = row.getAttribute('data-reminder');
-    
-    if (status === 'disetujui') disetujui++;
-    if (status === 'diajukan') diajukan++;
-    if (status === 'draft') draft++;
     if (reminder === 'reminder_1_tahun') reminder1Tahun++;
     if (reminder === 'reminder_1_bulan') reminder1Bulan++;
     if (reminder === 'reminder_1_minggu') reminder1Minggu++;
   });
+
+  // Hanya update elemen yang benar-benar ada di HTML
+  const b1t = document.getElementById('badge1Tahun');
+  const b1b = document.getElementById('badge1Bulan');
+  const b1m = document.getElementById('badge1Minggu');
   
-  document.getElementById('badgeTotal').textContent = 'Total: ' + total;
-  document.getElementById('badgeDisetujui').textContent = 'Disetujui: ' + disetujui;
-  document.getElementById('badgeDiajukan').textContent = 'Diajukan: ' + diajukan;
-  document.getElementById('badgeDraft').textContent = 'Draft: ' + draft;
-  document.getElementById('badgeReminder1Tahun').textContent = 'Reminder 1 Tahun: ' + reminder1Tahun;
-  document.getElementById('badgeReminder1Minggu').textContent = 'Reminder 1 Minggu: ' + reminder1Minggu;
-  document.getElementById('badgeTampil').textContent = 'Ditampilkan: ' + total;
-  
-  // Update badge di tab juga
-  document.getElementById('badge1Tahun').textContent = reminder1Tahun;
-  document.getElementById('badge1Bulan').textContent = reminder1Bulan;
-  document.getElementById('badge1Minggu').textContent = reminder1Minggu;
+  if (b1t) b1t.textContent = reminder1Tahun;
+  if (b1b) b1b.textContent = reminder1Bulan;
+  if (b1m) b1m.textContent = reminder1Minggu;
 }
 
-// Helper functions
 function showAlertWA(type, message) {
   const alertClass = type === 'success' ? 'alert-success' : 
                      type === 'danger' ? 'alert-danger' : 'alert-info';
@@ -613,16 +665,6 @@ function showAlertWA(type, message) {
     }
   }, 5000);
 }
-
-
-if (!response.success) {
-    if (response.type === 'warning') {
-        showNotification('warning', response.message); // tampil kuning
-    } else {
-        showNotification('error', response.message);   // tampil merah
-    }
-}
-
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

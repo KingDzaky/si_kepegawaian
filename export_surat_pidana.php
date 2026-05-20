@@ -159,7 +159,6 @@ function format_nip($nip) {
         .title-line1 {
             font-size: 12pt;
             font-weight: bold;
-            text-decoration: underline;
         }
 
         .nomor-surat {

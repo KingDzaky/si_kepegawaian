@@ -52,6 +52,7 @@ $nomor_wa = trim($_POST['nomor_wa'] ?? '');
 $pangkat_terakhir = trim($_POST['pangkat_terakhir'] ?? '');
 $golongan = trim($_POST['golongan'] ?? '');
 $tmt_pangkat = trim($_POST['tmt_pangkat'] ?? '');
+$tmt_pangkat_awal = trim($_POST['tmt_pangkat_awal'] ?? ''); // kosong = pakai tmt_pangkat
 $jabatan_terakhir = trim($_POST['jabatan_terakhir'] ?? '');
 $eselon = trim($_POST['eselon'] ?? '');
 $jenis_jabatan = trim($_POST['jenis_jabatan'] ?? '');
@@ -146,7 +147,8 @@ $sql = "UPDATE duk
             nomor_wa = ?,
             pangkat_terakhir = ?, 
             golongan = ?, 
-            tmt_pangkat = ?, 
+            tmt_pangkat = ?,
+            tmt_pangkat_awal = ?,
             jabatan_terakhir = ?, 
             eselon = ?, 
             jenis_jabatan = ?,
@@ -164,8 +166,11 @@ if (!$stmt) {
     exit;
 }
 
+// Kalau tmt_pangkat_awal dikosongkan → pakai tmt_pangkat
+$tmt_pangkat_awal_final = !empty($tmt_pangkat_awal) ? $tmt_pangkat_awal : $tmt_pangkat;
+
 $stmt->bind_param(
-    'sssssssssssssssssii',
+    'ssssssssssssssssssii',
     $nama,
     $nip,
     $kartu_pegawai,
@@ -177,6 +182,7 @@ $stmt->bind_param(
     $pangkat_terakhir,
     $golongan,
     $tmt_pangkat,
+    $tmt_pangkat_awal_final,
     $jabatan_terakhir,
     $eselon,
     $jenis_jabatan,

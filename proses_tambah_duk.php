@@ -34,6 +34,7 @@ $nomor_wa = trim($_POST['nomor_wa'] ?? '');
 $pangkat_terakhir = trim($_POST['pangkat_terakhir'] ?? '');
 $golongan = trim($_POST['golongan'] ?? '');
 $tmt_pangkat = trim($_POST['tmt_pangkat'] ?? '');
+$tmt_pangkat_awal = trim($_POST['tmt_pangkat_awal'] ?? ''); // kosong = sama dengan tmt_pangkat
 $jabatan_terakhir = trim($_POST['jabatan_terakhir'] ?? '');
 $eselon = trim($_POST['eselon'] ?? '');
 $jenis_jabatan = trim($_POST['jenis_jabatan'] ?? '');
@@ -167,43 +168,19 @@ if ($eselon === 'Non-Eselon') {
 // ==================== SANITASI DATA ====================
 $nip = empty($nip) ? null : $nip;
 
+// Kalau tmt_pangkat_awal dikosongkan → pakai tmt_pangkat
+$tmt_pangkat_awal_final = !empty($tmt_pangkat_awal) ? $tmt_pangkat_awal : $tmt_pangkat;
+
 // ==================== INSERT KE DATABASE ====================
-// ✅ PENTING: Ini INSERT, bukan UPDATE!
 $sql = "INSERT INTO duk (
-    nama,
-    nip,
-    kartu_pegawai,
-    ttl,
-    jenis_kelamin,
-    pendidikan_terakhir,
-    prodi,
-    nomor_wa,
-    pangkat_terakhir,
-    golongan,
+    nama, nip, kartu_pegawai, ttl, jenis_kelamin,
+    pendidikan_terakhir, prodi, nomor_wa,
+    pangkat_terakhir, golongan,
     tmt_pangkat,
-    jabatan_terakhir,
-    eselon,
-    jenis_jabatan,
-    jft_tingkat,
-    jfu_kelas,
-    tmt_eselon,
-    id_opd,
-    created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-
-// Cek duplikat nomor_usulan sebelum INSERT
-$cek = $koneksi->prepare("SELECT id FROM duk WHERE nip = ?");
-$cek->bind_param("s", $nomor_usulan);
-$cek->execute();
-$cek->store_result();
-
-if ($cek->num_rows > 0) {
-    $cek->close();
-    alertGagal('form_tambah_duk.php', 
-        'Nip sudah digunakan! Silakan gunakan nomor lain.');
-    exit;
-}
-$cek->close();
+    tmt_pangkat_awal,
+    jabatan_terakhir, eselon, jenis_jabatan,
+    jft_tingkat, jfu_kelas, tmt_eselon, id_opd, created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
 $stmt = $koneksi->prepare($sql);
 
@@ -213,27 +190,15 @@ if (!$stmt) {
     exit;
 }
 
-// ✅ Bind 18 parameter
 $stmt->bind_param(
-    'sssssssssssssssssi',  // 17 x string, 1 x integer (id_opd)
-    $nama,
-    $nip,
-    $kartu_pegawai,
-    $ttl,
-    $jenis_kelamin,
-    $pendidikan_terakhir,
-    $prodi,
-    $nomor_wa_clean,
-    $pangkat_terakhir,
-    $golongan,
+    'ssssssssssssssssssi',  // 18 x string, 1 x integer
+    $nama, $nip, $kartu_pegawai, $ttl, $jenis_kelamin,
+    $pendidikan_terakhir, $prodi, $nomor_wa_clean,
+    $pangkat_terakhir, $golongan,
     $tmt_pangkat,
-    $jabatan_terakhir,
-    $eselon,
-    $jenis_jabatan,
-    $jft_tingkat,
-    $jfu_kelas,
-    $tmt_eselon,
-    $id_opd
+    $tmt_pangkat_awal_final,
+    $jabatan_terakhir, $eselon, $jenis_jabatan,
+    $jft_tingkat, $jfu_kelas, $tmt_eselon, $id_opd
 );
 
 if ($stmt->execute()) {

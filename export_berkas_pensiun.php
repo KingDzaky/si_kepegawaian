@@ -72,6 +72,11 @@ $tahun = date('Y');
 $bulan_romawi = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 $bulan_sekarang = $bulan_romawi[(int)date('n')];
 
+$bulan_romawi_indo = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
 $nomor_pengantar = "800.1.6.6/" . str_pad($id, 3, '0', STR_PAD_LEFT) . "/SET-DPPKBPM/$bulan_sekarang/$tahun";
 $nomor_pengantar_pkb = "800.1.11.2/DPPKBPM/$tahun";
 $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
@@ -182,7 +187,6 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         
         .nomor-surat h3 {
             margin: 5px 0;
-            text-decoration: underline;
             font-size: 12pt;
             font-weight: bold;
         }
@@ -241,6 +245,21 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         /* Page Break */
         .page-break {
             page-break-after: always;
+        }
+
+        /* Styling untuk isian manual (jika diperlukan) */
+
+                .isian-manual {
+            display: inline-block;
+            min-width: 45px;
+            border-bottom: 1px solid #000;
+            margin: 0 3px;
+        }
+        .isian-manual-panjang {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 1px solid #000;
+            margin: 0 3px;
         }
         
         /* No Print Elements */
@@ -547,7 +566,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     
     <!-- Tanggal -->
     <div class="tanggal-surat">
-        <p>Banjarmasin, <?= tanggal_indonesia(date('Y-m-d')) ?></p>
+    <p>Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?></p>
     </div>
     
     <!-- Kepada -->
@@ -561,7 +580,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     <!-- Nomor Surat -->
     <div class="nomor-surat">
         <h3>SURAT PENGANTAR</h3>
-        <p>NOMOR : <?= $nomor_pengantar_pkb ?></p>
+        <p>NOMOR : 800.1.11.2/<span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/DPPKBPM-BJM/<?= date('Y') ?></p>
     </div>
     
     <!-- Tabel -->
@@ -578,7 +597,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
             <tr>
                 <td>1.</td>
                 <td>
-                    Permohonan Cuti<br>
+                    Permohonan Pensiun<br>
                     <?= htmlspecialchars($data['nama']) ?><br>
                     Nip. <?= htmlspecialchars($data['nip']) ?>
                 </td>
@@ -598,7 +617,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         <tr>
             <td style="width: 50%;"></td>
             <td style="width: 50%; text-align: left;">
-                <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, <?= tanggal_indonesia(date('Y-m-d')) ?></p>
+                <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= tanggal_indonesia(date('Y-m-d')) ?></p>
                 <p style="margin: 2px 0; line-height: 1.3;">Pengirim,</p>
                 <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
                 <div style="height: 60px;"></div>
@@ -641,7 +660,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         
         <!-- Tanggal -->
         <div class="tanggal-surat">
-            <p>Banjarmasin, <?= tanggal_indonesia(date('Y-m-d')) ?></p>
+        <p>Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?></p>
         </div>
         
         <!-- Kepada -->
@@ -654,7 +673,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         <!-- Nomor Surat -->
         <div class="nomor-surat">
             <h3>SURAT PENGANTAR</h3>
-            <p>NOMOR : <?= $nomor_pengantar ?></p>
+            <p>NOMOR : 800.1.6.6/<span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/SET-DPPKBPM/<?= $bulan_sekarang ?>/<?= date('Y') ?></p>
         </div>
         
         <!-- Tabel -->
@@ -690,7 +709,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
             <tr>
                 <td style="width: 50%;"></td>
                 <td style="width: 50%; text-align: left;">
-                    <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, <?= tanggal_indonesia(date('Y-m-d')) ?></p>
+                <p>Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;">Pengirim,</p>
                     <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
                     <div style="height: 60px;"></div>
@@ -741,7 +760,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
             <h3 style="margin: 5px 0;">SURAT PERNYATAN</h3>
             <h3 style="margin: 5px 0; font-size: 11pt;">TIDAK SEDANG MENJALANI PROSES PIDANA ATAU PERNAH DIPIDANA PENJARA</h3>
             <h3 style="margin: 5px 0; font-size: 11pt;">BERDASARKAN PUTUSAN PENGADILAN YANG TELAH BERKEKUATAN HUKUM TETAP</h3>
-            <p style="margin-top: 10px;">NOMOR : <?= $nomor_pernyataan ?></p>
+            <p>NOMOR : 800.1.6.6/-SEKR/<span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>/DPPKBPM-BJM/<?= date('Y') ?></p>
         </div>
         
         <!-- Isi Surat -->
@@ -816,7 +835,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
             <tr>
                 <td style="width: 50%;"></td>
                 <td style="width: 50%; text-align: left;">
-                    <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, <?= tanggal_indonesia(date('Y-m-d')) ?></p>
+                <p>Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala DPPKBPM,</strong></p>
                     <div style="height: 60px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">

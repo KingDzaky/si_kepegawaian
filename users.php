@@ -20,9 +20,10 @@ require_once 'includes/sidebar.php';
     ============================================================ */
 
     .main-content {
-        padding: 20px;
-        margin-left: 250px;
-        transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 400px); /* sesuaikan 200px dengan tinggi footer */
+    padding: 20px;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
     }
 
     /* ===== PAGE HEADER ===== */
@@ -371,6 +372,8 @@ require_once 'includes/sidebar.php';
         .users-container .action-buttons {
             justify-content: center;
         }
+
+        
     }
 </style>
 

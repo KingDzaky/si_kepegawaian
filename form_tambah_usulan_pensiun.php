@@ -46,8 +46,9 @@ $duk_list = $koneksi->query($query_duk);
 
 // Ambil data Penyuluh untuk dropdown
 $query_penyuluh = "SELECT id, nip, nama, ttl, pangkat_terakhir, golongan, jabatan_terakhir, 
-                   pendidikan_terakhir, prodi, jenis_kelamin, '' as nomor_wa, '' as kartu_pegawai, tmt_pangkat
-                   FROM penyuluh 
+                   pendidikan_terakhir, prodi, jenis_kelamin, nomor_wa, '' as kartu_pegawai, tmt_pangkat
+                   FROM penyuluh
+                   WHERE deleted_at IS NULL AND status_pegawai = 'aktif'
                    ORDER BY nama ASC";
 $penyuluh_list = $koneksi->query($query_penyuluh);
 ?>
@@ -210,7 +211,7 @@ $penyuluh_list = $koneksi->query($query_penyuluh);
                         data-pendidikan="<?= htmlspecialchars($penyuluh['pendidikan_terakhir']) ?>"
                         data-prodi="<?= htmlspecialchars($penyuluh['prodi']) ?>"
                         data-jk="<?= $penyuluh['jenis_kelamin'] ?>"
-                        data-wa="">
+                        data-wa="<?= htmlspecialchars($penyuluh['nomor_wa'] ?? '') ?>">  
                   <?= htmlspecialchars($penyuluh['nama']) ?> - <?= $penyuluh['nip'] ?>
                 </option>
               <?php endwhile; ?>

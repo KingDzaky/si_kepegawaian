@@ -157,7 +157,7 @@ function kirim_notifikasi_kenaikan_pangkat($koneksi, $id_kenaikan_pangkat) {
     $stmt = $koneksi->prepare("
         SELECT kp.*, d.nomor_wa
         FROM kenaikan_pangkat kp
-        LEFT JOIN duk d ON kp.nip = d.nip
+        LEFT JOIN duk d ON kp.nip = d.nip AND d.deleted_at IS NULL
         WHERE kp.id = ?
         LIMIT 1
     ");

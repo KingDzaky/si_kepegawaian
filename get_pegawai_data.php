@@ -39,6 +39,7 @@ $query = "SELECT
     d.pangkat_terakhir,
     d.golongan,
     d.tmt_pangkat,
+    d.tmt_pangkat_awal,
     d.jabatan_terakhir,
     d.id_opd,
     d.status_pegawai,
@@ -138,29 +139,7 @@ $cek_aktif->execute();
 $usulan_aktif = $cek_aktif->get_result()->fetch_assoc();
 $cek_aktif->close();
 
-if ($usulan_aktif) {
-    $status_aktif = $usulan_aktif['status'];
-    $no_usulan    = $usulan_aktif['nomor_usulan'];
-    $tmt_baru     = date('d/m/Y', strtotime($usulan_aktif['tmt_pangkat_baru']));
 
-    $pesan = "Pegawai ini masih memiliki usulan kenaikan pangkat yang <strong>{$status_aktif}</strong> "
-           . "(No: {$no_usulan}, TMT Baru: {$tmt_baru}). ";
-
-    if ($status_aktif === 'disetujui') {
-        $pesan .= "Silakan klik tombol <strong>'SK Terbit'</strong> di halaman approval "
-               . "untuk mengonfirmasi SK BKN sudah keluar sebelum membuat usulan baru.";
-    } else {
-        $pesan .= "Selesaikan atau batalkan usulan tersebut terlebih dahulu.";
-    }
-
-    $koneksi->close();
-    echo json_encode([
-        'success' => false,
-        'type'    => 'warning',
-        'message' => $pesan
-    ]);
-    exit;
-}
 
 // ========================================
 // PARSE TTL — handle berbagai format
@@ -223,19 +202,28 @@ if (!empty($pegawai['ttl'])) {
 // Karena DUK hanya diupdate setelah SK terbit (proses_sk_terbit.php),
 // nilai tmt_pangkat selalu merupakan TMT pangkat yang sedang berjalan.
 // ========================================
+// GANTI SELURUH BAGIAN HITUNG MASA KERJA
 $mk_tahun_lama = 0;
 $mk_bulan_lama = 0;
 
-if (!empty($pegawai['tmt_pangkat'])) {
-    $tmt = new DateTime($pegawai['tmt_pangkat']);
-    $now = new DateTime();
+// Gunakan tmt_pangkat_awal jika tmt_pangkat adalah masa depan
+$tmt_untuk_hitung = $pegawai['tmt_pangkat'];
 
-    // Jika TMT pangkat lebih dari hari ini (masa depan),
-    // masa kerja = 0 karena belum mulai berjalan
-    if ($tmt > $now) {
-        $mk_tahun_lama = 0;
-        $mk_bulan_lama = 0;
-    } else {
+if (!empty($pegawai['tmt_pangkat_awal'])) {
+    $tmt_obj = new DateTime($pegawai['tmt_pangkat']);
+    $now_obj  = new DateTime();
+    
+    // Jika tmt_pangkat adalah masa depan, pakai tmt_pangkat_awal
+    if ($tmt_obj > $now_obj) {
+        $tmt_untuk_hitung = $pegawai['tmt_pangkat_awal'];
+    }
+}
+
+if (!empty($tmt_untuk_hitung)) {
+    $tmt  = new DateTime($tmt_untuk_hitung);
+    $now  = new DateTime();
+    
+    if ($tmt <= $now) {
         $diff = $tmt->diff($now);
         $mk_tahun_lama = $diff->y;
         $mk_bulan_lama = $diff->m;
@@ -280,6 +268,7 @@ echo json_encode([
         'pangkat_lama'          => $pegawai['pangkat_terakhir'],
         'golongan_lama'         => $pegawai['golongan'],
         'tmt_pangkat_lama'      => $pegawai['tmt_pangkat'],
+        'tmt_pangkat_awal'      => $pegawai['tmt_pangkat_awal'],
         'jabatan_lama'          => $pegawai['jabatan_terakhir'],
         'masa_kerja_tahun_lama' => $mk_tahun_lama,
         'masa_kerja_bulan_lama' => $mk_bulan_lama,

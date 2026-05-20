@@ -275,19 +275,10 @@ $masaKerjaPangkat = hitungMasaKerja($penyuluh['tmt_pangkat']);
 
                     <div class="info-item">
                       <div class="info-label">
-                        <i class="fas fa-home me-2"></i>Alamat
-                      </div>
-                      <div class="info-value">
-                        <?= !empty($penyuluh['alamat']) ? htmlspecialchars($penyuluh['alamat']) : '<span class="text-muted">Belum diisi</span>' ?>
-                      </div>
-                    </div>
-
-                    <div class="info-item">
-                      <div class="info-label">
                         <i class="fas fa-phone me-2"></i>No. Telepon
                       </div>
                       <div class="info-value">
-                        <?= !empty($penyuluh['no_telepon']) ? htmlspecialchars($penyuluh['no_telepon']) : '<span class="text-muted">Belum diisi</span>' ?>
+                        <?= !empty($penyuluh['nomor_wa']) ? htmlspecialchars($penyuluh['nomor_wa']) : '<span class="text-muted">Belum diisi</span>' ?>
                       </div>
                     </div>
                   </div>
@@ -310,7 +301,7 @@ $masaKerjaPangkat = hitungMasaKerja($penyuluh['tmt_pangkat']);
                       <div class="timeline-content">
                         <h6>Pangkat</h6>
                         <p class="mb-1">
-                          <strong><?= htmlspecialchars($penyuluh['pangkat'] ?? 'Belum ditetapkan') ?></strong>
+                          <strong><?= htmlspecialchars($penyuluh['pangkat_terakhir'] ?? 'Belum ditetapkan') ?></strong>
                         </p>
                         <small class="text-muted">
                           <i class="fas fa-calendar me-1"></i>
@@ -349,9 +340,9 @@ $masaKerjaPangkat = hitungMasaKerja($penyuluh['tmt_pangkat']);
                         <i class="fas fa-map-marker-alt"></i>
                       </div>
                       <div class="timeline-content">
-                        <h6>Unit Kerja</h6>
+                        <h6>Jabatan Terakhir</h6>
                         <p class="mb-1">
-                          <strong><?= htmlspecialchars($penyuluh['unit_kerja'] ?? 'Belum ditetapkan') ?></strong>
+                          <strong><?= htmlspecialchars($penyuluh['jabatan_terakhir'] ?? 'Belum ditetapkan') ?></strong>
                         </p>
                       </div>
                     </div>
@@ -970,7 +961,7 @@ function shareProfile() {
 
 // Contact employee (placeholder)
 function contactEmployee() {
-  const phone = '<?= $penyuluh['no_telepon'] ?? '' ?>';
+  const phone = '<?= $penyuluh['nomor_wa'] ?? '' ?>';
   if (phone) {
     window.location.href = 'tel:' + phone;
   } else {

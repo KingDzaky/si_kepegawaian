@@ -629,3 +629,8 @@ body {
   #dukTable tbody tr {
     animation: fadeInUp 0.3s ease;
   }
+
+  #tablePensiun td .badge {
+    display: inline-block;
+    margin-bottom: 4px;
+}

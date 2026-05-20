@@ -102,7 +102,7 @@ $stmt->close();
 
     .main-content .form-control:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #2c3e50;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
 
@@ -131,7 +131,7 @@ $stmt->close();
         align-items: center;
         gap: 8px;
         text-decoration: none;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%);
         color: white;
     }
 
@@ -199,7 +199,7 @@ $stmt->close();
     }
 
     .main-content .toggle-password:hover {
-        color: #667eea;
+        color: #2c3e50;
     }
 
     /* ===== DIVIDER SECTION ===== */
@@ -374,7 +374,7 @@ $stmt->close();
                 icon: 'warning',
                 title: 'Perhatian',
                 text: 'Nama lengkap minimal 3 karakter!',
-                confirmButtonColor: '#667eea'
+                confirmButtonColor: '#2c3e50'
             });
             return false;
         }
@@ -387,7 +387,7 @@ $stmt->close();
                     icon: 'warning',
                     title: 'Perhatian',
                     text: 'Password baru minimal 6 karakter!',
-                    confirmButtonColor: '#667eea'
+                    confirmButtonColor: '#2c3e50'
                 });
                 return false;
             }
@@ -398,7 +398,7 @@ $stmt->close();
                     icon: 'error',
                     title: 'Password Tidak Cocok',
                     text: 'Password baru dan konfirmasi password tidak sama!',
-                    confirmButtonColor: '#667eea'
+                    confirmButtonColor: '#2c3e50'
                 });
                 return false;
             }

@@ -286,7 +286,7 @@ function val($field, $data, $default = '') {
                     <div class="form-group fade-in">
                       <label for="tmt_pangkat" class="form-label">
                         <i class="fas fa-calendar-alt"></i>
-                        TMT Pangkat
+                        TMT Pangkat Terakhir
                       </label>
                       <div class="input-group">
                         <input type="date" name="tmt_pangkat" id="tmt_pangkat" class="form-control" 
@@ -294,6 +294,27 @@ function val($field, $data, $default = '') {
                                data-original="<?= htmlspecialchars($data['tmt_pangkat'] ?? '') ?>">
                         <span class="change-indicator"><i class="fas fa-edit"></i></span>
                       </div>
+                      <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        TMT pangkat terakhir (diperbarui otomatis saat kenaikan pangkat disetujui)
+                      </small>
+                    </div>
+
+                    <div class="form-group fade-in">
+                      <label for="tmt_pangkat_awal" class="form-label">
+                        <i class="fas fa-calendar-check"></i>
+                        TMT Pangkat Awal <span class="text-muted fw-normal">(untuk hitung masa kerja)</span>
+                      </label>
+                      <div class="input-group">
+                        <input type="date" name="tmt_pangkat_awal" id="tmt_pangkat_awal" class="form-control" 
+                               value="<?= htmlspecialchars($data['tmt_pangkat_awal'] ?? '') ?>"
+                               data-original="<?= htmlspecialchars($data['tmt_pangkat_awal'] ?? '') ?>">
+                        <span class="change-indicator"><i class="fas fa-edit"></i></span>
+                      </div>
+                      <small class="text-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Isi sesuai SK. Contoh: jika masa kerja 17 tahun tapi SK memotong 3 tahun → isi TMT yang menghasilkan 14 tahun. Dikosongkan = otomatis pakai TMT Pangkat Terakhir.
+                      </small>
                     </div>
                   </div>
 

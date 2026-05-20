@@ -84,7 +84,7 @@ require_once 'includes/sidebar.php';
 
     .main-content .form-control:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #2c3e50;
         box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
 
@@ -124,7 +124,7 @@ require_once 'includes/sidebar.php';
     }
 
     .main-content .toggle-password:hover {
-        color: #667eea;
+        color: #2c3e50;
     }
 
     /* ===== SECTION DIVIDER ===== */
@@ -163,7 +163,7 @@ require_once 'includes/sidebar.php';
         align-items: center;
         gap: 8px;
         text-decoration: none;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%);
         color: white;
     }
 
