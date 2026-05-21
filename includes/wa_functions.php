@@ -198,7 +198,7 @@ function kirim_notifikasi_kenaikan_pangkat($koneksi, $id_kenaikan_pangkat) {
     }
 
     $pesan .= "Silakan login ke sistem untuk melihat detail lengkap.\n";
-    $pesan .= "\n---\nPesan otomatis dari Sistem Informasi Kepegawaian\nDPPKBPM Kota Banjarmasin";
+    $pesan .= "\n---\nPesan otomatis dari Sistem Administrasi Kepegawaian\nDPPKBPM Kota Banjarmasin";
 
     $result = kirimWA($data['nomor_wa'], $pesan);
 
@@ -252,7 +252,7 @@ function kirim_reminder_kenaikan_pangkat($data) {
     $pesan .= "✅ Fotocopy ijazah terakhir yang dilegalisir\n";
     $pesan .= "✅ Pas foto terbaru 3x4 (2 lembar)\n\n";
     $pesan .= "Silakan hubungi bagian kepegawaian atau login ke sistem.\n\n";
-    $pesan .= "---\nPesan otomatis dari Sistem Informasi Kepegawaian\nDPPKBPM Kota Banjarmasin";
+    $pesan .= "---\nPesan otomatis dari Sistem Administrasi Kepegawaian\nDPPKBPM Kota Banjarmasin";
 
     return kirimWA($data['nomor_wa'], $pesan);
 }

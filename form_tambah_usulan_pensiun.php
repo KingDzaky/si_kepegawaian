@@ -260,10 +260,10 @@ $penyuluh_list = $koneksi->query($query_penyuluh);
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Tanggal Pensiun (Otomatis) <span class="text-danger">*</span></label>
+                <label class="form-label">Tanggal Pensiun (Otomatis) Atau Bisa Diubah Sesuai SK <span class="text-danger">*</span></label>
                 <input type="date" class="form-control bg-light" name="tanggal_pensiun" 
-                       id="tanggal_pensiun" readonly required>
-                <small class="text-muted">Otomatis: Tanggal Lahir + 60 tahun</small>
+                       id="tanggal_pensiun" required>
+                <small class="text-muted">Otomatis: Tanggal Lahir + 58 tahun</small>
               </div>
             </div>
             <div class="col-md-4">
@@ -447,7 +447,7 @@ function hitungTanggalPensiun() {
   
   const lahir = new Date(tglLahir);
   const pensiun = new Date(lahir);
-  pensiun.setFullYear(lahir.getFullYear() + 60);
+  pensiun.setFullYear(lahir.getFullYear() + 58); // Pensiun di usia 58 tahun
   
   // Format YYYY-MM-DD
   const year = pensiun.getFullYear();

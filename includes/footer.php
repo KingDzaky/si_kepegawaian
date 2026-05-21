@@ -24,7 +24,7 @@
                 <div class="logo-glow"></div>
               </div>
               <div class="brand-info">
-                <h6 class="brand-title mb-1">Sistem Informasi</h6>
+                <h6 class="brand-title mb-1">Sistem Administrasi</h6>
                 <small class="brand-subtitle">Kepegawaian Kota Banjarmasin</small>
               </div>
             </div>
@@ -39,16 +39,6 @@
               <a href="dashboard.php" class="footer-link">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
-                <div class="link-underline"></div>
-              </a>
-              <a href="dataduk.php" class="footer-link">
-                <i class="fas fa-users"></i>
-                <span>Data DUK</span>
-                <div class="link-underline"></div>
-              </a>
-              <a href="users.php" class="footer-link">
-                <i class="fas fa-user-cog"></i>
-                <span>Users</span>
                 <div class="link-underline"></div>
               </a>
               <a href="help.php" class="footer-link">
@@ -115,7 +105,7 @@
           <div class="col-md-6">
             <div class="copyright">
               <i class="fas fa-copyright"></i>
-              <span>2025 Sistem Informasi Kepegawaian</span>
+              <span>2025 Sistem Administrasi Kepegawaian DPPKBPM Kota Banjarmasin</span>
               <div class="version-badge">V.1</div>
             </div>
           </div>

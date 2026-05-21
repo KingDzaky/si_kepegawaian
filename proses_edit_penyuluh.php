@@ -116,12 +116,22 @@ if (!empty($nip)) {
 
 // ==================== VALIDASI NOMOR WA (Jika Diisi) ====================
 if (!empty($nomor_wa)) {
-    // Validasi format nomor WA Indonesia (08xxxxxxxxxx, 10-15 digit)
-    if (!preg_match('/^08\d{8,13}$/', $nomor_wa)) {
-        alertGagal("form_edit_penyuluh.php?id=$id", 'Format Nomor WhatsApp tidak valid. Harus diawali 08 dan terdiri dari 10-15 digit');
+    // Bersihkan karakter non-digit
+    $nomor_wa_clean = preg_replace('/[^0-9]/', '', $nomor_wa);
+    
+    // Terima format 08xxx ATAU 62xxx
+    if (!preg_match('/^(08|62)\d{8,13}$/', $nomor_wa_clean)) {
+        alertGagal("form_edit_penyuluh.php?id=$id", 'Format Nomor WhatsApp tidak valid. Harus diawali 08 atau 62 dan terdiri dari 10-15 digit');
     }
     
-    // Cek duplikasi Nomor WA (kecuali untuk data ini sendiri)
+    // Auto convert: 08xxx → 628xxx
+    if (substr($nomor_wa_clean, 0, 1) === '0') {
+        $nomor_wa_clean = '62' . substr($nomor_wa_clean, 1);
+    }
+    
+    $nomor_wa = $nomor_wa_clean;
+    
+    // Cek duplikasi (kecuali data ini sendiri)
     $check_wa = $koneksi->prepare("SELECT id, nama FROM penyuluh WHERE nomor_wa = ? AND id != ?");
     $check_wa->bind_param("si", $nomor_wa, $id);
     $check_wa->execute();

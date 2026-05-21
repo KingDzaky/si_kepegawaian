@@ -413,7 +413,6 @@ $golongan_list = [
                         <option value="diajukan"  <?= $data['status'] == 'diajukan'  ? 'selected' : '' ?>>Diajukan</option>
                         <option value="disetujui" <?= $data['status'] == 'disetujui' ? 'selected' : '' ?>>Disetujui</option>
                         <option value="ditolak"   <?= $data['status'] == 'ditolak'   ? 'selected' : '' ?>>Ditolak</option>
-                        <option value="sk_terbit" <?= $data['status'] == 'sk_terbit' ? 'selected' : '' ?>>✓ SK Terbit</option>
                       </select>
                     </div>
                   </div>

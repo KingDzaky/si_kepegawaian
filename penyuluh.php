@@ -40,7 +40,7 @@ $pendidikan_options = $koneksi->query("SELECT DISTINCT pendidikan_terakhir FROM 
       </div>
       <div class="header-text">
         <h1 class="dashboard-title">Data Penyuluh</h1>
-        <p class="dashboard-subtitle">Sistem Informasi Manajemen Data Penyuluh DPPKBPM</p>
+        <p class="dashboard-subtitle">Sistem Administrasi Manajemen Data Penyuluh DPPKBPM</p>
       </div>
     </div>
   </div>

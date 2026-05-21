@@ -36,7 +36,7 @@ define('FONNTE_API_URL', 'https://api.fonnte.com/send');
 // PENGATURAN UMUM
 // ============================================
 define('WA_SENDER_NAME', 'DPPKBPM Kota Banjarmasin');
-define('WA_SIGNATURE', "\n\n---\nPesan otomatis dari Sistem Informasi Kepegawaian\nDPPKBPM Kota Banjarmasin");
+define('WA_SIGNATURE', "\n\n---\nPesan otomatis dari Sistem Administrasi Kepegawaian\nDPPKBPM Kota Banjarmasin");
 
 /**
  * Template pesan notifikasi

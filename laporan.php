@@ -746,10 +746,6 @@ require_once 'includes/sidebar.php';
                                         <a href="?tahun=<?= date('Y') ?>&status=all" class="btn-export btn-primary">
                                             <i class="fas fa-sync"></i> Reset Filter
                                         </a>
-                                        <a href="?debug=1&tahun=<?= $filter_tahun ?>&status=<?= $filter_status ?>&search=<?= urlencode($search) ?>" 
-                                           class="btn-export" style="background: #ffc107; color: #333;">
-                                            <i class="fas fa-bug"></i> Mode Debug
-                                        </a>
                                     </div>
                                 </td>
                             </tr>

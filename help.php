@@ -518,20 +518,15 @@ require_once 'includes/sidebar.php';
             </h2>
             <div class="content-card">
               <h5>Apa itu Satya Lencana?</h5>
-              <p>Satya Lencana adalah penghargaan masa kerja pegawai ASN. Sistem secara <strong>otomatis mengkalkulasi</strong> kelayakan Satya Lencana berdasarkan data masa kerja yang ada di riwayat kenaikan pangkat.</p>
+              <p>Satya Lencana adalah penghargaan masa kerja pegawai ASN. Sistem secara <strong>otomatis mengexport</strong> kelayakan Satya Lencana berdasarkan data yang ada di riwayat kenaikan pangkat.</p>
 
               <h5 class="mt-4">Cara Kerja Satya Lencana</h5>
               <div class="info-box info">
                 <i class="fas fa-info-circle"></i>
                 <div>
-                  <strong>Otomatis dari Kenaikan Pangkat:</strong> Satya Lencana <em>tidak perlu diinput manual</em>. Sistem membaca data masa kerja dari riwayat kenaikan pangkat pegawai dan menentukan jenis Satya Lencana yang layak diterima.
+                  <strong>Otomatis dari Kenaikan Pangkat:</strong> Satya Lencana <em>tidak perlu diinput manual</em>. Sistem membaca data dari riwayat kenaikan pangkat pegawai dan menentukan jenis Satya Lencana yang layak diterima.
                 </div>
               </div>
-              <ul class="feature-list mt-3">
-                <li><i class="fas fa-star text-warning me-2"></i><strong>Karya Satya 10 Tahun</strong> — masa kerja ≥ 10 tahun</li>
-                <li><i class="fas fa-star text-warning me-2"></i><strong>Karya Satya 20 Tahun</strong> — masa kerja ≥ 20 tahun</li>
-                <li><i class="fas fa-star text-warning me-2"></i><strong>Karya Satya 30 Tahun</strong> — masa kerja ≥ 30 tahun</li>
-              </ul>
 
               <h5 class="mt-4">Melihat Data Satya Lencana</h5>
               <ol class="step-list">

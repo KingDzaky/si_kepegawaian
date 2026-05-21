@@ -50,7 +50,7 @@ $error = $_GET['error'] ?? '';
             </div>
             <div class="header-text">
               <h2 class="form-title">Edit Data Penyuluh</h2>
-              <p class="form-subtitle">Sistem Informasi Penyuluh DPPKBPM</p>
+              <p class="form-subtitle">Sistem Administrasi DPPKBPM</p>
             </div>
           </div>
           <div class="progress-indicator">
@@ -668,18 +668,19 @@ $(document).ready(function() {
                     }
                     break;
                 
-                case 'nomor_wa':
-                    if (value !== '') {
-                        // Validasi format nomor WA Indonesia
-                        if (!/^08\d{8,13}$/.test(value)) {
-                            isValid = false;
-                            message = 'Format: 08xxxxxxxxxx (10-15 digit)';
-                        } else {
-                            message = 'Nomor WhatsApp valid';
+                    case 'nomor_wa':
+                        if (value !== '') {
+                            const clean = value.replace(/\D/g, '');
+                            // Terima format 08xxx ATAU 62xxx
+                            if (!/^(08|62)\d{8,13}$/.test(clean)) {
+                                isValid = false;
+                                message = 'Format: 08xxxxxxxxxx atau 628xxxxxxxxxx (10-15 digit)';
+                            } else {
+                                message = 'Nomor WhatsApp valid';
+                            }
                         }
-                    }
-                    break;
-                    
+                        break;
+                                        
                 default:
                     if (value !== '') {
                         message = 'Data valid';
@@ -788,12 +789,12 @@ $(document).ready(function() {
     
     // Input formatting untuk nomor WA
     $('#nomor_wa').on('input', function() {
-        let value = $(this).val().replace(/\D/g, '');
-        if (value.length > 15) {
-            value = value.substring(0, 15);
-        }
-        $(this).val(value);
-    });
+    let value = $(this).val().replace(/\D/g, '');
+    if (value.length > 15) {
+        value = value.substring(0, 15);
+    }
+    $(this).val(value);
+});
     
     // Dynamic pangkat-golongan matching
     $('#pangkat_terakhir').change(function() {

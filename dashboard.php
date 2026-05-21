@@ -742,7 +742,7 @@ $result_duk = $koneksi->query($sql_duk);
               <img src="assets/img/Apel.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Workshop">
               <div class="carousel-caption">
                 <h5><i class="fas fa-laptop-code me-2"></i>Workshop Teknologi</h5>
-                <p>Pelatihan penggunaan sistem informasi kepegawaian berbasis teknologi.</p>
+                <p>Pelatihan penggunaan Sistem Administrasi kepegawaian berbasis teknologi.</p>
               </div>
             </div>
           </div>
