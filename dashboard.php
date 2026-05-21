@@ -695,69 +695,72 @@ $result_duk = $koneksi->query($sql_duk);
   </div>
 
   <!-- Carousel Foto -->
-  <div class="carousel-container fade-in">
-    <div class="chart-card">
-      <div class="card-header">
-        <i class="fas fa-images me-2"></i> Galeri DPPKBPM Kota Banjarmasin
-      </div>
-      <div class="card-body p-0">
-        <div id="fotoCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-          <div class="carousel-indicators">
-            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="2"></button>
-            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="3"></button>
-            <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="4"></button>
-          </div>
-          <div class="carousel-inner">
-            <div class="carousel-item active">
-              <img src="assets/img/DPPKBPM_f.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Kegiatan Rapat">
-              <div class="carousel-caption">
-                <h5><i class="fas fa-users me-2"></i>Kegiatan Rapat Koordinasi</h5>
-                <p>Dokumentasi rapat internal dinas yang membahas program kerja strategis tahun ini.</p>
-              </div>
+            <div id="fotoCarousel" class="carousel slide carousel-fade" 
+                data-bs-ride="carousel" data-bs-interval="5000">
+                <div class="chart-card">
+                <div class="card-header">
+                    <i class="fas fa-images me-2"></i> Galeri DPPKBPM Kota Banjarmasin
+                </div>
+                <div class="carousel-indicators">
+                <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="3"></button>
+                <button type="button" data-bs-target="#fotoCarousel" data-bs-slide-to="4"></button>
             </div>
-            <div class="carousel-item">
-              <img src="assets/img/Depan.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Penyuluhan">
-              <div class="carousel-caption">
-                <h5><i class="fas fa-bullhorn me-2"></i>Penyuluhan Masyarakat</h5>
-                <p>Kegiatan sosialisasi dan edukasi bersama masyarakat.</p>
-              </div>
+
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                <img src="assets/img/DPPKBPM_f.jpeg" alt="Kegiatan Rapat">
+                <div class="carousel-caption">
+                    <h5><i class="fas fa-users me-2"></i>Halaman Depan Kantor</h5>
+                    <p>Dokumentasi halaman DPPKBPM Kota Banjarmasin 2025.</p>
+                </div>
+                </div>
+                <div class="carousel-item">
+                <img src="assets/img/Depan.jpeg" alt="Penyuluhan">
+                <div class="carousel-caption">
+                    <h5><i class="fas fa-bullhorn me-2"></i>Dokumentasi Kantor</h5>
+                    <p>Dokumentasi Pribadi 2025.</p>
+                </div>
+                </div>
+                <div class="carousel-item">
+                <img src="assets/img/Foto.jpeg" alt="Pelatihan">
+                <div class="carousel-caption">
+                    <h5><i class="fas fa-graduation-cap me-2"></i>Perpisahan Pegawai</h5>
+                    <p>Dokumentasi perpisahan pegawai 2 Oktober 2025.</p>
+                </div>
+                </div>
+                <div class="carousel-item">
+                <img src="assets/img/Olahraga.jpeg" alt="Lapangan">
+                <div class="carousel-caption">
+                    <h5><i class="fas fa-eye me-2"></i>Senam Bersama</h5>
+                    <p>Kegiatan Senam Rutin Bersama 30 Oktober 2025.</p>
+                </div>
+                </div>
+                <div class="carousel-item">
+                <img src="assets/img/Apel.jpeg" alt="Apel">
+                <div class="carousel-caption">
+                    <h5><i class="fas fa-flag me-2"></i>Apel Pagi</h5>
+                    <p>Kegiatan apel rutin sebagai bentuk disiplin dan koordinasi pegawai.</p>
+                </div>
+                </div>
             </div>
-            <div class="carousel-item">
-              <img src="assets/img/Foto.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Pelatihan">
-              <div class="carousel-caption">
-                <h5><i class="fas fa-graduation-cap me-2"></i>Pelatihan Pegawai</h5>
-                <p>Program pengembangan SDM melalui pelatihan.</p>
-              </div>
+
+            <button class="carousel-control-prev" type="button" 
+                    data-bs-target="#fotoCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" 
+                    data-bs-target="#fotoCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
             </div>
-            <div class="carousel-item">
-              <img src="assets/img/Olahraga.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Lapangan">
-              <div class="carousel-caption">
-                <h5><i class="fas fa-eye me-2"></i>Monitoring Lapangan</h5>
-                <p>Kegiatan pengawasan dan evaluasi langsung di lapangan.</p>
-              </div>
-            </div>
-            <div class="carousel-item">
-              <img src="assets/img/Apel.jpeg" class="d-block w-100" style="height:400px; object-fit:cover;" alt="Workshop">
-              <div class="carousel-caption">
-                <h5><i class="fas fa-laptop-code me-2"></i>Workshop Teknologi</h5>
-                <p>Pelatihan penggunaan Sistem Administrasi kepegawaian berbasis teknologi.</p>
-              </div>
-            </div>
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#fotoCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#fotoCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
 
   <!-- Visi Misi -->
   <div class="vision-mission fade-in">

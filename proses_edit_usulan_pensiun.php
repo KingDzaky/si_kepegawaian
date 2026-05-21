@@ -86,6 +86,7 @@ $nama_stmt->close();
 $query = "UPDATE usulan_pensiun SET 
           nomor_usulan = ?,
           tanggal_usulan = ?,
+          tanggal_pensiun = ?,
           jenis_pensiun = ?,
           alasan = ?,
           status = ?,
@@ -101,15 +102,23 @@ if (!$stmt) {
 }
 
 $stmt->bind_param(
-    "ssssssi",
+    "sssssssi",
     $nomor_usulan,
     $tanggal_usulan,
+    $tanggal_pensiun,
     $jenis_pensiun,
     $alasan,
     $status,
     $keterangan,
     $id
 );
+
+$tanggal_pensiun = $_POST['tanggal_pensiun'] ?? '';
+
+if (empty($tanggal_pensiun)) {
+    alertGagal("form_edit_usulan_pensiun.php?id=$id", 'Tanggal pensiun tidak boleh kosong!');
+    exit;
+}
 
 if ($stmt->execute()) {
     // ========== UPDATE BERHASIL ==========

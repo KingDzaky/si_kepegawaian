@@ -110,9 +110,14 @@ require_once 'includes/sidebar.php';
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label">Tanggal Pensiun</label>
-                <input type="date" class="form-control bg-light" 
-                       value="<?= $data['tanggal_pensiun'] ?>" readonly>
+                <label class="form-label">Tanggal Pensiun <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" 
+                      name="tanggal_pensiun"
+                      value="<?= $data['tanggal_pensiun'] ?>" 
+                      required>
+                <small class="text-muted">
+                  <i class="fas fa-info-circle"></i> Sesuaikan jika ada perubahan SK
+                </small>
               </div>
             </div>
           </div>
