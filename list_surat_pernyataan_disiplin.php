@@ -93,7 +93,7 @@ $total_pegawai = $result->num_rows;
             <h1 class="dashboard-title">
                 <i class="fas fa-file-alt"></i> Surat Keterangan
             </h1>
-            <p class="dashboard-subtitle">Daftar Surat Keterangan PNS</p>
+            <p class="dashboard-subtitle">Daftar Surat Keterangan PNS untuk kelengkapan usulan kenaikan pangkat</p>
         </div>
     </div>
 

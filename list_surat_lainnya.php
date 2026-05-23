@@ -84,7 +84,7 @@ $total_pegawai = $result->num_rows;
             <h1 class="dashboard-title">
                 <i class="fas fa-file-contract"></i> Surat-Surat Lainnya
             </h1>
-            <p class="dashboard-subtitle">Daftar Surat Tidak Pernah Dijatuhi Hukuman Disiplin dan Surat Tidak Sedang Menjalani Proses Pidana</p>
+            <p class="dashboard-subtitle">Daftar Surat Tidak Pernah Dijatuhi Hukuman Disiplin dan Surat Tidak Sedang Menjalani Proses Pidana untuk kelengkapan usulan kenaikan pangkat</p>
         </div>
     </div>
 
