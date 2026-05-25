@@ -361,10 +361,10 @@ function format_nip($nip) {
                     <!-- Kosong untuk seimbang -->
                 </td>
                 <td style="width: 50%; text-align: center; vertical-align: top;">
-                <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $bulan_sekarang ?> <?= $tahun_sekarang ?></p>
+                <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <?= $bulan_sekarang ?> <?= $tahun_sekarang ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;"><strong>KEPALA DINAS,</strong></p>
                     <div style="height: 70px;"></div>
-                    <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
+                    <p style="margin: 2px 0; line-height: 1.3; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
                     <p style="margin: 2px 0; line-height: 1.3;"><?= htmlspecialchars($pangkat_kepala) ?> (<?= htmlspecialchars($golongan_kepala) ?>)</p>
                     <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars(format_nip($nip_kepala)) ?></p>
                 </td>

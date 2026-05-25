@@ -360,33 +360,53 @@ function format_nip($nip) {
         </div>
 
           <!-- SIGNATURE AREA -->
-          <table style="width: 100%; font-size: 11px; margin-top: 20px;">
-            <tr>
-                <td style="width: 40%; vertical-align: top;">
-                    <table style="width: 200px; border-collapse: collapse; border: 1px solid black;">
-                        <tr>
-                            <td colspan="2" style="text-align: center; border: 1px solid black; font-weight: bold;">Paraf</td>
-                        </tr>
-                        <tr>
-                            <td style="height: 25px; border: 1px solid black; padding: 4px 6px;">Sekretaris</td>
-                            <td style="width: 60px; border: 1px solid black;"></td>
-                        </tr>
-                        <tr>
-                            <td style="height: 25px; border: 1px solid black; padding: 4px 6px;">Kasubag Umpeg</td>
-                            <td style="border: 1px solid black;"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td style="width: 60%; text-align: center; vertical-align: top;">
-                    <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?= $bulan_sekarang ?> <?= $tahun_sekarang ?></p>
-                    <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
-                    <div style="height: 50px;"></div>
-                    <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
-                    <p style="margin: 2px 0; line-height: 1.3;"><?= htmlspecialchars($pangkat_kepala) ?> / <?= htmlspecialchars($golongan_kepala) ?></p>
-                    <p style="margin: 2px 0; line-height: 1.3;">NIP. <?= htmlspecialchars(format_nip($nip_kepala)) ?></p>
-                </td>
-            </tr>
-        </table>
+          <table style="width: 100%; font-size: 11pt; margin-top: 20px;">
+    <tr>
+        <!-- KIRI: Tabel Paraf -->
+        <td style="width: 40%; vertical-align: top;">
+            <table style="width: 200px; border-collapse: collapse; border: 1px solid black;">
+                <tr>
+                    <td colspan="2" style="text-align: center; border: 1px solid black; 
+                        font-weight: bold; padding: 4px;">Paraf</td>
+                </tr>
+                <tr>
+                    <td style="height: 35px; border: 1px solid black; 
+                        padding: 4px 6px;">Sekretaris</td>
+                    <td style="width: 70px; border: 1px solid black;"></td>
+                </tr>
+                <tr>
+                    <td style="height: 35px; border: 1px solid black; 
+                        padding: 4px 6px;">Kasubag Umpeg</td>
+                    <td style="border: 1px solid black;"></td>
+                </tr>
+            </table>
+        </td>
+
+        <!-- KANAN: TTD Kepala Dinas -->
+        <td style="width: 60%; text-align: center; vertical-align: top;">
+            <p style="margin: 2px 0; line-height: 1.5;">
+                Banjarmasin, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                <?= $bulan_sekarang ?> <?= $tahun_sekarang ?>
+            </p>
+            <p style="margin: 2px 0; line-height: 1.5;">
+                <strong>KEPALA DINAS,</strong>
+            </p>
+
+            <!-- Kotak TTD yang lebih besar -->
+            <div style="height: 70px;"></div>
+
+            <p style="margin: 2px 0; line-height: 1.4; font-weight: bold;">
+                <?= htmlspecialchars($nama_kepala) ?>
+            </p>
+            <p style="margin: 2px 0; line-height: 1.4;">
+                <?= htmlspecialchars($pangkat_kepala) ?> / <?= htmlspecialchars($golongan_kepala) ?>
+            </p>
+            <p style="margin: 2px 0; line-height: 1.4;">
+                NIP. <?= htmlspecialchars(format_nip($nip_kepala)) ?>
+            </p>
+        </td>
+    </tr>
+</table>
     </div>
 
     <!-- BUTTONS -->
