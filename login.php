@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'config/koneksi.php';
+require_once 'includes/alert_functions.php';
+
 
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['user_id'])) {
@@ -31,7 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = $user['role'];
 
             // Redirect ke dashboard
-            header('Location: dashboard.php');
+            if (isset($_SESSION['user_id'])) {
+                alertSuksesLogin('dashboard.php', 'Selamat datang kembali!');
+            }
             exit;
         } else {
             $error = 'Username atau password salah!';
@@ -275,7 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="logo-container">
             <div class="logo-wrapper">
                 <div class="logo-glow"></div>
-                <img src="assets/img/logo.png" alt="Logo DPPKBPM" class="logo-img"
+                <img src="assets/img/logo2.png" alt="Logo DPPKBPM" class="logo-img"
                     onerror="this.src='https://via.placeholder.com/100x100/667eea/ffffff?text=LOGO'">
             </div>
         </div>

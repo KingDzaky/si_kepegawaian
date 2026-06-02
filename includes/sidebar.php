@@ -693,7 +693,7 @@
     <!-- Logo Section -->
     <div class="logo-section">
       <div class="logo-container">
-        <img src="assets/img/logo.png" alt="Logo Kota Banjarmasin" class="logo-img"
+        <img src="assets/img/logo2.png" alt="Logo Kota Banjarmasin" class="logo-img"
              onerror="this.src='https://via.placeholder.com/100x100/3b82f6/ffffff?text=Logo'">
         <div class="logo-shadow"></div>
       </div>

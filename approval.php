@@ -23,7 +23,7 @@ ORDER BY k.created_at ASC";
 
 $result = $koneksi->query($query);
 
-// Statistik — tanpa sk_terbit
+// Statistik
 $stats_query = "SELECT 
     (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'diajukan') as pending,
     (SELECT COUNT(*) FROM kenaikan_pangkat WHERE status = 'disetujui') as disetujui,
@@ -39,7 +39,7 @@ require_once 'includes/sidebar.php';
 <style>
     .stats-container {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 20px;
         margin-bottom: 30px;
     }
@@ -259,9 +259,6 @@ require_once 'includes/sidebar.php';
             </div>
         </div>
     <?php endif; ?>
-
-
-    
 </main>
 
 <!-- Modal Approve -->
@@ -358,14 +355,12 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.classList.remove('active');
     }
 }
 
-// Close modal with ESC key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         document.querySelectorAll('.modal').forEach(modal => {

@@ -163,7 +163,7 @@ $stmt->bind_param(
     $nama,                     // 4  - s
     $kartu_pegawai,            // 5  - s
     $tempat_lahir,             // 6  - s
-    $tanggal_lahir,             // 6  - s
+    $tanggal_lahir,             // 6s  - s
     $pendidikan_terakhir,      // 7  - s
     $prodi,                    // 8  - s
     $pangkat_lama,             // 9  - s

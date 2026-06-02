@@ -11,8 +11,7 @@ if (!isAdmin()) {
 }
 
 // DEBUG: Log semua POST data
-error_log("===== POST DATA =====");
-error_log(print_r($_POST, true));
+
 
 // Escape semua input
 $nomor_usulan = mysqli_real_escape_string($koneksi, trim($_POST['nomor_usulan'] ?? ''));

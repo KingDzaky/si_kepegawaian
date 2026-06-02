@@ -88,75 +88,86 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     <meta charset="UTF-8">
     <title>Berkas Pensiun - <?= htmlspecialchars($data['nama']) ?></title>
     <style>
-        @page {
-            margin: 2cm 2.5cm;
-        }
-        
-        @page :first {
+         @page {
             size: A4;
+            margin: 0.76cm 2.03cm 2cm 2cm;
+            /*      TOP RIGHT BOTTOM LEFT */
         }
-        
-        /* Untuk surat pernyataan (F4) */
-        @page pernyataan {
-            size: 215mm 330mm; /* F4 size */
+ 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+ 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Arial, sans-serif;
             font-size: 12pt;
             line-height: 1.5;
-            color: #000;
-            margin: 0;
-            padding: 0;
+            padding: 20px;
         }
         
-        /* KOP SURAT STYLE - Mengikuti format resmi */
-        .kop-surat {
+        
+        /* HEADER */
+        .header-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            min-height: 90px;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-logo {
+            flex-shrink: 0;
+            margin-right: 14px;
+        }
+ 
+        .header-logo img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+ 
+        .header-text {
+            flex: 1;
             text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 4px solid #000;
-            position: relative;
         }
-        
-        .kop-logo {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 60px;
-        }
-        
-        .kop-logo img {
-            width: 90px;
-            height: 60px;
-        }
-        
-        .kop-text {
-            padding-left: 45px;
-            padding-right: 0;
-        }
-        
-        .kop-surat h2 {
+ 
+        .header-text p {
             margin: 0;
-            padding: 0;
-            font-size: 11pt;
-            font-weight: bold;
-            line-height: 1.15;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        
-        .kop-surat p {
-            margin: 0;
-            padding: 0;
-            font-size: 8pt;
             line-height: 1.2;
         }
-        
-        .kop-surat .alamat {
-            font-size: 7.5pt;
-            margin-top: 2px;
-            line-height: 1.15;
+ 
+        .header-line1 {
+            font-size: 12pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line2 {
+            font-size: 16pt;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line3 {
+            font-size: 10.5pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 3px;
+        }
+ 
+        .header-line4 {
+            font-size: 10pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 1px;
+        }
+ 
+        .divider {
+            border: none;
+            border-top: 3px solid #000;
+            margin: 2px 0;
         }
         
         /* Tanggal Surat */
@@ -441,7 +452,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         }
         
         .tabel-data td {
-            padding: 4px 0;
+            padding: 2px 0;
             vertical-align: top;
             font-size: 12pt;
         }
@@ -462,13 +473,13 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         /* ISI SURAT PERNYATAAN */
         .isi-surat {
             text-align: justify;
-            margin: 20px 0;
-            font-size: 12pt;
-            line-height: 1.6;
-        }
+    margin: 5px 0; /* dari 20px ke 10px */
+    font-size: 12pt;
+    line-height: 1.2; /* dari 1.6 ke 1.5 */
+}
         
         .isi-surat p {
-            margin: 10px 0;
+            margin: 6px 0;
         }
         
         .isi-surat h4 {
@@ -549,20 +560,21 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
 <!-- ========================================
      SURAT PENGANTAR PKB (UNTUK PENYULUH)
      ======================================== -->
-<div class="page-pengantar-pkb">
-    <!-- KOP SURAT -->
-    <div class="kop-surat">
-        <div class="kop-logo">
-            <img src="assets/img/logo.png" alt="Logo Banjarmasin">
+<div class="page">
+     <!-- HEADER -->
+     <div class="header-wrapper">
+            <div class="header-logo">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
+            </div>
+            <div class="header-text">
+                <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
+                <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
+            </div>
         </div>
-        <div class="kop-text">
-            <h2>PEMERINTAH KOTA BANJARMASIN</h2>
-            <h2>DINAS PENGENDALIAN PENDUDUK, KELUARGA</h2>
-            <h2>BERENCANA DAN PEMBERDAYAAN MASYARAKAT</h2>
-            <p class="alamat">Jalan Brigjend H. Hasan Basri – Kayutangi II RT.16 Telp (0511) 3301346 Fax (0511)3305371,</p>
-            <p class="alamat">Pos-el : dppkbpm@gmail.go.id, Laman http://dppkbpm.banjarmasinkota.go.id</p>
-        </div>
-    </div>
+ 
+        <div class="divider"></div>
     
     <!-- Tanggal -->
     <div class="tanggal-surat">
@@ -613,26 +625,35 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     </div>
     
     <!-- TTD -->
-    <table style="width: 100%; margin-top: 30px;">
-        <tr>
-            <td style="width: 50%;"></td>
-            <td style="width: 50%; text-align: left;">
-                <p style="margin: 2px 0; line-height: 1.3;">Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= tanggal_indonesia(date('Y-m-d')) ?></p>
-                <p style="margin: 2px 0; line-height: 1.3;">Pengirim,</p>
-                <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
-                <div style="height: 60px;"></div>
-                <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">
-                    <?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
-                </p>
-                <p style="margin: 2px 0; line-height: 1.3;">
-                    <?= htmlspecialchars($data['kadis_pangkat']) ?>
-                </p>
-                <p style="margin: 2px 0; line-height: 1.3;">
-                    NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
-                </p>
-            </td>
-        </tr>
-    </table>
+    <!-- TTD -->
+<table style="width: 100%; margin-top: 20px; font-size: 12pt;">
+    <tr>
+        <td style="width: 50%;"></td>
+        <td style="width: 50%; text-align: left; vertical-align: top;">
+            <p style="margin: 0; line-height: 1.5;">
+                Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
+                <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?>
+            </p>
+            <p style="margin: 0; line-height: 1.5;">Pengirim,</p>
+            <p style="margin: 0; line-height: 1.5;"><strong>Kepala Dinas,</strong></p>
+            <div style="height: 45px;"></div>
+            <p style="margin: 0; line-height: 1.4; text-decoration: underline; font-weight: bold;">
+                <?= htmlspecialchars(trim(
+                    ($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . 
+                    $data['kadis_nama'] . 
+                    ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : '')
+                )) ?>
+            </p>
+            <p style="margin: 0; line-height: 1.4;">
+                <?= htmlspecialchars($data['kadis_pangkat']) ?>
+                (<?= htmlspecialchars($data['kadis_golongan']) ?>)
+            </p>
+            <p style="margin: 0; line-height: 1.4;">
+                NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
+            </p>
+        </td>
+    </tr>
+</table>
     
 </div>
 
@@ -643,20 +664,21 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     <!-- ========================================
          SURAT PENGANTAR DUK
          ======================================== -->
-    <div class="page-pengantar-duk">
+    <div class="page">
         <!-- KOP SURAT -->
-        <div class="kop-surat">
-            <div class="kop-logo">
-                <img src="assets/img/logo.png" alt="Logo Banjarmasin">
+        <div class="header-wrapper">
+            <div class="header-logo">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
             </div>
-            <div class="kop-text">
-                <h2>PEMERINTAH KOTA BANJARMASIN</h2>
-                <h2>DINAS PENGENDALIAN PENDUDUK, KELUARGA</h2>
-                <h2>BERENCANA DAN PEMBERDAYAAN MASYARAKAT</h2>
-                <p class="alamat">Jalan Brigjend.H.Hasan Basri-Kayu Tangi II RT.16 Telp (0511) 3301346 Fax (0511)3305371,</p>
-                <p class="alamat">Banjarmasin,70124</p>
+            <div class="header-text">
+                <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
+                <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
             </div>
         </div>
+ 
+        <div class="divider"></div>
         
         <!-- Tanggal -->
         <div class="tanggal-surat">
@@ -705,27 +727,26 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
         </table>
         
         <!-- TTD -->
+        <!-- TTD -->
         <table style="width: 100%; margin-top: 30px;">
             <tr>
                 <td style="width: 50%;"></td>
                 <td style="width: 50%; text-align: left;">
                 <p>Banjarmasin, <span class="isian-manual">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <?= $bulan_romawi_indo[(int)date('n')] ?> <?= date('Y') ?></p>
-                    <p style="margin: 2px 0; line-height: 1.3;">Pengirim,</p>
-                    <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala Dinas,</strong></p>
+                    <p style="margin: 2px 0; line-height: 1.3;"><strong>Kepala DPPKBPM,</strong></p>
                     <div style="height: 60px;"></div>
                     <p style="margin: 2px 0; line-height: 1.3; text-decoration: underline; font-weight: bold;">
                         <?= htmlspecialchars(trim(($data['kadis_gelar_depan'] ? $data['kadis_gelar_depan'] . '. ' : '') . $data['kadis_nama'] . ($data['kadis_gelar_belakang'] ? ', ' . $data['kadis_gelar_belakang'] : ''))) ?>
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
-                        <?= htmlspecialchars($data['kadis_pangkat']) ?> 
-                        (<?= htmlspecialchars($data['kadis_golongan']) ?>)
+                        <?= htmlspecialchars($data['kadis_pangkat']) ?>
                     </p>
                     <p style="margin: 2px 0; line-height: 1.3;">
                         NIP. <?= htmlspecialchars(format_nip($data['kadis_nip'])) ?>
                     </p>
                 </td>
             </tr>
-        </table>
+    </table>
         
     </div>
     
@@ -740,20 +761,21 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
     <!-- ========================================
          SURAT PERNYATAAN DISIPLIN (F4)
          ======================================== -->
-    <div class="page-pernyataan">
+    <div class="page">
         <!-- KOP SURAT -->
-        <div class="kop-surat">
-            <div class="kop-logo">
-                <img src="assets/img/logo.png" alt="Logo Banjarmasin">
+        <div class="header-wrapper">
+            <div class="header-logo">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
             </div>
-            <div class="kop-text">
-                <h2>PEMERINTAH KOTA BANJARMASIN</h2>
-                <h2>DINAS PENGENDALIAN PENDUDUK, KELUARGA</h2>
-                <h2>BERENCANA DAN PEMBERDAYAAN MASYARAKAT</h2>
-                <p class="alamat">JL. Brigjend H. Hasan Basri – Kayutangi II RT. 16 Banjarmasin 70124</p>
-                <p class="alamat">Pos-el : dppkbpm@gmail.go.id, Laman http://dppkbpm.banjarmasinkota.go.id</p>
+            <div class="header-text">
+                <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
+                <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
             </div>
         </div>
+ 
+        <div class="divider"></div>
         
         <!-- Judul Surat -->
         <div class="nomor-surat" style="margin-top: 30px;">
@@ -820,9 +842,9 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                 </tr>
             </table>
             
-            <p style="margin-top: 20px; text-align: left;">tidak pernah dijatuhi hukuman disiplin tingkat sedang/berat.</p>
+            <p style="margin-top: 5px; text-align: left;">tidak pernah dijatuhi hukuman disiplin tingkat sedang/berat.</p>
             
-            <p style="margin-top: 20px; text-align: justify;">
+            <p style="margin-top: 5px; text-align: justify;">
                 Demikian surat pernyataan ini saya buat dengan sesungguhnya dengan mengingat
                 sumpah jabatan dan apabila dikemudian hari ternyata isi surat pernyataan ini tidak benar
                 yang mengakibatkan kerugian bagi negara maka saya bersedia menanggung kerugian
@@ -830,6 +852,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
             </p>
         </div>
         
+        <!-- TTD -->
         <!-- TTD -->
         <table style="width: 100%; margin-top: 30px;">
             <tr>
@@ -849,7 +872,7 @@ $nomor_pernyataan = "800.1.6.6/-SEKR/DPPKBPM-BJM/$tahun";
                     </p>
                 </td>
             </tr>
-        </table>
+    </table>
         
     </div>
 

@@ -100,7 +100,7 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['total'=>0,'diajukan'=>
             box-shadow: 0 3px 6px rgba(0,0,0,0.15);
         }
         .btn-close-w {
-            background: #6c757d; color: white;
+            background: #2c3e50; color: white;
             padding: 10px 20px; border: none; border-radius: 5px;
             cursor: pointer; font-size: 13px;
         }
@@ -108,15 +108,68 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['total'=>0,'diajukan'=>
         .btn-close-w:hover { background: #5a6268; }
 
         /* ===== HEADER ===== */
-        .header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #2c3e50;
+          /* HEADER */
+          .header-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            min-height: 90px;
+            font-family: Arial, sans-serif;
         }
-        .header h1 { font-size: 15pt; margin: 3px 0; color: #2c3e50; }
-        .header h2 { font-size: 11pt; margin: 2px 0; color: #555; font-weight: normal; }
-        .header p  { font-size: 9.5pt; margin: 5px 0 0; color: #666; }
+ 
+        .header-logo {
+            flex-shrink: 0;
+            margin-right: 14px;
+        }
+ 
+        .header-logo img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+        }
+ 
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+ 
+        .header-text p {
+            margin: 0;
+            line-height: 1.2;
+        }
+ 
+        .header-line1 {
+            font-size: 12pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line2 {
+            font-size: 16pt;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line3 {
+            font-size: 10.5pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 3px;
+        }
+ 
+        .header-line4 {
+            font-size: 10pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 1px;
+        }
+ 
+        .divider {
+            border: none;
+            border-top: 3px solid #000;
+            margin: 8px 0;
+        }
+        
 
         /* ===== STATISTIK ===== */
         .stats-container {
@@ -177,18 +230,20 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['total'=>0,'diajukan'=>
         <button onclick="window.close()" class="btn-close-w">✖️ Tutup</button>
     </div>
 
-    <!-- Header -->
-    <div class="header">
-        <h1>LAPORAN USULAN PENSIUN PEGAWAI</h1>
-        <h2>DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA</h2>
-        <h2>DAN PEMBERDAYAAN MASYARAKAT KOTA BANJARMASIN</h2>
-        <p>
-            Tahun: <strong><?= $filter_tahun ?></strong>
-            <?php if ($filter_status != 'all'): ?>
-                &nbsp;|&nbsp; Status: <strong><?= strtoupper($filter_status) ?></strong>
-            <?php endif; ?>
-        </p>
-    </div>
+   <!-- HEADER -->
+   <div class="header-wrapper">
+            <div class="header-logo">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
+            </div>
+            <div class="header-text">
+                <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
+                <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
+            </div>
+        </div>
+ 
+        <div class="divider"></div>
 
     <!-- Statistik -->
     <div class="stats-container">
@@ -287,11 +342,21 @@ $stats = $stats_result ? $stats_result->fetch_assoc() : ['total'=>0,'diajukan'=>
         </tbody>
     </table>
 
+   
+     
+
+
     <!-- Footer -->
     <div class="footer">
         <div>
             Total: <strong><?= $result ? $result->num_rows : 0 ?></strong> pegawai &nbsp;|&nbsp;
             Dicetak pada: <?= date('d F Y, H:i:s') ?> WIB
+            <p>
+            Filter Tahun: <strong><?= $filter_tahun ?></strong>
+            <?php if ($filter_status != 'all'): ?>
+                &nbsp;|&nbsp; Status: <strong><?= strtoupper($filter_status) ?></strong>
+            <?php endif; ?>
+            </p>
         </div>
         <div>SI Kepegawaian – DPPKBPM Kota Banjarmasin</div>
     </div>

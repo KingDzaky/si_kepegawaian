@@ -43,6 +43,9 @@ function alertSuksesTambah($redirect_url, $message = '') {
 function alertSuksesApproval($redirect_url, $message = '') {
     setAlertURL('sukses_approval', $redirect_url, $message);
 }
+function alertSuksesLogin($redirect_url, $message = '') {
+    setAlertURL('sukses_login', $redirect_url, $message);
+}
 
 function alertSuksesUbah($redirect_url, $message = '') {
     setAlertURL('sukses_ubah', $redirect_url, $message);

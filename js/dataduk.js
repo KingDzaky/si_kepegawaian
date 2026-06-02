@@ -1127,10 +1127,10 @@ function prosesDataPerGolongan(data) {
 
     // Logo (opsional - jika ada)
     const logo = new Image();
-    logo.src = 'assets/img/logo.png';
+    logo.src = 'assets/img/logo2.png';
 
     try {
-      doc.addImage(logo, 'PNG', 15, 8, 20, 20);
+      doc.addImage(logo, 'PNG', 30, 8, 20, 20);
     } catch (e) {
       console.warn('Logo tidak tersedia');
     }
@@ -2335,3 +2335,5 @@ console.log('✅ Template 5 - Detail Per Golongan berhasil dimuat!');
       showNotification(`Error Excel: ${error.message}`, 'danger');
     }
   }
+
+  

@@ -94,30 +94,66 @@ if ($format === 'excel') {
             padding: 10mm;
         }
         
-        .header {
+        /* HEADER */
+        .header-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            min-height: 90px;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-logo {
+            flex-shrink: 0;
+            margin-right: 14px;
+        }
+ 
+        .header-logo img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+        }
+ 
+        .header-text {
+            flex: 1;
             text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #333;
         }
-        
-        .header h1 {
-            font-size: 14pt;
-            margin: 3px 0;
-            color: #333;
+ 
+        .header-text p {
+            margin: 0;
+            line-height: 1.2;
         }
-        
-        .header h2 {
-            font-size: 11pt;
-            margin: 2px 0;
-            color: #555;
+ 
+        .header-line1 {
+            font-size: 12pt;
             font-weight: normal;
+            font-family: Arial, sans-serif;
         }
-        
-        .header p {
-            font-size: 9pt;
-            margin: 5px 0 0 0;
-            color: #666;
+ 
+        .header-line2 {
+            font-size: 16pt;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line3 {
+            font-size: 10.5pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 3px;
+        }
+ 
+        .header-line4 {
+            font-size: 10pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 1px;
+        }
+ 
+        .divider {
+            border: none;
+            border-top: 3px solid #000;
+            margin: 8px 0;
         }
         
         .stats-container {
@@ -262,11 +298,19 @@ if ($format === 'excel') {
     </button>
  
     <!-- Header -->
-    <div class="header">
-        <h1>DAFTAR URUSAN KEPEGAWAIAN</h1>
-        <h2>DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA</h2>
-        <h2>DAN PEMBERDAYAAN MASYARAKAT KOTA BANJARMASIN</h2>
-    </div>
+    <div class="header-wrapper">
+            <div class="header-logo">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
+            </div>
+            <div class="header-text">
+                <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
+                <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
+            </div>
+        </div>
+ 
+        <div class="divider"></div>
     
     <!-- Statistik -->
     <div class="stats-container">

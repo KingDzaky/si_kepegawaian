@@ -243,6 +243,7 @@ $penyuluh_list = $koneksi->query($query_penyuluh);
               <div class="mb-3">
                 <label class="form-label">Kartu Pegawai</label>
                 <input type="text" class="form-control" name="kartu_pegawai" id="kartu_pegawai" readonly>
+                <small>Kartu pegawai tidak Wajib di isi</small>
               </div>
             </div>
             <div class="col-md-6">
@@ -312,7 +313,8 @@ $penyuluh_list = $koneksi->query($query_penyuluh);
               <div class="mb-3">
                 <label class="form-label">Nomor WhatsApp</label>
                 <input type="text" class="form-control" name="nomor_wa" id="nomor_wa" readonly>
-                <small class="text-muted">Untuk notifikasi reminder pensiun</small>
+                <small class="text-muted">Jika tidak ada *Nomor Wa* Maka Tombol Reminder Tidak Muncul, Pastikan Nomor WA ditambahkan sebelumnya.
+                </small>
               </div>
             </div>
           </div>

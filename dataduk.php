@@ -49,14 +49,14 @@ $total_rows = $result_duk->num_rows;
    BULK DELETE STYLES
    ====================================================== */
 .bulk-action-bar {
-    display: none;
+  display: none;
     align-items: center;
     gap: 10px;
     padding: 10px 16px;
-    background: linear-gradient(135deg, #fff3cd, #ffeeba);
-    border: 1px solid #ffc107;
-    border-radius: 8px;
-    margin-bottom: 12px;
+    background: #fffbeb;
+    border: 1px solid #fbbf24;
+    border-radius: 0;
+    margin-bottom: 0;
     flex-wrap: wrap;
 }
 
@@ -65,18 +65,30 @@ $total_rows = $result_duk->num_rows;
 }
 
 .bulk-action-bar .selected-info {
-    font-weight: 600;
-    color: #856404;
+  display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #92400e;
     margin-right: auto;
 }
 
 .bulk-action-bar .selected-info span {
-    background: #ffc107;
-    color: #212529;
-    padding: 2px 8px;
+  background: #fbbf24;
+    color: #78350f;
+    padding: 2px 10px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    margin-left: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 0; 
+}
+
+.bulk-divider {
+    width: 1px;
+    height: 24px;
+    background: #fde68a;
+    flex-shrink: 0;
 }
 
 /* Checkbox styling */
@@ -103,29 +115,61 @@ tr.row-selected {
 
 /* Tombol hapus semua — merah mencolok */
 .btn-hapus-semua {
-    background: linear-gradient(135deg, #dc3545, #c82333);
+  display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #dc2626;
     color: white;
     border: none;
-    padding: 6px 14px;
     border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 12.5px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: opacity 0.15s;
 }
 .btn-hapus-semua:hover { opacity: 0.85; color: white; }
 
+/* Tombol trigger pilih */
+#triggerBulkWrap {
+    margin-bottom: 8px;
+}
+
+.btn-trigger-pilih:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-trigger-pilih {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
 /* Tombol hapus terpilih */
 .btn-hapus-terpilih {
-    background: linear-gradient(135deg, #fd7e14, #e67e22);
+  display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #ea580c;
     color: white;
     border: none;
-    padding: 6px 14px;
     border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 12.5px;
+    font-weight: 500;
     cursor: pointer;
-    transition: opacity 0.2s;
+    opacity: 0.45; /* disabled by default */
+    transition: opacity 0.15s;
 }
 .btn-hapus-terpilih:hover { opacity: 0.85; color: white; }
 .btn-hapus-terpilih:disabled {
@@ -313,6 +357,7 @@ tr.row-selected {
         <i class="fas fa-check-square me-1"></i>
         Terpilih: <span id="selectedCount">0</span> data
       </div>
+      <div class="bulk-divider"></div>
       <button class="btn-hapus-terpilih" id="btnHapusTerpilih" onclick="hapusTerpilih()" disabled>
         <i class="fas fa-trash me-1"></i>Hapus Terpilih
       </button>

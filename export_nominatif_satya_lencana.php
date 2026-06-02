@@ -66,7 +66,7 @@ $tahun_sekarang = date('Y');
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Arial, sans-serif;
             font-size: 11pt;
             line-height: 1.4;
             padding: 20px;

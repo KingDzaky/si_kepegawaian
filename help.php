@@ -412,7 +412,7 @@ require_once 'includes/sidebar.php';
               <div class="info-box danger">
                 <i class="fas fa-crown"></i>
                 <div>
-                  <strong>Hanya Superadmin</strong> yang dapat menghapus data secara permanen. Admin hanya bisa melakukan soft delete.
+                  <strong>Superadmin dan Admin</strong> yang dapat menghapus data secara permanen. Admin dan Superadmin bisa melakukan soft delete.
                 </div>
               </div>
               <ol class="step-list">

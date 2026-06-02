@@ -199,7 +199,6 @@ if (!empty($pegawai['ttl'])) {
 // ========================================
 // HITUNG MASA KERJA LAMA OTOMATIS
 // Dihitung dari tmt_pangkat di DUK sampai hari ini.
-// Karena DUK hanya diupdate setelah SK terbit (proses_sk_terbit.php),
 // nilai tmt_pangkat selalu merupakan TMT pangkat yang sedang berjalan.
 // ========================================
 // GANTI SELURUH BAGIAN HITUNG MASA KERJA

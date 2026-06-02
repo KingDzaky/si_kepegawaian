@@ -41,6 +41,21 @@ if (isset($_GET['alert'])) {
             });
             ";
             break;
+
+        case 'sukses_login':
+            $message = $custom_message ?: 'Login berhasil';
+            echo "
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: '$message',
+                showConfirmButton: true,
+                confirmButtonColor: '#28a745',
+                timer: 3000,
+                timerProgressBar: true
+            });
+            ";
+            break;
             
         case 'sukses_ubah':
             $message = $custom_message ?: 'Data berhasil diubah';

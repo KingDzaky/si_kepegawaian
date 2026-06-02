@@ -23,9 +23,9 @@ if ($username === '' || $password === '') {
 
 // Prepared statement aman
 $sql = "SELECT id, username, password, role FROM users WHERE username = ?";
-if (!$stmt = $conn->prepare($sql)) {
+if (!$stmt = $koneksi->prepare($sql)) {
     // jika prepare gagal, tampilkan error koneksi (debug)
-    echo "Query prepare failed: " . htmlspecialchars($conn->error);
+    echo "Query prepare failed: " . htmlspecialchars($koneksi->error);
     exit;
 }
 

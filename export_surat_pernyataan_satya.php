@@ -88,57 +88,68 @@ function format_nip($nip) {
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Arial, sans-serif;
             font-size: 12pt;
             line-height: 1.5;
             padding: 20px;
         }
 
-        /* HEADER */
-        .header-wrapper {
-            position: relative;
-            margin-bottom: 8px;
-            min-height: 85px;
+          /* HEADER */
+          .header-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            min-height: 90px;
+            font-family: Arial, sans-serif;
         }
-
+ 
         .header-logo {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 70px;
+            flex-shrink: 0;
+            margin-right: 14px;
         }
-
+ 
         .header-logo img {
-            width: 120px;
-            height: 94px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
         }
-
+ 
         .header-text {
+            flex: 1;
             text-align: center;
-            padding: 0 100px;
         }
-
+ 
         .header-text p {
             margin: 0;
             line-height: 1.2;
         }
-
+ 
         .header-line1 {
-            font-size: 11pt;
-            font-weight: bold;
-        }
-
-        .header-line2 {
             font-size: 12pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+        }
+ 
+        .header-line2 {
+            font-size: 16pt;
             font-weight: bold;
+            font-family: Arial, sans-serif;
         }
-
+ 
         .header-line3 {
-            font-size: 9pt;
-            margin-top: 2px;
+            font-size: 10.5pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 3px;
         }
-
+ 
+        .header-line4 {
+            font-size: 10pt;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-top: 1px;
+        }
+ 
         .divider {
             border: none;
             border-top: 3px solid #000;
@@ -270,16 +281,16 @@ function format_nip($nip) {
         <!-- HEADER -->
         <div class="header-wrapper">
             <div class="header-logo">
-                <img src="assets/img/logo.png" alt="Logo" onerror="this.style.display='none'">
+                <img src="assets/img/logo2.png" alt="Logo" onerror="this.style.display='none'">
             </div>
             <div class="header-text">
                 <p class="header-line1">PEMERINTAH KOTA BANJARMASIN</p>
                 <p class="header-line2">DINAS PENGENDALIAN PENDUDUK, KELUARGA BERENCANA DAN PEMBERDAYAAN MASYARAKAT</p>
-                <p class="header-line3">JL. Brigjen H. Hasan Basri - Kayutangi II RT.16 Banjarmasin 70124</p>
-                <p class="header-line3">Pos-el : dppkbpm@gmail.go.id, Laman http://dppkbpm.banjarmasinkota.go.id</p>
+                <p class="header-line3">JL. Brigjen H. Hasan Basri &#8211; Kayutangi II RT.16 Banjarmasin 70124</p>
+                <p class="header-line4">Pos-el : <a href="mailto:dppkbpm@gmail.go.id" style="color:#0000FF; text-decoration:underline;">dppkbpm@gmail.go.id</a>, Laman <a href="http://dppkbpm.banjarmasinkota.go.id" style="color:#0000FF; text-decoration:underline;">http://dppkbpm.banjarmasinkota.go.id</a></p>
             </div>
         </div>
-
+ 
         <div class="divider"></div>
 
         <!-- TITLE -->
