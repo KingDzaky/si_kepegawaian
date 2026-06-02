@@ -169,7 +169,7 @@ require_once 'includes/sidebar.php';
                 <div class="info-item">
                     <label>Tanggal Pensiun</label>
                     <strong style="color:<?= $segera ? '#ff9800' : '#333' ?>;">
-                        <?= date('d F Y', strtotime($row['tanggal_pensiun'])) ?>
+                        <?= date('d/m/Y', strtotime($row['tanggal_pensiun'])) ?>
                     </strong>
                 </div>
             </div>

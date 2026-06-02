@@ -231,7 +231,7 @@ require_once 'includes/sidebar.php';
                 </div>
                 <div class="info-item">
                     <label>Tanggal Diajukan</label>
-                    <strong><?= date('d F Y', strtotime($row['created_at'])) ?></strong>
+                    <strong><?= date('d/m/Y', strtotime($row['created_at'])) ?></strong>
                 </div>
             </div>
             
