@@ -123,7 +123,11 @@ $success = $_GET['success'] ?? '';
                              name="ttl" 
                              id="ttl" 
                              class="form-control enhanced-input" 
-                             placeholder="Contoh: Banjarmasin, 15 Januari 1985">
+                             placeholder="Contoh: Banjarmasin, 1980-02-20">
+                             <small class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Format: Tempat, YYYY-MM-DD (contoh: Banjarmasin 1980-02-10)
+                            </small>
                       <div class="input-feedback"></div>
                     </div>
                   </div>
