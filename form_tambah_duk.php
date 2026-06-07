@@ -601,6 +601,8 @@ document.getElementById('eselon').addEventListener('change', function() {
   jfuKelasSelect.removeAttribute('required');
 
   if (eselonValue === 'Non-Eselon') {
+    jenisJabatanGroup.style.display = 'block';           // ← tambahkan ini
+    jenisJabatanSelect.setAttribute('required', 'required');
     tmtEselonLabel.innerHTML = `
       <i class="fas fa-calendar-check"></i>
       T.M.T Jabatan Fungsional <span class="required">*</span>
