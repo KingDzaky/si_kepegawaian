@@ -250,7 +250,7 @@ $result_duk = $koneksi->query($sql_duk);
             <div class="card-body">
                 <div>
                     <div>Total DUK</div>
-                    <small>Data Urut Kepangkatan</small>
+                    <small>Data Urut Kepegawaian</small>
                 </div>
                 <i class="fas fa-users card-icon"></i>
             </div>

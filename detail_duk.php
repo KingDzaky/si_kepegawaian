@@ -34,6 +34,25 @@ $stmt_kp->execute();
 $riwayat_kp = $stmt_kp->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt_kp->close();
 
+
+// ── Proyeksi Kenaikan Pangkat Berikutnya ─────────────────────────────────────
+$stmt_proj = $koneksi->prepare(
+  "SELECT pangkat_baru, golongan_baru, tmt_pangkat_baru,
+          masa_kerja_tahun_baru, masa_kerja_bulan_baru,
+          jabatan_baru, status, nomor_usulan, jenis_kenaikan,
+          DATEDIFF(tmt_pangkat_baru, CURDATE()) as hari_menuju_tmt
+   FROM kenaikan_pangkat
+   WHERE nip = ? AND deleted_at IS NULL
+     AND status IN ('diajukan','disetujui')
+     AND tmt_pangkat_baru >= CURDATE()
+   ORDER BY tmt_pangkat_baru ASC
+   LIMIT 1"
+);
+$stmt_proj->bind_param("s", $duk['nip']);
+$stmt_proj->execute();
+$proyeksi_kp = $stmt_proj->get_result()->fetch_assoc();
+$stmt_proj->close();
+
 // ── Usulan Pensiun ────────────────────────────────────────────────────────────
 $stmt_up = $koneksi->prepare(
     "SELECT id, nomor_usulan, tanggal_usulan, tanggal_pensiun, jenis_pensiun, status,
@@ -153,6 +172,51 @@ if ($duk['eselon'] === 'Non-Eselon') {
 }
 .countdown-unit .cnt-num { font-size: 1.3rem; font-weight: 800; color: #856404; display: block; }
 .countdown-unit .cnt-lbl { font-size: .62rem; color: #856404; text-transform: uppercase; }
+
+
+/* Proyeksi Kenaikan Pangkat */
+.proyeksi-kp-box {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+  border: 1.5px solid #bee3f8;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.proyeksi-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+.proyeksi-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, #3498db, #1a6fa8);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem; flex-shrink: 0;
+}
+.proyeksi-title {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+}
+.proyeksi-title strong { font-size: 1rem; color: #1a3c5e; display: flex; align-items: center; gap: 6px; }
+.proyeksi-label { font-size: .72rem; color: #5a8db5; text-transform: uppercase; letter-spacing: .04em; }
+.gol-pill {
+  background: #3498db; color: #fff;
+  padding: 1px 9px; border-radius: 999px; font-size: .75rem; font-weight: 700;
+}
+.proyeksi-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+}
+.proyeksi-item {
+  background: #fff; border-radius: 8px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 3px;
+  border: 1px solid #d0e8f5;
+}
+.pi-label { font-size: .72rem; color: #5a8db5; }
+.pi-value { font-size: .88rem; font-weight: 600; color: #1a3c5e; }
+.proyeksi-countdown-label {
+  font-size: .78rem; color: #5a8db5; margin-bottom: 8px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+@media (max-width: 576px) {
+  .proyeksi-grid { grid-template-columns: 1fr; }
+}
+
 </style>
 
 <main class="main-content">
@@ -393,6 +457,79 @@ if ($duk['eselon'] === 'Non-Eselon') {
                     </div>
                   </div>
                 </div>
+
+                <?php if ($proyeksi_kp): 
+                      $h_tmt   = (int)$proyeksi_kp['hari_menuju_tmt'];
+                      $th_tmt  = floor($h_tmt / 365);
+                      $bl_tmt  = floor(($h_tmt % 365) / 30);
+                      $hr_tmt  = $h_tmt % 30;
+                  ?>
+                  <div class="info-section">
+                    <h6 class="section-title">
+                      <i class="fas fa-chart-line me-2"></i>Proyeksi Kenaikan Pangkat Berikutnya
+                    </h6>
+                    <div class="proyeksi-kp-box">
+                      <div class="proyeksi-header">
+                        <div class="proyeksi-icon">
+                          <i class="fas fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="proyeksi-title">
+                          <span class="proyeksi-label">Pangkat / Golongan Baru</span>
+                          <strong><?= htmlspecialchars($proyeksi_kp['pangkat_baru']) ?>
+                            <span class="gol-pill"><?= htmlspecialchars($proyeksi_kp['golongan_baru']) ?></span>
+                          </strong>
+                        </div>
+                        <span class="badge-sm <?= $proyeksi_kp['status'] ?>" style="align-self:flex-start">
+                          <?= ucfirst($proyeksi_kp['status']) ?>
+                        </span>
+                      </div>
+
+                      <div class="proyeksi-grid">
+                        <div class="proyeksi-item">
+                          <span class="pi-label"><i class="fas fa-calendar-check me-1"></i>TMT Pangkat Baru</span>
+                          <span class="pi-value"><?= formatTglIndo($proyeksi_kp['tmt_pangkat_baru'], $bulan_indo) ?></span>
+                        </div>
+                        <div class="proyeksi-item">
+                          <span class="pi-label"><i class="fas fa-briefcase me-1"></i>Jabatan</span>
+                          <span class="pi-value"><?= htmlspecialchars($proyeksi_kp['jabatan_baru'] ?: '-') ?></span>
+                        </div>
+                        <div class="proyeksi-item">
+                          <span class="pi-label"><i class="fas fa-clock me-1"></i>Masa Kerja Proyeksi</span>
+                          <span class="pi-value">
+                            <?= (int)$proyeksi_kp['masa_kerja_tahun_baru'] ?> tahun
+                            <?= (int)$proyeksi_kp['masa_kerja_bulan_baru'] ?> bulan
+                          </span>
+                        </div>
+                        <div class="proyeksi-item">
+                          <span class="pi-label"><i class="fas fa-file-alt me-1"></i>No. Usulan</span>
+                          <span class="pi-value"><?= htmlspecialchars($proyeksi_kp['nomor_usulan']) ?></span>
+                        </div>
+                      </div>
+
+                      <div class="proyeksi-countdown-label">
+                        <i class="fas fa-hourglass-half me-1"></i>Waktu menuju TMT:
+                      </div>
+                      <div class="pensiun-countdown">
+                        <?php if ($th_tmt > 0): ?>
+                        <div class="countdown-unit" style="background:#e8f4fd;border-color:#3498db">
+                          <span class="cnt-num" style="color:#1a6fa8"><?= $th_tmt ?></span>
+                          <span class="cnt-lbl" style="color:#1a6fa8">Tahun</span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if ($bl_tmt > 0): ?>
+                        <div class="countdown-unit" style="background:#e8f4fd;border-color:#3498db">
+                          <span class="cnt-num" style="color:#1a6fa8"><?= $bl_tmt ?></span>
+                          <span class="cnt-lbl" style="color:#1a6fa8">Bulan</span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="countdown-unit" style="background:#e8f4fd;border-color:#3498db">
+                          <span class="cnt-num" style="color:#1a6fa8"><?= $hr_tmt ?></span>
+                          <span class="cnt-lbl" style="color:#1a6fa8">Hari</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <?php endif; ?>
 
                 <div class="info-section">
                   <h6 class="section-title"><i class="fas fa-briefcase me-2"></i>Jabatan & Eselon</h6>
