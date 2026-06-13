@@ -45,11 +45,31 @@ if ($id > 0) {
     $result_usulan = $stmt_usulan->get_result();
     $usulan_data = $result_usulan->fetch_assoc();
 
+    // Cek apakah ada usulan pensiun yang masih aktif
+
+    $check_pensiun = "SELECT COUNT(*) as total 
+                  FROM usulan_pensiun 
+                  WHERE nip = ? 
+                  AND status IN ('draft', 'diajukan', 'disetujui')
+                  AND deleted_at IS NULL";
+    $stmt_pensiun = $koneksi->prepare($check_pensiun);
+    $stmt_pensiun->bind_param("s", $pegawai['nip']);
+    $stmt_pensiun->execute();
+    $pensiun_data = $stmt_pensiun->get_result()->fetch_assoc();
+    $stmt_pensiun->close();
+
     // Jika ada usulan aktif dan belum konfirmasi
-    if ($usulan_data['total'] > 0 && $confirm !== 'yes') {
+    $total_aktif = $usulan_data['total'] + $pensiun_data['total'];
+    if ($total_aktif > 0 && $confirm !== 'yes') {
+        $pesan = [];
+        if ($usulan_data['total'] > 0)
+            $pesan[] = "{$usulan_data['total']} usulan kenaikan pangkat aktif";
+        if ($pensiun_data['total'] > 0)
+            $pesan[] = "{$pensiun_data['total']} usulan pensiun aktif";
+        
         alertWarning(
             'dataduk.php',
-            "Pegawai {$pegawai['nama']} masih memiliki {$usulan_data['total']} usulan kenaikan pangkat aktif. Hapus usulan terlebih dahulu atau konfirmasi penghapusan."
+            "Pegawai {$pegawai['nama']} masih memiliki " . implode(' dan ', $pesan) . ". Selesaikan atau hapus usulan tersebut terlebih dahulu."
         );
     }
 

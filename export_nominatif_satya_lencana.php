@@ -120,18 +120,21 @@ $tahun_sekarang = date('Y');
 
         /* SIGNATURE */
         .signature {
-            margin-top: 30px;
-            text-align: right;
-        }
-
-        .signature p {
-            margin: 3px 0;
-            line-height: 1.3;
-        }
-
-        .signature .space {
-            height: 60px;
-        }
+                margin-top: 30px;
+                display: flex;
+                justify-content: flex-end;
+            }
+            .signature-block {
+                text-align: left;
+                min-width: 280px;
+            }
+            .signature-block p {
+                margin: 3px 0;
+                line-height: 1.5;
+            }
+            .signature-block .space {
+                height: 60px;
+            }
 
         /* PRINT */
         @media print {
@@ -262,14 +265,27 @@ $tahun_sekarang = date('Y');
 
         <!-- SIGNATURE -->
         <div class="signature">
-            <p>Banjarmasin, <?= $tanggal_sekarang ?> <?= $bulan_sekarang ?> <?= $tahun_sekarang ?></p>
-            <p><strong>KEPALA DINAS,</strong></p>
-            <div class="space"></div>
-            <p style="text-decoration: underline; font-weight: bold;"><?= htmlspecialchars($nama_kepala) ?></p>
-            <p><?= htmlspecialchars($kepala['pangkat']) ?> (<?= htmlspecialchars($kepala['golongan']) ?>)</p>
-            <p>NIP. <?= htmlspecialchars($kepala['nip']) ?></p>
-        </div>
-    </div>
+  <div class="signature-block">
+    <p>Banjarmasin, <?= $tanggal_sekarang ?> <?= $bulan_sekarang ?> <?= $tahun_sekarang ?></p>
+    <p><strong>KEPALA DINAS,</strong></p>
+    <div class="space"></div>
+    <p style="text-decoration:underline; font-weight:bold;">
+      <?= htmlspecialchars($nama_kepala) ?>
+    </p>
+    <p><?= htmlspecialchars($kepala['pangkat']) ?> (<?= htmlspecialchars($kepala['golongan']) ?>)</p>
+    <?php
+      // Format NIP: 19730719199302 1002 → 19730719 199302 1 002
+      $nip_raw = preg_replace('/\s+/', '', $kepala['nip']);
+      $nip_fmt = '';
+      if (strlen($nip_raw) === 18) {
+          $nip_fmt = substr($nip_raw,0,8).' '.substr($nip_raw,8,6).' '.substr($nip_raw,14,1).' '.substr($nip_raw,15,3);
+      } else {
+          $nip_fmt = $kepala['nip'];
+      }
+    ?>
+    <p>NIP. <?= htmlspecialchars($nip_fmt) ?></p>
+  </div>
+</div>
 
     <!-- BUTTONS -->
     <div class="no-print button-container">

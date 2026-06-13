@@ -191,7 +191,7 @@ require_once 'includes/sidebar.php';
                       <td>Lihat Usulan Pensiun</td>
                       <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
                       <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
-                      <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
+                      <td class="text-center text-danger"><i class="fas fa-times-circle"></i></td>
                     </tr>
                     <tr>
                       <td>Tambah / Edit / Hapus Usulan Pensiun</td>
@@ -200,10 +200,10 @@ require_once 'includes/sidebar.php';
                       <td class="text-center text-danger"><i class="fas fa-times-circle"></i></td>
                     </tr>
                     <tr>
-                      <td>Lihat Usulan Pensiun</td>
+                      <td>Lihat Usulan Kenaikan Pangkat</td>
                       <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
                       <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
-                      <td class="text-center text-success"><i class="fas fa-check-circle"></i></td>
+                      <td class="text-center text-danger"><i class="fas fa-times-circle"></i></td>
                     </tr>
                     <tr>
                       <td>Kelola Kenaikan Pangkat</td>
@@ -255,7 +255,7 @@ require_once 'includes/sidebar.php';
               <div class="info-box danger mt-3">
                 <i class="fas fa-crown"></i>
                 <div>
-                  <strong>Superadmin Eksklusif:</strong> Hanya Superadmin yang dapat mengaktifkan kembali pegawai yang dinonaktifkan dan menghapus data secara permanen dari Recycle Bin.
+                  <strong>Superadmin Eksklusif:</strong> Hanya Superadmin yang dapat mengaktifkan kembali pegawai yang dinonaktifkan, mengelola data user dan hapus massal duk.
                 </div>
               </div>
             </div>

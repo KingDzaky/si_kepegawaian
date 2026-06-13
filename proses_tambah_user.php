@@ -49,6 +49,16 @@ if (mysqli_num_rows($check_result) > 0) {
 
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+
+// Tambahkan setelah validasi awal, sebelum INSERT
+if ($role === 'superadmin') {
+    $cek = $koneksi->query("SELECT COUNT(*) as total FROM users WHERE role = 'superadmin'");
+    if ($cek->fetch_assoc()['total'] > 0) {
+        header('Location: form_tambah_user.php?error=Super Admin sudah ada, tidak bisa menambahkan lagi');
+        exit;
+    }
+}
+
 // Insert data (password plaintext - sesuai permintaan)
 $query = "INSERT INTO users (username, password, nama_lengkap, role, is_active, created_at) 
           VALUES ('$username', '$hashedPassword', '$nama_lengkap', '$role', $is_active, NOW())";

@@ -11,7 +11,12 @@ if (!isSuperAdmin()) {
 require_once 'config/koneksi.php';
 require_once 'includes/header.php';
 require_once 'includes/sidebar.php';
+
+$cek_super = $koneksi->query("SELECT COUNT(*) as total FROM users WHERE role = 'superadmin'")->fetch_assoc();
+$superadmin_sudah_ada = $cek_super['total'] > 0;
+
 ?>
+
 
 <style>
     /* ============================================================
@@ -307,6 +312,12 @@ require_once 'includes/sidebar.php';
                     <option value="admin">Admin</option>
                     <option value="kepala_dinas">Kepala Dinas</option>
                 </select>
+                <?php if ($superadmin_sudah_ada): ?>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle"></i> 
+                    Super Admin hanya boleh satu, sudah terdaftar di sistem
+                </small>
+                <?php endif; ?>
             </div>
 
             <div class="form-group">

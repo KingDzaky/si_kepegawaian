@@ -38,6 +38,30 @@ $data = $result->fetch_assoc();
 $nama_penyuluh = $data['nama'];
 $check->close();
 
+
+$cek_p = $koneksi->prepare(
+    "SELECT COUNT(*) as total FROM usulan_pensiun 
+     WHERE nip = (SELECT nip FROM penyuluh WHERE id = ?) 
+     AND status IN ('draft','diajukan','disetujui') 
+     AND deleted_at IS NULL"
+);
+$cek_p->bind_param("i", $id);
+$cek_p->execute();
+$total_pensiun = $cek_p->get_result()->fetch_assoc()['total'];
+$cek_p->close();$cek_p = $koneksi->prepare(
+    "SELECT COUNT(*) as total FROM usulan_pensiun 
+     WHERE nip = (SELECT nip FROM penyuluh WHERE id = ?) 
+     AND status IN ('draft','diajukan','disetujui') 
+     AND deleted_at IS NULL"
+);
+
+if ($total_pensiun > 0) {
+    alertWarning(
+        'penyuluh.php',
+        "Penyuluh $nama_penyuluh masih memiliki $total_pensiun usulan pensiun aktif. Selesaikan terlebih dahulu sebelum menghapus data."
+    );
+}
+
 // Hapus data
 $sql = "DELETE FROM penyuluh WHERE id = ?";
 $stmt = $koneksi->prepare($sql);
