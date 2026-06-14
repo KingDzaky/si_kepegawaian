@@ -91,7 +91,7 @@ function format_nip($nip) {
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Arial', Times, serif;
             font-size: 12pt;
             line-height: 1.5;
             padding: 20px;
