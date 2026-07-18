@@ -45,7 +45,11 @@ $query = "SELECT
     k.golongan_baru,
     k.jabatan_baru,
     k.nomor_usulan,
-    k.tanggal_usulan
+    k.tanggal_usulan,
+    -- TAMBAHAN: hitung berkas Satya Lencana (SPMT + Surat Pernyataan) yang sudah diupload
+    (SELECT COUNT(*) FROM berkas_kenaikan_pangkat bks 
+     WHERE bks.id_kenaikan_pangkat = k.id 
+     AND bks.jenis_berkas IN ('SPMT Satya Lencana', 'Surat Pernyataan Satya Lencana')) as jumlah_berkas_satya
 FROM kenaikan_pangkat k
 WHERE YEAR(k.tanggal_usulan) = ?
 ORDER BY k.nama ASC";
@@ -69,6 +73,10 @@ $stmt_stats = $koneksi->prepare($query_stats);
 $stmt_stats->bind_param("i", $filter_tahun);
 $stmt_stats->execute();
 $stats = $stmt_stats->get_result()->fetch_assoc();
+
+// TAMBAHAN: total jenis berkas Satya Lencana yang wajib (harus sama dengan
+// $jenis_wajib_satya di form_upload_berkas_satya.php)
+const TOTAL_BERKAS_WAJIB_SATYA = 2;
 ?>
 
 <link rel="stylesheet" href="css/dataduk.css">
@@ -347,11 +355,12 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
                 <thead>
                     <tr>
                         <th style="width: 5%;">No</th>
-                        <th style="width: 20%;">No Usulan</th>
-                        <th style="width: 25%;">Pegawai</th>
-                        <th style="width: 18%;">Pangkat / Golongan</th>
-                        <th style="width: 22%;">Jabatan</th>
-                        <th style="width: 10%;" class="text-center">Export Surat</th>
+                        <th style="width: 18%;">No Usulan</th>
+                        <th style="width: 22%;">Pegawai</th>
+                        <th style="width: 15%;">Pangkat / Golongan</th>
+                        <th style="width: 18%;">Jabatan</th>
+                        <th style="width: 12%;" class="text-center">Export Surat</th>
+                        <th style="width: 10%;" class="text-center">Berkas</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -412,13 +421,36 @@ $stats = $stmt_stats->get_result()->fetch_assoc();
                                 </a>
                             </div>
                         </td>
+                        <td class="text-center">
+                            <?php
+                                // TAMBAHAN: status upload berkas hasil scan SPMT & Surat Pernyataan
+                                $jumlah_berkas_satya = (int)($row['jumlah_berkas_satya'] ?? 0);
+                                if ($jumlah_berkas_satya >= TOTAL_BERKAS_WAJIB_SATYA) {
+                                    $btnClassSatya = 'btn-success';
+                                    $titleSatya = 'Berkas Lengkap (' . $jumlah_berkas_satya . '/' . TOTAL_BERKAS_WAJIB_SATYA . ')';
+                                } elseif ($jumlah_berkas_satya > 0) {
+                                    $btnClassSatya = 'btn-warning';
+                                    $titleSatya = 'Berkas Sebagian (' . $jumlah_berkas_satya . '/' . TOTAL_BERKAS_WAJIB_SATYA . ')';
+                                } else {
+                                    $btnClassSatya = 'btn-info';
+                                    $titleSatya = 'Belum Ada Berkas (0/' . TOTAL_BERKAS_WAJIB_SATYA . ')';
+                                }
+                            ?>
+                            <a href="form_upload_berkas_kp.php?id=<?= $row['id'] ?>"
+                               class="btn <?= $btnClassSatya ?> btn-sm position-relative" title="<?= $titleSatya ?> &mdash; isi via Dokumen Tambahan">
+                                <i class="fas fa-file-upload"></i>
+                                <span class="badge rounded-pill bg-dark position-absolute top-0 start-100 translate-middle" style="font-size:9px;">
+                                    <?= $jumlah_berkas_satya ?>/<?= TOTAL_BERKAS_WAJIB_SATYA ?>
+                                </span>
+                            </a>
+                        </td>
                     </tr>
                     <?php 
                         endwhile;
                     else:
                     ?>
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state">
                                 <i class="fas fa-inbox"></i>
                                 <h4>Tidak ada data</h4>

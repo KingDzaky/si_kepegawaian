@@ -31,7 +31,10 @@ $query = "SELECT
             (SELECT COUNT(*) FROM notifikasi_wa 
              WHERE id_kenaikan_pangkat = kp.id 
              AND status = 'terkirim' 
-             AND pesan LIKE '%PENGINGAT KENAIKAN PANGKAT%') as reminder_terkirim
+             AND pesan LIKE '%PENGINGAT KENAIKAN PANGKAT%') as reminder_terkirim,
+            -- TAMBAHAN: hitung berkas yang sudah diupload untuk usulan ini
+            (SELECT COUNT(*) FROM berkas_kenaikan_pangkat bkp 
+             WHERE bkp.id_kenaikan_pangkat = kp.id) as jumlah_berkas
           FROM kenaikan_pangkat kp
           LEFT JOIN notifikasi_wa nw ON kp.id = nw.id_kenaikan_pangkat 
                 AND nw.status = 'terkirim' 
@@ -39,6 +42,9 @@ $query = "SELECT
           LEFT JOIN duk d ON kp.nip = d.nip
           ORDER BY kp.created_at DESC";
 $result = $koneksi->query($query);
+
+// TAMBAHAN: total jenis berkas wajib (harus sama dengan $jenis_wajib di form_upload_berkas_kp.php)
+const TOTAL_BERKAS_WAJIB_KP = 4;
 ?>
 
 <link rel="stylesheet" href="css/dataduk.css">
@@ -322,6 +328,27 @@ $result = $koneksi->query($query);
                   <a href="form_edit_kenaikan_pangkat.php?id=<?= $row['id'] ?>" 
                      class="btn btn-warning btn-sm" title="Edit">
                     <i class="fas fa-edit"></i>
+                  </a>
+                  <?php
+                    // TAMBAHAN: status kelengkapan berkas
+                    $jumlah_berkas = (int)($row['jumlah_berkas'] ?? 0);
+                    if ($jumlah_berkas >= TOTAL_BERKAS_WAJIB_KP) {
+                        $berkasBtnClass = 'btn-success';
+                        $berkasTitle = 'Berkas Lengkap (' . $jumlah_berkas . '/' . TOTAL_BERKAS_WAJIB_KP . ') - Klik untuk lihat/kelola';
+                    } elseif ($jumlah_berkas > 0) {
+                        $berkasBtnClass = 'btn-warning';
+                        $berkasTitle = 'Berkas Sebagian (' . $jumlah_berkas . '/' . TOTAL_BERKAS_WAJIB_KP . ') - Klik untuk lengkapi';
+                    } else {
+                        $berkasBtnClass = 'btn-info';
+                        $berkasTitle = 'Belum Ada Berkas (0/' . TOTAL_BERKAS_WAJIB_KP . ') - Klik untuk upload';
+                    }
+                  ?>
+                  <a href="form_upload_berkas_kp.php?id=<?= $row['id'] ?>" 
+                     class="btn <?= $berkasBtnClass ?> btn-sm position-relative" title="<?= $berkasTitle ?>">
+                    <i class="fas fa-file-upload"></i>
+                    <span class="badge rounded-pill bg-dark position-absolute top-0 start-100 translate-middle" style="font-size:9px;">
+                      <?= $jumlah_berkas ?>/<?= TOTAL_BERKAS_WAJIB_KP ?>
+                    </span>
                   </a>
                   <button onclick="confirmDelete(<?= $row['id'] ?>, '<?= htmlspecialchars($row['nomor_usulan']) ?>')" 
                           class="btn btn-danger btn-sm" title="Hapus">

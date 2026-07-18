@@ -3,7 +3,8 @@ session_start();
 require_once 'check_session.php';
 require_once 'config/koneksi.php';
 require_once 'includes/wa_functions.php';
-
+// DUK butuh 2 berkas, Penyuluh butuh 1 berkas
+// Ditentukan per-baris nanti berdasarkan sumber_data
 // Superadmin, admin, dan kepala dinas bisa akses
 if (!hasRole(['superadmin', 'admin', 'kepala_dinas'])) {
     header('Location: dashboard.php?error=Akses ditolak');
@@ -25,6 +26,10 @@ $query = "SELECT
             up.*,
             DATEDIFF(up.tanggal_pensiun, CURDATE()) as hari_tersisa,
             
+              -- cek berkas pensiun
+            (SELECT COUNT(*) FROM berkas_pensiun bp 
+            WHERE bp.id_usulan_pensiun = up.id) as jumlah_berkas,
+
             -- Cek notifikasi approval
             (SELECT COUNT(*) FROM notifikasi_pensiun 
              WHERE id_usulan_pensiun = up.id 
@@ -301,6 +306,21 @@ $result = $koneksi->query($query);
               if ($perlu_reminder_1_tahun) $data_reminder = 'reminder_1_tahun';
               else if ($perlu_reminder_1_bulan) $data_reminder = 'reminder_1_bulan';
               else if ($perlu_reminder_1_minggu) $data_reminder = 'reminder_1_minggu';
+
+              $total_berkas_wajib = ($row['sumber_data'] === 'penyuluh') ? 1 : 2;
+              $jumlah_berkas = (int)($row['jumlah_berkas'] ?? 0);
+
+              if ($jumlah_berkas >= $total_berkas_wajib) {
+                  $berkasBtnClass = 'btn-success';
+                  $berkasTitle = 'Berkas Lengkap (' . $jumlah_berkas . '/' . $total_berkas_wajib . ')';
+              } elseif ($jumlah_berkas > 0) {
+                  $berkasBtnClass = 'btn-warning';
+                  $berkasTitle = 'Berkas Sebagian (' . $jumlah_berkas . '/' . $total_berkas_wajib . ')';
+              } else {
+                  $berkasBtnClass = 'btn-info';
+                  $berkasTitle = 'Belum Ada Berkas (0/' . $total_berkas_wajib . ')';
+              }
+
           ?>
             <tr data-status="<?= $row['status'] ?>" 
                 data-sumber="<?= $row['sumber_data'] ?>"
@@ -418,6 +438,14 @@ $result = $koneksi->query($query);
                        class="btn btn-warning btn-sm" style="width: 48px;" title="Edit">
                       <i class="fas fa-edit"></i>
                     </a>
+                    <a href="form_upload_berkas_pensiun.php?id=<?= $row['id'] ?>" 
+                              class="btn <?= $berkasBtnClass ?> btn-sm position-relative" 
+                              title="<?= $berkasTitle ?>">
+                                <i class="fas fa-file-upload"></i>
+                                <span class="badge rounded-pill bg-dark position-absolute top-0 start-100 translate-middle" style="font-size:9px;">
+                                    <?= $jumlah_berkas ?>/<?= $total_berkas_wajib ?>
+                                </span>
+                            </a>
                     <button onclick="confirmDelete(<?= $row['id'] ?>, '<?= htmlspecialchars($row['nomor_usulan']) ?>')" 
                             class="btn btn-danger btn-sm" style="width: 48px;" title="Hapus">
                       <i class="fas fa-trash"></i>

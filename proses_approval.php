@@ -47,7 +47,6 @@ if (!$kp) {
 // ============================================
 if ($action === 'approve') {
 
-    // 1. Update status kenaikan_pangkat → disetujui
     $stmt1 = $koneksi->prepare("
         UPDATE kenaikan_pangkat 
         SET status     = 'disetujui',
@@ -59,41 +58,12 @@ if ($action === 'approve') {
     $stmt1->execute();
     $stmt1->close();
 
-    // 2. ✅ Auto-update tabel DUK langsung
-    //    Validasi: hanya update jika pangkat_baru tidak kosong
-    if (!empty($kp['pangkat_baru']) && !empty($kp['golongan_baru'])) {
-        $stmt2 = $koneksi->prepare("
-            UPDATE duk SET
-                pangkat_terakhir = ?,
-                golongan         = ?,
-                tmt_pangkat      = ?,
-                jabatan_terakhir = CASE 
-                    WHEN ? != '' THEN ? 
-                    ELSE jabatan_terakhir 
-                END
-            WHERE nip = ?
-        ");
-        $stmt2->bind_param("ssssss",
-            $kp['pangkat_baru'],
-            $kp['golongan_baru'],
-            $kp['tmt_pangkat_baru'],
-            $kp['jabatan_baru'],
-            $kp['jabatan_baru'],
-            $kp['nip']
-        );
-        $stmt2->execute();
-
-        $rows_updated = $stmt2->affected_rows;
-        $stmt2->close();
-
-        error_log("✅ DUK diperbarui untuk NIP: {$kp['nip']} | Rows: $rows_updated");
-    } else {
-        // Pangkat baru kosong — catat di log tapi tetap approve
-        error_log("⚠️ Pangkat baru kosong untuk KP ID: $id, NIP: {$kp['nip']} — DUK tidak diupdate");
-    }
+      // Blok update DUK dihapus dari sini — dipindah ke proses_upload_berkas.php
+    // DUK baru ter-update otomatis setelah 4 berkas wajib lengkap
 
     $koneksi->close();
-    alertSuksesUbah('approval.php', "Usulan {$kp['nama']} telah disetujui dan data DUK diperbarui.");
+    alertSuksesUbah('approval.php', "Usulan {$kp['nama']} telah disetujui. Menunggu kelengkapan berkas untuk update DUK.");
+
 
 // ============================================
 // REJECT — Tolak usulan
